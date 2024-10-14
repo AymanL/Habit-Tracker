@@ -45,6 +45,7 @@
 		02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EC2FBE2A20E5730004DA4B /* DevelopmentTests.swift */; };
 		02FD36682A4F32A70023AB38 /* ShortcutsHabitEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36672A4F32A70023AB38 /* ShortcutsHabitEntity.swift */; };
 		02FD366A2A4F33080023AB38 /* CompleteHabitIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36692A4F33080023AB38 /* CompleteHabitIntent.swift */; };
+		CD2154AF2CBD43BA004BE691 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02C3A88B2A0FBA7A0044D090 /* Assets.xcassets */; };
 		CD606A092CA1C75200544BAE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD606A082CA1C75200544BAE /* WidgetKit.framework */; };
 		CD606A0B2CA1C75200544BAE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD606A0A2CA1C75200544BAE /* SwiftUI.framework */; };
 		CD606A162CA1C75500544BAE /* HabitWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -519,6 +520,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD2154AF2CBD43BA004BE691 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
