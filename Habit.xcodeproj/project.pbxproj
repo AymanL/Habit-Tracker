@@ -76,7 +76,7 @@
 			remoteGlobalIDString = 02C3A8832A0FBA780044D090;
 			remoteInfo = Habit;
 		};
-		CD606A142CA1C75500544BAE /* PBXContainerItemProxy */ = {
+		CDAB260C2CBD637D003580C3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 02C3A87C2A0FBA780044D090 /* Project object */;
 			proxyType = 1;
@@ -88,7 +88,7 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		CD606A1B2CA1C75500544BAE /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
@@ -146,6 +146,7 @@
 		02EC2FBE2A20E5730004DA4B /* DevelopmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopmentTests.swift; sourceTree = "<group>"; };
 		02FD36672A4F32A70023AB38 /* ShortcutsHabitEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsHabitEntity.swift; sourceTree = "<group>"; };
 		02FD36692A4F33080023AB38 /* CompleteHabitIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteHabitIntent.swift; sourceTree = "<group>"; };
+		CD2154B02CBD59A4004BE691 /* HabitWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD606A082CA1C75200544BAE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CD606A0A2CA1C75200544BAE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -242,6 +243,7 @@
 		02C3A87B2A0FBA780044D090 = {
 			isa = PBXGroup;
 			children = (
+				CD2154B02CBD59A4004BE691 /* HabitWidgetExtension.entitlements */,
 				CD606A272CA1CD1900544BAE /* HabitWidgetExtensionDebug.entitlements */,
 				0220B20D2A97A7B000C29248 /* .gitignore */,
 				0220B20B2A97900200C29248 /* README.md */,
@@ -394,7 +396,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CD606A152CA1C75500544BAE /* PBXTargetDependency */,
+				CDAB260D2CBD637D003580C3 /* PBXTargetDependency */,
 			);
 			name = Habit;
 			productName = Habit;
@@ -611,10 +613,10 @@
 			target = 02C3A8832A0FBA780044D090 /* Habit */;
 			targetProxy = 02EC2FB32A1CECF00004DA4B /* PBXContainerItemProxy */;
 		};
-		CD606A152CA1C75500544BAE /* PBXTargetDependency */ = {
+		CDAB260D2CBD637D003580C3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CD606A052CA1C75200544BAE /* HabitWidgetExtension */;
-			targetProxy = CD606A142CA1C75500544BAE /* PBXContainerItemProxy */;
+			targetProxy = CDAB260C2CBD637D003580C3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -662,10 +664,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = ARZ2WA89W2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.HabitUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.HabitUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -805,12 +807,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.Habit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -829,7 +832,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Habit/Preview Content\"";
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = ARZ2WA89W2;
 				ENABLE_PREVIEWS = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -838,12 +841,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.Habit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -878,10 +882,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = ARZ2WA89W2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.HabitTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.HabitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -906,7 +910,7 @@
 				INFOPLIST_FILE = HabitWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HabitWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -914,7 +918,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.Habit.HabitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit.HabitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -930,16 +934,17 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = HabitWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = ARZ2WA89W2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HabitWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HabitWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -947,7 +952,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.Habit.HabitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit.HabitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;

@@ -135,7 +135,7 @@ struct HabitRowView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack() {
             HStack() {
                 habitTitle
                 //                        .padding(.horizontal, 22)
@@ -144,16 +144,16 @@ struct HabitRowView: View {
                 checkmarksView
                                         .padding(.trailing, 12)
             }
-                            .padding(.leading, 22)
+//                            .padding(.leading, 22)
             //                .padding(.top, 12)
             //
                             .frame(maxHeight: .infinity)
             
         }
         //        .frame(height: 95)
-                .clipShape(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                )
+//                .clipShape(
+//                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+//                )
         //        .sheet(isPresented: $isPresentingEditHabitView) {
         //            DetailView(habit: habit)
         //        }
