@@ -15,6 +15,12 @@ import CoreData
 ///
 /// This extension provides convenience methods and computed properties for easy access and manipulation of `Habit` instances.
 extension Habit {
+    /// The type of habit tracking
+    enum HabitType: String {
+        case boolean
+        case counter
+    }
+    
     /// Initializes a new `Habit` instance with the given parameters.
     ///
     /// This convenience initializer allows you to create a new `Habit` instance with the specified properties, and automatically sets the creation date to the current date and the completed dates to an empty array.
@@ -24,12 +30,14 @@ extension Habit {
     ///   - title: The title of the habit.
     ///   - motivation: The motivation or reason behind the habit.
     ///   - color: The color associated with the habit.
-    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor) {
+    ///   - type: The type of habit tracking (boolean or counter).
+    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor, type: HabitType = .boolean) {
         self.init(context: context)
         self.id = UUID()
         self.title = title
         self.motivation = motivation
         self.color = color
+        self.type = type
         self.creationDate = Date()
         self.completedDates = []
     }
@@ -75,8 +83,80 @@ extension Habit {
     ///
     /// Provides a convenient interface for accessing and setting the habit's completed dates. If the underlying storage property (`completedDates_`) is `nil`, an empty array is returned when accessing the property.
     var completedDates: [Date] {
-        get { completedDates_ ?? [] }
-        set { completedDates_ = newValue }
+        get {
+            print("DEBUG: Getting completedDates from CoreData: \(String(describing: completedDates_))")
+            return completedDates_ ?? []
+        }
+        set {
+            print("DEBUG: Setting completedDates in CoreData to: \(newValue)")
+            completedDates_ = newValue
+        }
+    }
+
+    /// The type of habit tracking
+    var type: HabitType {
+        get { HabitType(rawValue: type_ ?? "boolean") ?? .boolean }
+        set { type_ = newValue.rawValue }
+    }
+    
+    /// Clean up the daily counters by normalizing all dates to the start of the day
+    func cleanupDailyCounters() {
+        let calendar = Calendar.current
+        var normalizedCounters: [Date: Int] = [:]
+        
+        for (date, count) in dailyCounters {
+            let normalizedDate = calendar.startOfDay(for: date)
+            normalizedCounters[normalizedDate] = count
+        }
+        
+        dailyCounters = normalizedCounters
+    }
+    
+    /// The daily counters for counter-type habits
+    var dailyCounters: [Date: Int] {
+        get {
+            print("DEBUG: Getting dailyCounters, raw value: \(String(describing: dailyCounters_))")
+            return dailyCounters_ ?? [:]
+        }
+        set {
+            print("DEBUG: Setting dailyCounters to: \(newValue)")
+            dailyCounters_ = newValue
+        }
+    }
+    
+    /// Get the counter value for a specific date
+    func counterValue(for date: Date) -> Int {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        let value = dailyCounters[normalizedDate] ?? 0
+        print("DEBUG: Getting counter value for \(normalizedDate): \(value)")
+        return value
+    }
+    
+    /// Set the counter value for a specific date
+    func setCounterValue(_ value: Int, for date: Date) {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        print("DEBUG: Setting counter value to \(value) for \(normalizedDate)")
+        var counters = dailyCounters
+        counters[normalizedDate] = value
+        dailyCounters = counters
+    }
+    
+    /// Increment the counter for a specific date
+    func incrementCounter(for date: Date) {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        print("DEBUG: Incrementing counter for \(normalizedDate)")
+        let currentValue = counterValue(for: normalizedDate)
+        setCounterValue(currentValue + 1, for: normalizedDate)
+        
+        // Add the date to completedDates if it's not already there
+        if !completedDates.contains(where: { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }) {
+            completedDates.append(normalizedDate)
+        }
+    }
+    
+    /// Check if a counter habit has any counts for a specific date
+    func hasCount(for date: Date) -> Bool {
+        counterValue(for: date) > 0
     }
 
     /// A preconfigured example `Habit` instance for testing or previewing purposes.
@@ -87,7 +167,53 @@ extension Habit {
         let viewContext = dataController.container.viewContext
         
         let habit = Habit(context: viewContext, title: "Example Habit", motivation: "Motivation text", color: HabitColor.randomColor)
-        habit.completedDates_ = Date.getRandomDates(maxDaysBack: 7*26)
+        
+        // Set creation date to 30 days ago
+        let calendar = Calendar.current
+        habit.creationDate = calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        
+        // Initialize with some sample data
+        if habit.type == .boolean {
+            // Add some random completed dates
+            habit.completedDates = Date.getRandomDates(maxDaysBack: 7*26)
+        } else {
+            // Add some random counter values
+            var counters: [Date: Int] = [:]
+            for daysAgo in 0..<30 {
+                if let date = calendar.date(byAdding: .day, value: -daysAgo, to: Date()) {
+                    counters[date] = Int.random(in: 1...5)
+                }
+            }
+            habit.dailyCounters = counters
+        }
+        
+        do {
+            try viewContext.save()
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+        
+        return habit
+    }
+    
+    /// A preconfigured example counter `Habit` instance for testing or previewing purposes.
+    static var counterExample: Habit {
+        let dataController = DataController.preview
+        let viewContext = dataController.container.viewContext
+        
+        let habit = Habit(context: viewContext, title: "Example Counter Habit", motivation: "Count your progress", color: HabitColor.randomColor, type: .counter)
+        
+        // Use the same date pattern as the boolean example
+        let randomDates = Date.getRandomDates(maxDaysBack: 7*26)
+        var counters: [Date: Int] = [:]
+        
+        // Add random counter values for each random date
+        for date in randomDates {
+            counters[date] = Int.random(in: 1...5)
+        }
+        
+        habit.dailyCounters = counters
         
         do {
             try viewContext.save()

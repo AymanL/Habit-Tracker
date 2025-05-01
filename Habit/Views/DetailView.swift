@@ -11,19 +11,21 @@ import SwiftUI
 struct DetailView: View {
     @ObservedObject var habit: Habit
     @AppStorage("overviewPageIndex") private var overviewPageIndex = 0
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @State private var isPresentingEditHabitView = false
     
-    private var completedDates: Binding<[DateComponents]> {
+    private var completedDates: Binding<[Date]> {
         Binding(
-            get: { habit.completedDates.asDateComponents },
-            set: { newValue in
-                habit.completedDates = newValue.asDates
-                dataController.save()
+            get: { habit.completedDates },
+            set: { newDates in
+                habit.completedDates = newDates
+                try? viewContext.save()
             }
         )
     }
     
     @EnvironmentObject var dataController: DataController
-    @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -31,9 +33,21 @@ struct DetailView: View {
             ScrollView {
                 regularityAndReminder
                 overview
-                ChartView(dates: habit.completedDates, color: habit.color)
-                    .padding([.horizontal, .bottom])
-                CalendarView(dateInterval: .init(start: .distantPast, end: Date.now), completedDates: completedDates, color: habit.color)
+                
+                ChartView(
+                    dates: habit.completedDates,
+                    color: habit.color,
+                    counterValues: habit.dailyCounters
+                )
+                    .frame(height: 200)
+                    .padding()
+                
+                CalendarView(
+                    dateInterval: DateInterval(start: .distantPast, end: Date()),
+                    completedDates: $habit.completedDates,
+                    color: habit.color,
+                    habit: habit
+                )
             }
             .navigationTitle("\(habit.title)")
             .toolbarBackground(Color(habit.color), for: .navigationBar)
@@ -171,8 +185,14 @@ struct DetailView: View {
 
 struct DetailView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailView(habit: Habit.example)
-            .previewLayout(.sizeThatFits)
+        Group {
+            DetailView(habit: Habit.example)
+                .previewDisplayName("Boolean Habit")
+            
+            DetailView(habit: Habit.counterExample)
+                .previewDisplayName("Counter Habit")
+        }
+        .previewLayout(.sizeThatFits)
     }
 }
 
