@@ -14,6 +14,7 @@ struct EditHabitView: View {
     @State private var title: String = ""
     @State private var motivation: String = ""
     @State private var color: HabitColor = HabitColor.randomColor
+    @State private var startDate: Date? = nil
     
     private var motivationPrompt = Constants.motivationPrompts.randomElement() ?? "Yes, you can! 💪"
     
@@ -42,9 +43,9 @@ struct EditHabitView: View {
                 VStack(spacing: 0) {
                     nameTextField
                     motivationTextField
-                    colorPicker                    
+                    colorPicker
+                    datePicker
                 }
-                
             }
             .toolbar {
                 saveToolbarItem
@@ -124,6 +125,38 @@ struct EditHabitView: View {
         .accessibilityHidden(true)
     }
     
+    var datePicker: some View {
+        VStack {
+            HStack {
+                Text("START DATE")
+                    .padding(.horizontal)
+                    .font(.caption.bold())
+                Spacer()
+            }
+            .accessibilityHidden(true)
+            .padding(.top)
+            
+            DatePicker(
+                "Start Date",
+                selection: Binding(
+                    get: { startDate ?? Date() },
+                    set: { startDate = $0 }
+                ),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.compact)
+            .padding(.horizontal)
+            .tint(Color(color))
+            
+            Toggle("Mark as completed from start date", isOn: Binding(
+                get: { startDate != nil },
+                set: { if !$0 { startDate = nil } }
+            ))
+            .padding(.horizontal)
+            .padding(.top, 8)
+        }
+    }
+    
     var saveToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
             Button("Save") {
@@ -154,9 +187,35 @@ struct EditHabitView: View {
                 habit.title = title
                 habit.motivation = motivation
                 habit.color = color
+                
+                // If there's a start date, mark all dates from start date to today as completed
+                if let startDate = startDate {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    
+                    // Get all dates from start date to today
+                    var currentDate = startDate
+                    while currentDate <= today {
+                        habit.addCompletedDate(currentDate)
+                        currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+                    }
+                }
             } else {
                 // Initialization creates a new habit in current managedObjectContext
-                let _ = Habit(context: managedObjectContext, title: title, motivation: motivation, color: color)
+                let newHabit = Habit(context: managedObjectContext, title: title, motivation: motivation, color: color)
+                
+                // If there's a start date, mark all dates from start date to today as completed
+                if let startDate = startDate {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    
+                    // Get all dates from start date to today
+                    var currentDate = startDate
+                    while currentDate <= today {
+                        newHabit.addCompletedDate(currentDate)
+                        currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+                    }
+                }
             }
             dataController.save()
         }
