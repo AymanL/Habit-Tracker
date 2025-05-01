@@ -13,6 +13,7 @@ struct HabitRowView: View {
     @EnvironmentObject var dataController: DataController
     @Environment(\.scenePhase) var scenePhase
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -72,19 +73,40 @@ struct HabitRowView: View {
     
     var checkmarksView: some View {
         HStack(spacing: 0) {
-            ForEach(0..<5) {number in
-                let daysAgo = abs(number - 4) // reverse order
-                Button {
-                    toggleCompletion(daysAgo: daysAgo)
-                } label: {
-                    let isCompleted = habit.isCompleted(daysAgo: daysAgo)
-                    Image(isCompleted ? "checkmark" : "circle")
-                        .resizable()
-                        .foregroundColor(.primary) // For this to work, set rendering mode to Template inside Attributes Inspector for the image.
-                        .padding(isCompleted ? 9 : 10)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
-                        .contentShape(Rectangle())
+            if habit.type == .counter {
+                HStack {
+                    Text("\(habit.counterValue(for: Date()))")
+                        .font(.headline)
+                    Button {
+                        print("DEBUG: Counter button tapped")
+                        print("DEBUG: Current counter value: \(habit.counterValue(for: Date()))")
+                        print("DEBUG: Daily counters before increment: \(habit.dailyCounters)")
+                        habit.incrementCounter(for: Date())
+                        print("DEBUG: Daily counters after increment: \(habit.dailyCounters)")
+                        print("DEBUG: New counter value: \(habit.counterValue(for: Date()))")
+                        dataController.save()
+                        print("DEBUG: Save completed")
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(Color(habit.color))
+                            .font(.title2)
+                    }
+                }
+            } else {
+                ForEach(0..<5) {number in
+                    let daysAgo = abs(number - 4) // reverse order
+                    Button {
+                        toggleCompletion(daysAgo: daysAgo)
+                    } label: {
+                        let isCompleted = habit.isCompleted(daysAgo: daysAgo)
+                        Image(isCompleted ? "checkmark" : "circle")
+                            .resizable()
+                            .foregroundColor(.primary) // For this to work, set rendering mode to Template inside Attributes Inspector for the image.
+                            .padding(isCompleted ? 9 : 10)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
+                            .contentShape(Rectangle())
+                    }
                 }
             }
         }

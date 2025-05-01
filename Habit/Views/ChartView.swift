@@ -18,9 +18,9 @@ struct ChartView: View {
         }
     }
     
-    // TODO: make it a Binding
     var dates: [Date]
     var color: HabitColor = .green
+    var counterValues: [Date: Int] = [:]  // Add counter values dictionary
     
     @AppStorage("displayMode") private var displayMode: DisplayModes = .sixMonths
 
@@ -29,6 +29,9 @@ struct ChartView: View {
     private var spacing: CGFloat { getSpacing() }
     private var cornerRadius: CGFloat { getCornerRadius() }
     private var strokeWidth: CGFloat { getStrokeWidth() }
+    
+    // Maximum counter value for color intensity scaling
+    private let maxCounterValue: Int = 5
     
     var body: some View {
         VStack {
@@ -50,7 +53,7 @@ struct ChartView: View {
                     VStack(spacing: spacing) {
                         ForEach(0..<rows, id: \.self) { row in
                             let index = getIndexForCell(column: column, row: row)
-                                                    
+                            
                             let daysShiftOffset = calculateDaysShiftOffset()
                             let shiftedIndex = index - daysShiftOffset
                             
@@ -58,13 +61,11 @@ struct ChartView: View {
                             
                             RoundedRectangle(cornerRadius: cornerRadius)
                                 .fill(color.fill)
-//                                .overlay(RoundedRectangle(cornerRadius: cornerRadius).stroke(color.stroke, lineWidth: strokeWidth))
                                 .aspectRatio(1.0, contentMode: .fit)
                         }
                     }
                 }
             }
-    //        .drawingGroup()
         }
         .onChange(of: displayMode, perform: { _ in
             HapticController.shared.impact(style: .light)
@@ -74,12 +75,19 @@ struct ChartView: View {
     
     func getColorForCell(index: Int) -> (fill: Color, stroke: Color) {
         let date = getDateForCell(numberOfDaysAgo: index)
+        let normalizedDate = Calendar.current.startOfDay(for: date)
         
-        // Check if day is after today and fill with clear color. If habit has been completed for the date, fill it with habit's color, otherwise fill with ligh gray color. See GitHub's contribution chart for reference of how it should look.
         if isDayAfterToday(date: date) {
             return (fill: .clear, stroke: .clear)
         } else {
-            if isDateCompleted(date) {
+            if let counterValue = counterValues[normalizedDate], counterValue > 0 {
+                // Calculate color intensity based on counter value
+                let intensity = min(CGFloat(counterValue) / CGFloat(maxCounterValue), 1.0)
+                let baseColor = Color(color)
+                let heatmapColor = baseColor.opacity(0.3 + (intensity * 0.7))  // Scale from 0.3 to 1.0 opacity
+                print("DEBUG: Cell color for date \(normalizedDate) with counter value \(counterValue): intensity \(intensity), opacity \(0.3 + (intensity * 0.7))")
+                return (fill: heatmapColor, stroke: .cellStrokeColor)
+            } else if isDateCompleted(date) {
                 return (fill: Color(color), stroke: .cellStrokeColor)
             } else {
                 return (fill: .cellFillColor, stroke: .cellStrokeColor)

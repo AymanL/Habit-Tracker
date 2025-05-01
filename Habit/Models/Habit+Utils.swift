@@ -18,24 +18,39 @@ extension Habit {
     
     var streak: Int {
         let dates = processDatesForStreakCalculation(completedDates)
+        print("DEBUG: Calculating streak for dates: \(dates)")
+        
         // Check if there are any completed dates
-        guard let firstDate = dates.first else { return 0 }
+        guard let firstDate = dates.first else {
+            print("DEBUG: No dates found, returning 0")
+            return 0
+        }
+        
         // If the most recent completion date is not today, there's no current streak
-        guard firstDate.isInSameDay(as: Date()) else { return 0 }
+        guard firstDate.isInSameDay(as: Date()) else {
+            print("DEBUG: Most recent date \(firstDate) is not today, returning 0")
+            return 0
+        }
         
         var previousDate = firstDate
-        
         var streak = 1
+        print("DEBUG: Starting streak calculation with first date: \(firstDate)")
 
         for date in dates.dropFirst() {
             let daysBetweenDates = previousDate.days(from: date)
+            print("DEBUG: Days between \(previousDate) and \(date): \(daysBetweenDates)")
+            
             if daysBetweenDates <= 1 {
                 streak += 1
+                print("DEBUG: Incrementing streak to \(streak)")
             } else {
+                print("DEBUG: Streak broken at \(streak)")
                 return streak
             }
             previousDate = date
         }
+        
+        print("DEBUG: Final streak: \(streak)")
         return streak
     }
     
@@ -65,18 +80,33 @@ extension Habit {
     }
     
     func processDatesForStreakCalculation(_ dates: [Date]) -> [Date] {
-        let dates = dates.map { Calendar.current.startOfDay(for: $0) }
+        print("DEBUG: Processing dates for streak calculation. Original dates: \(dates)")
+        
+        // Normalize all dates to start of day
+        let normalizedDates = dates.map { Calendar.current.startOfDay(for: $0) }
+        print("DEBUG: Normalized dates: \(normalizedDates)")
+        
         // Filter dates without days after today
-        let datesWithoutDaysAfterToday = dates.filter { $0 <= Date.now }
+        let datesWithoutDaysAfterToday = normalizedDates.filter { $0 <= Date.now }
+        print("DEBUG: Dates without future dates: \(datesWithoutDaysAfterToday)")
+        
         // Remove duplicates
         let uniqueDatesWithinPeriod = datesWithoutDaysAfterToday.removingDuplicates()
+        print("DEBUG: Unique dates: \(uniqueDatesWithinPeriod)")
+        
         // Sort from newest to oldest
         let sortedDates = uniqueDatesWithinPeriod.sorted { $0 > $1 }
+        print("DEBUG: Sorted dates: \(sortedDates)")
+        
         return sortedDates
     }
 
     func isCompleted(for date: Date) -> Bool {
-        completedDates.contains { Calendar.current.isDate($0, inSameDayAs: date) }
+        if type == .boolean {
+            return completedDates.contains { Calendar.current.isDate($0, inSameDayAs: date) }
+        } else {
+            return counterValue(for: date) > 0
+        }
     }
     
     func isCompleted(daysAgo: Int) -> Bool {
@@ -87,8 +117,15 @@ extension Habit {
     ///
     /// - Parameter date: The date to add.
     func addCompletedDate(_ date: Date) {
-        if !self.isCompleted(for: date) {
-            self.completedDates.append(date)
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        print("DEBUG: Adding completed date: \(normalizedDate)")
+        print("DEBUG: Current completed dates: \(completedDates)")
+        
+        if !self.isCompleted(for: normalizedDate) {
+            self.completedDates.append(normalizedDate)
+            print("DEBUG: Date added. New completed dates: \(completedDates)")
+        } else {
+            print("DEBUG: Date already exists in completed dates")
         }
     }
     
@@ -96,7 +133,18 @@ extension Habit {
     ///
     /// - Parameter date: The date to remove.
     func removeCompletedDate(_ date: Date) {
-        self.completedDates.removeAll(where: { $0.isInSameDay(as: date) } )
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        print("DEBUG: Removing completed date: \(normalizedDate)")
+        print("DEBUG: Current completed dates: \(completedDates)")
+        
+        self.completedDates.removeAll(where: { Calendar.current.isDate($0, inSameDayAs: normalizedDate) })
+        
+        // Also clear the counter value for this date
+        if type == .counter {
+            setCounterValue(0, for: normalizedDate)
+        }
+        
+        print("DEBUG: Date removed. New completed dates: \(completedDates)")
     }
     
     func toggleCompletion(daysAgo: Int) {
