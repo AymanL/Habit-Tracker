@@ -80,14 +80,20 @@ struct ChartView: View {
         if isDayAfterToday(date: date) {
             return (fill: .clear, stroke: .clear)
         } else {
-            if let counterValue = counterValues[normalizedDate], counterValue > 0 {
-                // Calculate color intensity based on counter value
-                let intensity = min(CGFloat(counterValue) / CGFloat(maxCounterValue), 1.0)
-                let baseColor = Color(color)
-                let heatmapColor = baseColor.opacity(0.3 + (intensity * 0.7))  // Scale from 0.3 to 1.0 opacity
-                print("DEBUG: Cell color for date \(normalizedDate) with counter value \(counterValue): intensity \(intensity), opacity \(0.3 + (intensity * 0.7))")
-                return (fill: heatmapColor, stroke: .cellStrokeColor)
+            // For counter habits, only use counter values
+            if let counterValue = counterValues[normalizedDate] {
+                if counterValue > 0 {
+                    // Calculate color intensity based on counter value
+                    let intensity = min(CGFloat(counterValue) / CGFloat(maxCounterValue), 1.0)
+                    let baseColor = Color(color)
+                    let heatmapColor = baseColor.opacity(0.3 + (intensity * 0.7))  // Scale from 0.3 to 1.0 opacity
+                    print("DEBUG: Cell color for date \(normalizedDate) with counter value \(counterValue): intensity \(intensity), opacity \(0.3 + (intensity * 0.7))")
+                    return (fill: heatmapColor, stroke: .cellStrokeColor)
+                } else {
+                    return (fill: .cellFillColor, stroke: .cellStrokeColor)
+                }
             } else if isDateCompleted(date) {
+                // Only use this for boolean habits
                 return (fill: Color(color), stroke: .cellStrokeColor)
             } else {
                 return (fill: .cellFillColor, stroke: .cellStrokeColor)

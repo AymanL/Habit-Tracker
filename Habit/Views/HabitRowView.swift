@@ -74,24 +74,43 @@ struct HabitRowView: View {
     var checkmarksView: some View {
         HStack(spacing: 0) {
             if habit.type == .counter {
-                HStack {
-                    Text("\(habit.counterValue(for: Date()))")
-                        .font(.headline)
-                    Button {
-                        print("DEBUG: Counter button tapped")
-                        print("DEBUG: Current counter value: \(habit.counterValue(for: Date()))")
-                        print("DEBUG: Daily counters before increment: \(habit.dailyCounters)")
-                        habit.incrementCounter(for: Date())
-                        print("DEBUG: Daily counters after increment: \(habit.dailyCounters)")
-                        print("DEBUG: New counter value: \(habit.counterValue(for: Date()))")
-                        dataController.save()
-                        print("DEBUG: Save completed")
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(Color(habit.color))
+                HStack(spacing: 8) {
+                    Button(action: {
+                        print("DEBUG: Minus button tapped")
+                        let currentValue = habit.counterValue(for: Date())
+                        if currentValue > 0 {
+                            habit.setCounterValue(currentValue - 1, for: Date())
+                            if currentValue - 1 == 0 {
+                                // If we're going to 0, remove the date from completedDates
+                                habit.removeCompletedDate(Date())
+                            }
+                            try? viewContext.save()
+                        }
+                    }) {
+                        Image(systemName: "minus.circle.fill")
                             .font(.title2)
+                            .foregroundColor(Color(habit.color))
                     }
+                    .accessibilityLabel("Decrement counter")
+                    
+                    Text("\(habit.counterValue(for: Date()))")
+                        .font(.title2.bold())
+                        .foregroundColor(Color(habit.color))
+                        .frame(minWidth: 30)
+                        .accessibilityLabel("Current counter value")
+                    
+                    Button(action: {
+                        print("DEBUG: Plus button tapped")
+                        habit.incrementCounter(for: Date())
+                        try? viewContext.save()
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color(habit.color))
+                    }
+                    .accessibilityLabel("Increment counter")
                 }
+                .padding(.trailing)
             } else {
                 ForEach(0..<5) {number in
                     let daysAgo = abs(number - 4) // reverse order
