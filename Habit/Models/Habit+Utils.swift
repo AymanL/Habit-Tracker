@@ -123,6 +123,12 @@ extension Habit {
         
         if !self.isCompleted(for: normalizedDate) {
             self.completedDates.append(normalizedDate)
+            
+            // For counter habits, initialize with a value of 1
+            if type == .counter {
+                setCounterValue(1, for: normalizedDate)
+            }
+            
             print("DEBUG: Date added. New completed dates: \(completedDates)")
         } else {
             print("DEBUG: Date already exists in completed dates")
