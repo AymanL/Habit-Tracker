@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -45,20 +45,6 @@
 		02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EC2FBE2A20E5730004DA4B /* DevelopmentTests.swift */; };
 		02FD36682A4F32A70023AB38 /* ShortcutsHabitEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36672A4F32A70023AB38 /* ShortcutsHabitEntity.swift */; };
 		02FD366A2A4F33080023AB38 /* CompleteHabitIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36692A4F33080023AB38 /* CompleteHabitIntent.swift */; };
-		CD2154AF2CBD43BA004BE691 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02C3A88B2A0FBA7A0044D090 /* Assets.xcassets */; };
-		CD606A092CA1C75200544BAE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD606A082CA1C75200544BAE /* WidgetKit.framework */; };
-		CD606A0B2CA1C75200544BAE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD606A0A2CA1C75200544BAE /* SwiftUI.framework */; };
-		CD606A162CA1C75500544BAE /* HabitWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		CD606A1C2CA1C9F700544BAE /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8902A0FBA7A0044D090 /* DataController.swift */; };
-		CD606A1D2CA1CA1D00544BAE /* Habit+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A89A2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift */; };
-		CD606A1E2CA1CA1D00544BAE /* Habit+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C39F952A73BF9500550CA1 /* Habit+Utils.swift */; };
-		CD606A1F2CA1CA1D00544BAE /* HabitColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C6B7C92A1B8B67003FAC61 /* HabitColor.swift */; };
-		CD606A202CA1CA1D00544BAE /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8A72A1260220044D090 /* Constants.swift */; };
-		CD606A212CA1CA2400544BAE /* View+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C39FA12A768B1F00550CA1 /* View+Ext.swift */; };
-		CD606A222CA1CA2400544BAE /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DAD6C12A4D772600F2DA14 /* Color+Ext.swift */; };
-		CD606A232CA1CA2400544BAE /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DAD6BF2A4C42FC00F2DA14 /* Date+Ext.swift */; };
-		CD606A242CA1CA2A00544BAE /* Habit.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8922A0FBA7A0044D090 /* Habit.xcdatamodeld */; };
-		CD606A252CA1CABF00544BAE /* CustomErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02089EBC2A626390003DB055 /* CustomErrors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,13 +62,6 @@
 			remoteGlobalIDString = 02C3A8832A0FBA780044D090;
 			remoteInfo = Habit;
 		};
-		CDAB260C2CBD637D003580C3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 02C3A87C2A0FBA780044D090 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CD606A052CA1C75200544BAE;
-			remoteInfo = HabitWidgetExtension;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -92,7 +71,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CD606A162CA1C75500544BAE /* HabitWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,26 +125,12 @@
 		02FD36672A4F32A70023AB38 /* ShortcutsHabitEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsHabitEntity.swift; sourceTree = "<group>"; };
 		02FD36692A4F33080023AB38 /* CompleteHabitIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteHabitIntent.swift; sourceTree = "<group>"; };
 		CD2154B02CBD59A4004BE691 /* HabitWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitWidgetExtension.entitlements; sourceTree = "<group>"; };
-		CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD606A082CA1C75200544BAE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CD606A0A2CA1C75200544BAE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CD606A262CA1CCEE00544BAE /* HabitDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitDebug.entitlements; sourceTree = "<group>"; };
 		CD606A272CA1CD1900544BAE /* HabitWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
+		E334A4682DC56ECB00AA1092 /* Habit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habit.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CD606A172CA1C75500544BAE /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = CD606A052CA1C75200544BAE /* HabitWidgetExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		CD606A0C2CA1C75200544BAE /* HabitWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CD606A172CA1C75500544BAE /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = HabitWidget; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		026E1CA52A24B58900B882C1 /* Frameworks */ = {
@@ -187,15 +151,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CD606A032CA1C75200544BAE /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CD606A0B2CA1C75200544BAE /* SwiftUI.framework in Frameworks */,
-				CD606A092CA1C75200544BAE /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,7 +205,6 @@
 				02C3A8862A0FBA780044D090 /* Habit */,
 				02EC2FB02A1CECF00004DA4B /* HabitTests */,
 				026E1CA92A24B58900B882C1 /* HabitUITests */,
-				CD606A0C2CA1C75200544BAE /* HabitWidget */,
 				CD606A072CA1C75200544BAE /* Frameworks */,
 				02C3A8852A0FBA780044D090 /* Products */,
 			);
@@ -262,7 +216,6 @@
 				02C3A8842A0FBA780044D090 /* Habit.app */,
 				02EC2FAF2A1CECF00004DA4B /* HabitTests.xctest */,
 				026E1CA82A24B58900B882C1 /* HabitUITests.xctest */,
-				CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,6 +223,7 @@
 		02C3A8862A0FBA780044D090 /* Habit */ = {
 			isa = PBXGroup;
 			children = (
+				E334A4682DC56ECB00AA1092 /* Habit.entitlements */,
 				CD606A262CA1CCEE00544BAE /* HabitDebug.entitlements */,
 				0224D8D42A13A3390067B559 /* Models */,
 				0224D8D52A13A3510067B559 /* Views */,
@@ -396,7 +350,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				CDAB260D2CBD637D003580C3 /* PBXTargetDependency */,
 			);
 			name = Habit;
 			productName = Habit;
@@ -421,28 +374,6 @@
 			productReference = 02EC2FAF2A1CECF00004DA4B /* HabitTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		CD606A052CA1C75200544BAE /* HabitWidgetExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CD606A182CA1C75500544BAE /* Build configuration list for PBXNativeTarget "HabitWidgetExtension" */;
-			buildPhases = (
-				CD606A022CA1C75200544BAE /* Sources */,
-				CD606A032CA1C75200544BAE /* Frameworks */,
-				CD606A042CA1C75200544BAE /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				CD606A0C2CA1C75200544BAE /* HabitWidget */,
-			);
-			name = HabitWidgetExtension;
-			packageProductDependencies = (
-			);
-			productName = HabitWidgetExtension;
-			productReference = CD606A062CA1C75200544BAE /* HabitWidgetExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -464,9 +395,6 @@
 						CreatedOnToolsVersion = 14.3.1;
 						TestTargetID = 02C3A8832A0FBA780044D090;
 					};
-					CD606A052CA1C75200544BAE = {
-						CreatedOnToolsVersion = 16.0;
-					};
 				};
 			};
 			buildConfigurationList = 02C3A87F2A0FBA780044D090 /* Build configuration list for PBXProject "Habit" */;
@@ -486,7 +414,6 @@
 				02C3A8832A0FBA780044D090 /* Habit */,
 				02EC2FAE2A1CECF00004DA4B /* HabitTests */,
 				026E1CA72A24B58900B882C1 /* HabitUITests */,
-				CD606A052CA1C75200544BAE /* HabitWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -515,14 +442,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CD606A042CA1C75200544BAE /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CD2154AF2CBD43BA004BE691 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -583,23 +502,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CD606A022CA1C75200544BAE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CD606A212CA1CA2400544BAE /* View+Ext.swift in Sources */,
-				CD606A252CA1CABF00544BAE /* CustomErrors.swift in Sources */,
-				CD606A222CA1CA2400544BAE /* Color+Ext.swift in Sources */,
-				CD606A232CA1CA2400544BAE /* Date+Ext.swift in Sources */,
-				CD606A1D2CA1CA1D00544BAE /* Habit+CoreDataHelpers.swift in Sources */,
-				CD606A1E2CA1CA1D00544BAE /* Habit+Utils.swift in Sources */,
-				CD606A242CA1CA2A00544BAE /* Habit.xcdatamodeld in Sources */,
-				CD606A1F2CA1CA1D00544BAE /* HabitColor.swift in Sources */,
-				CD606A202CA1CA1D00544BAE /* Constants.swift in Sources */,
-				CD606A1C2CA1C9F700544BAE /* DataController.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -612,11 +514,6 @@
 			isa = PBXTargetDependency;
 			target = 02C3A8832A0FBA780044D090 /* Habit */;
 			targetProxy = 02EC2FB32A1CECF00004DA4B /* PBXContainerItemProxy */;
-		};
-		CDAB260D2CBD637D003580C3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CD606A052CA1C75200544BAE /* HabitWidgetExtension */;
-			targetProxy = CDAB260C2CBD637D003580C3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -647,10 +544,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.HabitUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -664,10 +561,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ARZ2WA89W2;
+				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.HabitUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -799,7 +696,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Habit/Preview Content\"";
-				DEVELOPMENT_TEAM = ARZ2WA89W2;
+				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -813,7 +710,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -829,6 +726,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Habit/Habit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Habit/Preview Content\"";
@@ -847,7 +745,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -864,10 +762,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DZPFWLMAM7;
+				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.nazariizomko.HabitTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -882,82 +780,15 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ARZ2WA89W2;
+				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.HabitTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Habit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Habit";
-			};
-			name = Release;
-		};
-		CD606A192CA1C75500544BAE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = HabitWidgetExtensionDebug.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ARZ2WA89W2;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HabitWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HabitWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit.HabitWidget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		CD606A1A2CA1C75500544BAE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = HabitWidgetExtension.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HabitWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HabitWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.headonelab.habit.HabitWidget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -996,15 +827,6 @@
 			buildConfigurations = (
 				02EC2FB62A1CECF00004DA4B /* Debug */,
 				02EC2FB72A1CECF00004DA4B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CD606A182CA1C75500544BAE /* Build configuration list for PBXNativeTarget "HabitWidgetExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CD606A192CA1C75500544BAE /* Debug */,
-				CD606A1A2CA1C75500544BAE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
