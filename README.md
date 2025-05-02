@@ -1,5 +1,10 @@
 # Habit
 
+# Features I want to add:
+- Choose for each habit the time it takes
+  - Have for each habit the cumulative time that was spent on it
+- Have habit group categories
+
 ## Overview
 
 Habit is a user-friendly habit tracking app designed to help users build positive habits and track their progress over time. The app is built using Swift and SwiftUI, making use of CoreData for data persistence, AppIntents for Siri integration, and includes features for localization and accessibility. 
