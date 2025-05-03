@@ -41,14 +41,11 @@ class DataController: ObservableObject {
     /// - Note: When `inMemory` is `true`, a temporary, in-memory database is created. Data written to this database is destroyed after the app finishes running.
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "Habit")
-        let url = URL.storeURL(for: "group.com.headonelab.habit", databaseName: "HabitDatabase")
-        let storeDescription = NSPersistentStoreDescription(url: url)
-        container.persistentStoreDescriptions = [storeDescription]
-
         
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
+        
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
