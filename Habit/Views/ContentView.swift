@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isPresentingEditHabitView = false
-    @AppStorage("sortingOption") private var sortingOption: SortingOption = .byDate
+    @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
     @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
     
     var body: some View {

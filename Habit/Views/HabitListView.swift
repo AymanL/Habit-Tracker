@@ -22,6 +22,8 @@ struct HabitListView: View {
             request.sortDescriptors = [NSSortDescriptor(keyPath: \Habit.creationDate_, ascending: isSortingOrderAscending)]
         case .byName:
             request.sortDescriptors = [NSSortDescriptor(keyPath: \Habit.title_, ascending: isSortingOrderAscending)]
+        case .byOrder:
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \Habit.order_, ascending: true)]
         }
         
         _habits = FetchRequest<Habit>(fetchRequest: request)
@@ -31,8 +33,10 @@ struct HabitListView: View {
         List {
             ForEach(habits) { habit in
                 HabitRowView(habit: habit)
+                    .id(habit.id)
             }
             .onDelete(perform: deleteItems)
+            .onMove(perform: moveItems)
             .listRowSeparator(.hidden)
             .buttonStyle(.plain)
             .listRowInsets(.init(top: 8, leading: 16, bottom: 6, trailing: 16))
@@ -42,6 +46,18 @@ struct HabitListView: View {
     
     private func deleteItems(offsets: IndexSet) {
         offsets.map { habits[$0] }.forEach(dataController.delete(_:))
+        dataController.save()
+    }
+    
+    private func moveItems(from source: IndexSet, to destination: Int) {
+        var updatedHabits = habits.map { $0 }
+        updatedHabits.move(fromOffsets: source, toOffset: destination)
+        
+        // Update the order of all habits
+        for (index, habit) in updatedHabits.enumerated() {
+            habit.order = index
+        }
+        
         dataController.save()
     }
 }
