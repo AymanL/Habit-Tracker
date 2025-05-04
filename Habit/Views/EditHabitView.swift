@@ -17,6 +17,7 @@ struct EditHabitView: View {
     @State private var selectedColor: HabitColor
     @State private var selectedType: Habit.HabitType
     @State private var startDate: Date
+    @State private var isWeekly: Bool
     
     private let habit: Habit?
     
@@ -27,43 +28,60 @@ struct EditHabitView: View {
         _selectedColor = State(initialValue: habit?.color ?? .blue)
         _selectedType = State(initialValue: habit?.type ?? .boolean)
         _startDate = State(initialValue: habit?.creationDate ?? Date())
+        _isWeekly = State(initialValue: habit?.isWeekly ?? false)
     }
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Habit Details")) {
-                    TextField("Title", text: $title)
+                Section {
+                    TextField("Name", text: $title)
                     TextField("Motivation", text: $motivation)
                 }
                 
-                Section(header: Text("Type")) {
-                    Picker("Habit Type", selection: $selectedType) {
-                        Text("Yes/No").tag(Habit.HabitType.boolean)
-                        Text("Counter").tag(Habit.HabitType.counter)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
+                Section {
+                    Toggle("Weekly Habit", isOn: $isWeekly)
+                        .tint(Color(selectedColor))
+                } header: {
+                    Text("Frequency")
+                } footer: {
+                    Text("Weekly habits count as completed when any day in the week is completed. Streaks are counted by weeks instead of days.")
                 }
                 
-                Section(header: Text("Color")) {
+                Section {
                     ColorsPickerView(selectedColor: $selectedColor)
+                } header: {
+                    Text("Color")
+                }
+                
+                if habit == nil {
+                    Section {
+                        Picker("Type", selection: $selectedType) {
+                            Text("Yes/No").tag(Habit.HabitType.boolean)
+                            Text("Counter").tag(Habit.HabitType.counter)
+                        }
+                        .pickerStyle(.segmented)
+                    } header: {
+                        Text("Type")
+                    }
                 }
                 
                 Section(header: Text("Start Date")) {
                     DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                 }
             }
-            .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
+            .navigationTitle(habit == nil ? "Add New Habit" : "Edit a Habit")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("Close") {
                         dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        saveHabit()
+                        save()
                     }
                     .disabled(title.isEmpty)
                 }
@@ -71,13 +89,13 @@ struct EditHabitView: View {
         }
     }
     
-    private func saveHabit() {
+    private func save() {
         if let habit = habit {
-            // Update existing habit
             habit.title = title
             habit.motivation = motivation
             habit.color = selectedColor
             habit.type = selectedType
+            habit.isWeekly = isWeekly
             
             // If the start date changed, initialize dates
             if habit.creationDate != startDate {
@@ -101,6 +119,7 @@ struct EditHabitView: View {
             newHabit.creationDate = startDate
             newHabit.completedDates = []
             newHabit.dailyCounters = [:]  // Initialize empty dictionary
+            newHabit.isWeekly = isWeekly
             
             // Initialize dates based on habit type
             if selectedType == .counter {

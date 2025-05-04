@@ -21,6 +21,12 @@ extension Habit {
         case counter
     }
     
+    /// Whether the habit is weekly (completing any day in a week counts as completing the whole week)
+    var isWeekly: Bool {
+        get { isWeekly_ }
+        set { isWeekly_ = newValue }
+    }
+    
     /// Initializes a new `Habit` instance with the given parameters.
     ///
     /// This convenience initializer allows you to create a new `Habit` instance with the specified properties, and automatically sets the creation date to the current date and the completed dates to an empty array.
@@ -31,13 +37,15 @@ extension Habit {
     ///   - motivation: The motivation or reason behind the habit.
     ///   - color: The color associated with the habit.
     ///   - type: The type of habit tracking (boolean or counter).
-    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor, type: HabitType = .boolean) {
+    ///   - isWeekly: Whether the habit is weekly.
+    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor, type: HabitType = .boolean, isWeekly: Bool = false) {
         self.init(context: context)
         self.id = UUID()
         self.title = title
         self.motivation = motivation
         self.color = color
         self.type = type
+        self.isWeekly = isWeekly
         self.creationDate = Date()
         self.completedDates = []
         
