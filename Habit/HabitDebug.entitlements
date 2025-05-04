@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.ayman.Habit</string>
+		<string>group.com.ayman.habit</string>
 	</array>
 </dict>
 </plist>
