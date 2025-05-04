@@ -7,6 +7,7 @@
         <attribute name="dailyCounters_" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer" customClassName="[Date: Int]"/>
         <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="motivation_" optional="YES" attributeType="String"/>
+        <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title_" optional="YES" attributeType="String"/>
         <attribute name="type_" optional="YES" attributeType="String"/>
     </entity>

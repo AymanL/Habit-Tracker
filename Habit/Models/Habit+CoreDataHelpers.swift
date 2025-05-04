@@ -40,6 +40,17 @@ extension Habit {
         self.type = type
         self.creationDate = Date()
         self.completedDates = []
+        
+        // Set initial order to be the last in the list
+        let request: NSFetchRequest<Habit> = Habit.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Habit.order_, ascending: false)]
+        request.fetchLimit = 1
+        
+        if let lastHabit = try? context.fetch(request).first {
+            self.order = Int(lastHabit.order_) + 1
+        } else {
+            self.order = 0
+        }
     }
     
     public var id: UUID {
@@ -91,6 +102,12 @@ extension Habit {
             print("DEBUG: Setting completedDates in CoreData to: \(newValue)")
             completedDates_ = newValue
         }
+    }
+
+    /// The order of the habit in the list
+    var order: Int {
+        get { Int(order_) }
+        set { order_ = Int64(newValue) }
     }
 
     /// The type of habit tracking

@@ -11,6 +11,7 @@ enum SortingOption: String, CaseIterable, Identifiable {
     var id: Self { self }
     case byDate = "Sort by Date"
     case byName = "Sort by Name"
+    case byOrder = "Custom Order"
     
     func localizedString() -> LocalizedStringKey {
         LocalizedStringKey(self.rawValue)
