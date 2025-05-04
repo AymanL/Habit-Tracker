@@ -3,6 +3,7 @@
 # Features I want to add:
 - Choose for each habit the time it takes
   - Have for each habit the cumulative time that was spent on it
+  - Overview of time spent with spheres of different sizes
 - Have habit group categories
 - Weekly habits
 
