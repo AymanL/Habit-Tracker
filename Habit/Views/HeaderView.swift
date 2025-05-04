@@ -12,12 +12,12 @@ struct HeaderView: View {
         HStack {
             Text("Habit")
                 .font(.largeTitle.bold())
-                .padding(.leading, 8) // 12 or 8?
+                .padding(.leading, 8)
             Spacer()
             HStack(spacing: 0) {
-                ForEach(0..<5) { number in
-                    let daysAgo = abs(number - 4) // reverse order
-                    let dayInfo = getDayInfo(daysAgo: daysAgo)
+                ForEach(0..<7) { index in
+                    let date = getDateForWeekday(index)
+                    let dayInfo = getDayInfo(for: date)
                     
                     VStack(spacing: 0) {
                         Text("\(dayInfo.dayNumber)")
@@ -25,7 +25,7 @@ struct HeaderView: View {
                     }
                     .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
                     .font(.system(size: 11, weight: .bold))
-                    .opacity(daysAgo == 0 ? 1 : 0.5)
+                    .opacity(Calendar.current.isDateInToday(date) ? 1 : 0.5)
                 }
             }
             .padding(.trailing, 10)
@@ -35,17 +35,30 @@ struct HeaderView: View {
         .accessibilityHidden(true)
     }
     
-    func getDayInfo(daysAgo: Int) -> (dayNumber: String, dayName: String) {
-        let today = Date.now
-        let todayMinusDaysAgo = Calendar.current.date(byAdding: .day, value: -daysAgo, to: today)!
+    private func getDateForWeekday(_ index: Int) -> Date {
+        let calendar = Calendar.current
+        let today = Date()
         
+        // Get the weekday of today (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+        let weekday = calendar.component(.weekday, from: today)
+        
+        // Calculate the offset to get to Monday (2)
+        let daysToMonday = (weekday + 5) % 7
+        
+        // Get the date of Monday
+        let monday = calendar.date(byAdding: .day, value: -daysToMonday, to: today)!
+        
+        // Add the index to get the desired day
+        return calendar.date(byAdding: .day, value: index, to: monday)!
+    }
+    
+    func getDayInfo(for date: Date) -> (dayNumber: String, dayName: String) {
         let dateFormatter = DateFormatter()
-//        dateFormatter.locale = Locale(identifier: "en_US")
         dateFormatter.dateFormat = "EEEEEE"
-        let dayName = dateFormatter.string(from: todayMinusDaysAgo)
+        let dayName = dateFormatter.string(from: date)
         
         dateFormatter.dateFormat = "d"
-        let dayNumber = dateFormatter.string(from: todayMinusDaysAgo)
+        let dayNumber = dateFormatter.string(from: date)
         
         return (dayNumber: dayNumber, dayName: dayName)
     }

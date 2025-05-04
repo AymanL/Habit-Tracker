@@ -18,40 +18,53 @@ extension Habit {
     
     var streak: Int {
         let dates = processDatesForStreakCalculation(completedDates)
-        print("DEBUG: Calculating streak for dates: \(dates)")
-        
         // Check if there are any completed dates
-        guard let firstDate = dates.first else {
-            print("DEBUG: No dates found, returning 0")
-            return 0
-        }
+        guard let firstDate = dates.first else { return 0 }
         
-        // If the most recent completion date is not today, there's no current streak
-        guard firstDate.isInSameDay(as: Date()) else {
-            print("DEBUG: Most recent date \(firstDate) is not today, returning 0")
-            return 0
-        }
-        
-        var previousDate = firstDate
-        var streak = 1
-        print("DEBUG: Starting streak calculation with first date: \(firstDate)")
-
-        for date in dates.dropFirst() {
-            let daysBetweenDates = previousDate.days(from: date)
-            print("DEBUG: Days between \(previousDate) and \(date): \(daysBetweenDates)")
+        if isWeekly {
+            // For weekly habits, we need to group dates by week
+            var currentStreak = 0
+            var currentWeekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: firstDate))!
             
-            if daysBetweenDates <= 1 {
-                streak += 1
-                print("DEBUG: Incrementing streak to \(streak)")
-            } else {
-                print("DEBUG: Streak broken at \(streak)")
-                return streak
+            for date in dates {
+                let weekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+                
+                if weekStart == currentWeekStart {
+                    // Same week, continue streak
+                    continue
+                } else if Calendar.current.dateComponents([.day], from: currentWeekStart, to: weekStart).day == 7 {
+                    // Next week, increment streak
+                    currentStreak += 1
+                    currentWeekStart = weekStart
+                } else {
+                    // Streak broken
+                    break
+                }
             }
-            previousDate = date
+            
+            // Add 1 for the current week if it's completed
+            if Calendar.current.isDateInToday(firstDate) || Calendar.current.isDateInYesterday(firstDate) {
+                currentStreak += 1
+            }
+            
+            return currentStreak
+        } else {
+            // Regular daily streak calculation
+            var previousDate = firstDate
+            var currentStreak = 1
+            
+            for date in dates.dropFirst() {
+                let daysBetweenDates = previousDate.days(from: date)
+                if daysBetweenDates <= 1 {
+                    currentStreak += 1
+                } else {
+                    break
+                }
+                previousDate = date
+            }
+            
+            return currentStreak
         }
-        
-        print("DEBUG: Final streak: \(streak)")
-        return streak
     }
     
     var longestStreak: Int {
@@ -59,24 +72,55 @@ extension Habit {
         // Check if there are any completed dates
         guard let firstDate = dates.first else { return 0 }
         
-        var previousDate = firstDate
-
-        var currentStreak = 1
-        var longestStreak = 0
-         
-        for date in dates.dropFirst() {
-            let daysBetweenDates = previousDate.days(from: date)
-            if daysBetweenDates <= 1 {
-                currentStreak += 1
-            } else {
-                // Check if the current streak is longer than the longest streak so far
-                longestStreak = max(currentStreak, longestStreak)
-                currentStreak = 1
+        if isWeekly {
+            // For weekly habits, we need to group dates by week
+            var currentStreak = 0
+            var longestStreak = 0
+            var currentWeekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: firstDate))!
+            
+            for date in dates {
+                let weekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+                
+                if weekStart == currentWeekStart {
+                    // Same week, continue streak
+                    continue
+                } else if Calendar.current.dateComponents([.day], from: currentWeekStart, to: weekStart).day == 7 {
+                    // Next week, increment streak
+                    currentStreak += 1
+                    currentWeekStart = weekStart
+                } else {
+                    // Streak broken, update longest streak
+                    longestStreak = max(currentStreak, longestStreak)
+                    currentStreak = 0
+                    currentWeekStart = weekStart
+                }
             }
-            previousDate = date
+            
+            // Add 1 for the current week if it's completed
+            if Calendar.current.isDateInToday(firstDate) || Calendar.current.isDateInYesterday(firstDate) {
+                currentStreak += 1
+            }
+            
+            return max(currentStreak, longestStreak)
+        } else {
+            // Regular daily streak calculation
+            var previousDate = firstDate
+            var currentStreak = 1
+            var longestStreak = 0
+            
+            for date in dates.dropFirst() {
+                let daysBetweenDates = previousDate.days(from: date)
+                if daysBetweenDates <= 1 {
+                    currentStreak += 1
+                } else {
+                    longestStreak = max(currentStreak, longestStreak)
+                    currentStreak = 1
+                }
+                previousDate = date
+            }
+            
+            return max(currentStreak, longestStreak)
         }
-        // Check if the last streak is the longest streak
-        return max(currentStreak, longestStreak)
     }
     
     func processDatesForStreakCalculation(_ dates: [Date]) -> [Date] {
