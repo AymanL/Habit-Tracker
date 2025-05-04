@@ -6,6 +6,7 @@
   - Overview of time spent with spheres of different sizes
 - Have habit group categories
 - Weekly habits
+- Be able to move a habit up or down by pressing it down
 
 ## Overview
 
