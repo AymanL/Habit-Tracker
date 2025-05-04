@@ -17,16 +17,25 @@ struct HabitRowView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
+            // Background with tap gesture
             Color.habitBackgroundColor
+                .contentShape(Rectangle())
                 .onTapGesture {
                     isPresentingEditHabitView = true
                 }
+            
+            // Content
             VStack(spacing: -8) {
                 HStack() {
                     percentageView
                     Spacer()
-                    checkmarksView
-                        .padding(.trailing, 10)
+                    if habit.type == .counter {
+                        counterControls
+                            .padding(.trailing, 10)
+                    } else {
+                        checkmarksView
+                            .padding(.trailing, 10)
+                    }
                 }
                 .padding(.leading, 22)
                 .padding(.top, 12)
@@ -71,62 +80,68 @@ struct HabitRowView: View {
                 )
     }
     
+    var counterControls: some View {
+        HStack(spacing: 8) {
+            Button(action: {
+                print("DEBUG: Minus button tapped")
+                let currentValue = habit.counterValue(for: Date())
+                if currentValue > 0 {
+                    habit.setCounterValue(currentValue - 1, for: Date())
+                    if currentValue - 1 == 0 {
+                        // If we're going to 0, remove the date from completedDates
+                        habit.removeCompletedDate(Date())
+                    }
+                    try? viewContext.save()
+                }
+            }) {
+                Image(systemName: "minus.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(Color(habit.color))
+            }
+            .accessibilityLabel("Decrement counter")
+            .buttonStyle(.plain)
+            
+            Text("\(habit.counterValue(for: Date()))")
+                .font(.title2.bold())
+                .foregroundColor(Color(habit.color))
+                .frame(minWidth: 30)
+                .accessibilityLabel("Current counter value")
+            
+            Button(action: {
+                print("DEBUG: Plus button tapped")
+                habit.incrementCounter(for: Date())
+                try? viewContext.save()
+            }) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(Color(habit.color))
+            }
+            .accessibilityLabel("Increment counter")
+            .buttonStyle(.plain)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { _ in
+            // This empty tap gesture will prevent the background tap from being triggered
+        }
+    }
+    
     var checkmarksView: some View {
         HStack(spacing: 0) {
-            if habit.type == .counter {
-                HStack(spacing: 8) {
-                    Button(action: {
-                        print("DEBUG: Minus button tapped")
-                        let currentValue = habit.counterValue(for: Date())
-                        if currentValue > 0 {
-                            habit.setCounterValue(currentValue - 1, for: Date())
-                            if currentValue - 1 == 0 {
-                                // If we're going to 0, remove the date from completedDates
-                                habit.removeCompletedDate(Date())
-                            }
-                            try? viewContext.save()
-                        }
-                    }) {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(Color(habit.color))
-                    }
-                    .accessibilityLabel("Decrement counter")
-                    
-                    Text("\(habit.counterValue(for: Date()))")
-                        .font(.title2.bold())
-                        .foregroundColor(Color(habit.color))
-                        .frame(minWidth: 30)
-                        .accessibilityLabel("Current counter value")
-                    
-                    Button(action: {
-                        print("DEBUG: Plus button tapped")
-                        habit.incrementCounter(for: Date())
-                        try? viewContext.save()
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(Color(habit.color))
-                    }
-                    .accessibilityLabel("Increment counter")
+            ForEach(0..<5) {number in
+                let daysAgo = abs(number - 4) // reverse order
+                Button {
+                    toggleCompletion(daysAgo: daysAgo)
+                } label: {
+                    let isCompleted = habit.isCompleted(daysAgo: daysAgo)
+                    Image(isCompleted ? "checkmark" : "circle")
+                        .resizable()
+                        .foregroundColor(.primary) // For this to work, set rendering mode to Template inside Attributes Inspector for the image.
+                        .padding(isCompleted ? 9 : 10)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
+                        .contentShape(Rectangle())
                 }
-                .padding(.trailing)
-            } else {
-                ForEach(0..<5) {number in
-                    let daysAgo = abs(number - 4) // reverse order
-                    Button {
-                        toggleCompletion(daysAgo: daysAgo)
-                    } label: {
-                        let isCompleted = habit.isCompleted(daysAgo: daysAgo)
-                        Image(isCompleted ? "checkmark" : "circle")
-                            .resizable()
-                            .foregroundColor(.primary) // For this to work, set rendering mode to Template inside Attributes Inspector for the image.
-                            .padding(isCompleted ? 9 : 10)
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
-                            .contentShape(Rectangle())
-                    }
-                }
+                .buttonStyle(.plain)
             }
         }
     }
