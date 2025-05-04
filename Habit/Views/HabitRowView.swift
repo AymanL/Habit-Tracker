@@ -147,8 +147,24 @@ struct HabitRowView: View {
 
 struct HabitRowView_Previews: PreviewProvider {
     static var previews: some View {
-        HabitRowView(habit: Habit.example)
-            .previewLayout(.sizeThatFits)
-            .padding()
+        VStack(spacing: 20) {
+            // Boolean habit preview
+            HabitRowView(habit: {
+                let habit = Habit.example
+                habit.type = .boolean
+                return habit
+            }())
+            
+            // Counter habit preview
+            HabitRowView(habit: {
+                let habit = Habit.example
+                habit.type = .counter
+                habit.setCounterValue(5, for: Date())
+                return habit
+            }())
+        }
+        .previewLayout(.sizeThatFits)
+        .padding()
+        .environmentObject(DataController.preview)
     }
 }

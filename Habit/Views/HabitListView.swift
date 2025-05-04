@@ -50,5 +50,6 @@ struct HabitListView_Previews: PreviewProvider {
     static var previews: some View {
         HabitListView(sortingOption: .byDate, isSortingOrderAscending: false)
             .environment(\.managedObjectContext, DataController.preview.container.viewContext)
+            .environmentObject(DataController.preview)
     }
 }
