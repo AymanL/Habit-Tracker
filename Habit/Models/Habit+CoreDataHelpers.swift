@@ -422,22 +422,14 @@ extension Habit {
         let activeDurations = durationHistory.filter { duration in
             let effectiveDate = calendar.startOfDay(for: duration.effectiveDate)
             let expirationDate = duration.expirationDate.map { calendar.startOfDay(for: $0) } ?? .distantFuture
-            return normalizedDate >= effectiveDate && normalizedDate < expirationDate
+            return normalizedDate >= effectiveDate && normalizedDate <= expirationDate
         }
         
         // If no durations were active, return 0
         guard let lastActiveDuration = activeDurations.last else {
-            print("DEBUG: No active duration found for date: \(normalizedDate)")
-            print("DEBUG: Available durations:")
-            for (index, duration) in durationHistory.enumerated() {
-                let effectiveDate = calendar.startOfDay(for: duration.effectiveDate)
-                let expirationDate = duration.expirationDate.map { calendar.startOfDay(for: $0) }
-                print("  [\(index)] minutes=\(duration.minutes), effectiveDate=\(effectiveDate), expirationDate=\(String(describing: expirationDate))")
-            }
             return 0
         }
         
-        print("DEBUG: Found active duration: minutes=\(lastActiveDuration.minutes), effectiveDate=\(calendar.startOfDay(for: lastActiveDuration.effectiveDate)), expirationDate=\(String(describing: lastActiveDuration.expirationDate.map { calendar.startOfDay(for: $0) })) for date: \(normalizedDate)")
         return lastActiveDuration.minutes
     }
     
