@@ -8,6 +8,7 @@
 - Weekly habits
 - Be able to move a habit up or down by pressing it down
 - Export to CSV to save data
+  - Be able to load data from CSV in case data was previously lost
 
 ## Overview
 
