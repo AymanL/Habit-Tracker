@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22G5048d" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entityMapping name="HabitToHabit" sourceEntityName="Habit" destinationEntityName="Habit" sourceModelVersionIdentifier="Habit 2" destinationModelVersionIdentifier="Habit 3">
+        <attributeMapping sourceName="color_" destinationName="color_"/>
+        <attributeMapping sourceName="completedDates_" destinationName="completedDates_"/>
+        <attributeMapping sourceName="creationDate_" destinationName="creationDate_"/>
+        <attributeMapping sourceName="dailyCounters_" destinationName="dailyCounters_"/>
+        <attributeMapping sourceName="durationHistory_" destinationName="durationHistory_"/>
+        <attributeMapping sourceName="id_" destinationName="id_"/>
+        <attributeMapping sourceName="isWeekly_" destinationName="isWeekly_"/>
+        <attributeMapping sourceName="motivation_" destinationName="motivation_"/>
+        <attributeMapping sourceName="order_" destinationName="order_"/>
+        <attributeMapping sourceName="title_" destinationName="title_"/>
+        <attributeMapping sourceName="type_" destinationName="type_"/>
+        <attributeMapping sourceName="duration_" destinationName="duration_" valueExpression="0"/>
+    </entityMapping>
+</model> 

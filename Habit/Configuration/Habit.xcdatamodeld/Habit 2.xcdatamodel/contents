@@ -14,4 +14,4 @@
         <attribute name="title_" optional="YES" attributeType="String"/>
         <attribute name="type_" optional="YES" attributeType="String"/>
     </entity>
-</model>
+</model> 

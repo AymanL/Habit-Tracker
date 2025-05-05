@@ -28,6 +28,7 @@ struct HabitRowView: View {
             VStack(spacing: -8) {
                 HStack() {
                     percentageView
+                    streakView
                     Spacer()
                     if habit.type == .counter {
                         counterControls
@@ -83,7 +84,6 @@ struct HabitRowView: View {
     var counterControls: some View {
         HStack(spacing: 8) {
             Button(action: {
-                print("DEBUG: Minus button tapped")
                 let currentValue = habit.counterValue(for: Date())
                 if currentValue > 0 {
                     habit.setCounterValue(currentValue - 1, for: Date())
@@ -96,25 +96,24 @@ struct HabitRowView: View {
             }) {
                 Image(systemName: "minus.circle.fill")
                     .font(.title2)
-                    .foregroundColor(Color(habit.color))
+                    .foregroundColor(Color(.gray))
             }
             .accessibilityLabel("Decrement counter")
             .buttonStyle(.plain)
             
             Text("\(habit.counterValue(for: Date()))")
                 .font(.title2.bold())
-                .foregroundColor(Color(habit.color))
+                .foregroundColor(Color(.gray))
                 .frame(minWidth: 30)
                 .accessibilityLabel("Current counter value")
             
             Button(action: {
-                print("DEBUG: Plus button tapped")
                 habit.incrementCounter(for: Date())
                 try? viewContext.save()
             }) {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                    .foregroundColor(Color(habit.color))
+                    .foregroundColor(Color(.gray))
             }
             .accessibilityLabel("Increment counter")
             .buttonStyle(.plain)
@@ -147,12 +146,33 @@ struct HabitRowView: View {
             }
         }
     }
+
+    var streakView: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "bolt.fill")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+            Text("\(habit.streak) \(habit.isWeekly ? (habit.streak == 1 ? "week" : "weeks") : (habit.streak == 1 ? "day" : "days"))")
+                .font(.custom("", size: 16, relativeTo: .subheadline))
+                .foregroundColor(.secondary)
+            .if(colorScheme == .dark) { $0.shadow(radius: 3) }
+        }
+    }
     
     var habitTitle: some View {
-        Text(habit.title)
-            .font(.custom("", size: 19, relativeTo: .title3))
-            .lineLimit(2)
-            .if(colorScheme == .dark) { $0.shadow(radius: 3) }
+        VStack {
+            Text(habit.title)
+                .font(.custom("", size: 19, relativeTo: .title3))
+                .lineLimit(2)
+                .if(colorScheme == .dark) { $0.shadow(radius: 3) }
+            
+            if habit.currentDuration > 0 {
+                Text("(\(habit.currentDuration) min)")
+                    .font(.custom("", size: 16, relativeTo: .subheadline))
+                    .foregroundColor(.secondary)
+                    .if(colorScheme == .dark) { $0.shadow(radius: 3) }
+            }
+        }
     }
     
     private func isWeekCompleted(date: Date) -> Bool {
@@ -174,7 +194,7 @@ struct HabitRowView: View {
         let calendar = Calendar.current
         let today = Date()
         
-        // Get the weekday of today (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+        // Get the weekday of today (1 = Sunday, 2 = Monday, ..., 7 = Saturday) 
         let weekday = calendar.component(.weekday, from: today)
         
         // Calculate the offset to get to Monday (2)

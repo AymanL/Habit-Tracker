@@ -15,6 +15,10 @@ struct DetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isPresentingEditHabitView = false
     
+    private var habitInstance: Habit {
+        habit
+    }
+    
     private var completedDates: Binding<[Date]> {
         Binding(
             get: { habit.completedDates },
@@ -108,33 +112,62 @@ struct DetailView: View {
         ZStack(alignment: .topLeading) {
             TabView(selection: $overviewPageIndex) {
                 // Note: There is no point in calculating strength gained in last year because with current formula strengthGainedInYear will always be equal to strengthPercentage.
+                let strength = habitInstance.strengthPercentage
+                let monthStrength = habitInstance.strengthGainedWithinLastDays(daysAgo: 30)
+                let yearStrength = habitInstance.strengthGainedWithinLastDays(daysAgo: 365)
+                
                 OverviewView(
                     title: "Habit Strength",
-                    mainText: "\(habit.strengthPercentage)%",
-                    secondaryText1: "Month: +\(habit.strengthGainedWithinLastDays(daysAgo: 30))%",
-                    secondaryText2: "Year: +\(habit.strengthGainedWithinLastDays(daysAgo: 365))%"
+                    mainText: "\(strength)%",
+                    secondaryText1: "Month: +\(monthStrength)%",
+                    secondaryText2: "Year: +\(yearStrength)%"
                 )
                 .tag(0)
                 .accessibilityElement(children: .combine)
                 
+                let completedCount = habitInstance.isWeekly ? 
+                    habitInstance.completedDates.count / 7 : 
+                    habitInstance.completedDates.count
+                let monthCompletions = habitInstance.isWeekly ? 
+                    habitInstance.completionsWithinLastDays(daysAgo: 30) / 7 : 
+                    habitInstance.completionsWithinLastDays(daysAgo: 30)
+                let yearCompletions = habitInstance.isWeekly ? 
+                    habitInstance.completionsWithinLastDays(daysAgo: 365) / 7 : 
+                    habitInstance.completionsWithinLastDays(daysAgo: 365)
+                
                 OverviewView(
                     title: "Completions",
-                    mainText: "\(habit.completedDates.count)",
-                    secondaryText1: "Month: +\(habit.completionsWithinLastDays(daysAgo: 30))",
-                    secondaryText2: "Year: +\(habit.completionsWithinLastDays(daysAgo: 365))"
+                    mainText: "\(completedCount)",
+                    secondaryText1: "Month: +\(monthCompletions)",
+                    secondaryText2: "Year: +\(yearCompletions)"
                 )
                 .tag(1)
                 .accessibilityElement(children: .combine)
 
+                let streak = habitInstance.streak
+                let longestStreak = habitInstance.longestStreak
+                
                 OverviewView(
                     title: "Streak",
-                    mainText: "\(habit.streak) days",
-                    secondaryText1: "Longest Streak: \(habit.longestStreak) days",
+                    mainText: "\(streak) \(habitInstance.isWeekly ? "weeks" : "days")",
+                    secondaryText1: "Longest Streak: \(longestStreak) \(habitInstance.isWeekly ? "weeks" : "days")",
                     secondaryText2: ""
                 )
                 .tag(2)
                 .accessibilityElement(children: .combine)
-
+                
+                let totalTime = habitInstance.getTotalTimeSpent()
+                let monthTime = habitInstance.getTotalTimeSpentInLastMonth()
+                let yearTime = habitInstance.getTotalTimeSpentInLastYear()
+                
+                OverviewView(
+                    title: "Time Spent",
+                    mainText: formatTime(totalTime),
+                    secondaryText1: "Month: \(formatTime(monthTime))",
+                    secondaryText2: "Year: \(formatTime(yearTime))"
+                )
+                .tag(3)
+                .accessibilityElement(children: .combine)
             }
             .tabViewStyle(.page)
             .frame(height: 190)
@@ -142,6 +175,17 @@ struct DetailView: View {
             Text("OVERVIEW")
                 .font(.caption.bold())
                 .padding()
+        }
+    }
+    
+    private func formatTime(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let remainingMinutes = minutes % 60
+        
+        if hours > 0 {
+            return "\(hours)h \(remainingMinutes)m"
+        } else {
+            return "\(remainingMinutes)m"
         }
     }
     
@@ -153,10 +197,10 @@ struct DetailView: View {
     }
     
     struct OverviewView: View {
-        var title: LocalizedStringKey
-        var mainText: LocalizedStringKey
-        var secondaryText1: LocalizedStringKey
-        var secondaryText2: LocalizedStringKey
+        var title: String
+        var mainText: String
+        var secondaryText1: String
+        var secondaryText2: String
         
         var body: some View {
             VStack(alignment: .leading, spacing: 0) {

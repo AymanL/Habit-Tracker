@@ -18,6 +18,8 @@ struct EditHabitView: View {
     @State private var selectedType: Habit.HabitType
     @State private var startDate: Date
     @State private var isWeekly: Bool
+    @State private var duration: Int
+    @State private var durationEffectiveDate: Date
     
     private let habit: Habit?
     
@@ -29,6 +31,8 @@ struct EditHabitView: View {
         _selectedType = State(initialValue: habit?.type ?? .boolean)
         _startDate = State(initialValue: habit?.creationDate ?? Date())
         _isWeekly = State(initialValue: habit?.isWeekly ?? false)
+        _duration = State(initialValue: habit?.currentDuration ?? 0)
+        _durationEffectiveDate = State(initialValue: Date())
     }
     
     var body: some View {
@@ -36,7 +40,9 @@ struct EditHabitView: View {
             Form {
                 Section {
                     TextField("Name", text: $title)
+                        .textInputAutocapitalization(.words)
                     TextField("Motivation", text: $motivation)
+                        .textInputAutocapitalization(.sentences)
                 }
                 
                 Section {
@@ -52,6 +58,17 @@ struct EditHabitView: View {
                     ColorsPickerView(selectedColor: $selectedColor)
                 } header: {
                     Text("Color")
+                }
+                
+                Section {
+                    Stepper("Duration: \(duration) minutes", value: $duration, in: 0...1440, step: 5)
+                    if duration > 0 {
+                        DatePicker("Effective Date", selection: $durationEffectiveDate, displayedComponents: .date)
+                    }
+                } header: {
+                    Text("Duration")
+                } footer: {
+                    Text("Set the expected duration for this habit. The duration will be applied from the effective date onwards.")
                 }
                 
                 if habit == nil {
@@ -86,6 +103,7 @@ struct EditHabitView: View {
                     .disabled(title.isEmpty)
                 }
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
     
@@ -108,6 +126,11 @@ struct EditHabitView: View {
             }
             
             habit.creationDate = startDate
+            
+            // Update duration if changed
+            if duration != habit.currentDuration {
+                habit.setDuration(duration, effectiveDate: durationEffectiveDate)
+            }
         } else {
             // Create new habit
             let newHabit = Habit(context: viewContext)
@@ -120,6 +143,11 @@ struct EditHabitView: View {
             newHabit.completedDates = []
             newHabit.dailyCounters = [:]  // Initialize empty dictionary
             newHabit.isWeekly = isWeekly
+            
+            // Set initial duration if specified
+            if duration > 0 {
+                newHabit.setDuration(duration, effectiveDate: durationEffectiveDate)
+            }
             
             // Initialize dates based on habit type
             if selectedType == .counter {
@@ -143,9 +171,19 @@ struct EditHabitView: View {
         var currentDate = startDate
         
         while currentDate <= Date() {
+            // Set counter value
             habit.setCounterValue(1, for: currentDate)
+            
+            // Add to completed dates if not already there
+            if !habit.completedDates.contains(where: { calendar.isDate($0, inSameDayAs: currentDate) }) {
+                habit.completedDates.append(currentDate)
+            }
+            
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
         }
+        
+        // Clean up any dates that don't have counters
+        habit.cleanupDailyCounters()
     }
     
     private func initializeBooleanDates(for habit: Habit) {
