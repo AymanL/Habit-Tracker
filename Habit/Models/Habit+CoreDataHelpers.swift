@@ -8,6 +8,29 @@
 import Foundation
 import CoreData
 
+@objc(HabitDuration)
+public class HabitDuration: NSObject, Codable {
+    public let minutes: Int
+    public let effectiveDate: Date
+    public var expirationDate: Date?
+    
+    public init(minutes: Int, effectiveDate: Date, expirationDate: Date? = nil) {
+        self.minutes = minutes
+        self.effectiveDate = effectiveDate
+        self.expirationDate = expirationDate
+        super.init()
+    }
+    
+    public var isActive: Bool {
+        let now = Date()
+        return now >= effectiveDate && (expirationDate == nil || now <= expirationDate!)
+    }
+    
+    public func isActiveOn(_ date: Date) -> Bool {
+        return date >= effectiveDate && (expirationDate == nil || date <= expirationDate!)
+    }
+}
+
 // Paul Hegarty (cs193p) suggests to use "_" for attributes that should never be nil.
 
 /// The `Habit` entity represents a habit in the application.
@@ -103,11 +126,9 @@ extension Habit {
     /// Provides a convenient interface for accessing and setting the habit's completed dates. If the underlying storage property (`completedDates_`) is `nil`, an empty array is returned when accessing the property.
     var completedDates: [Date] {
         get {
-            print("DEBUG: Getting completedDates from CoreData: \(String(describing: completedDates_))")
             return completedDates_ ?? []
         }
         set {
-            print("DEBUG: Setting completedDates in CoreData to: \(newValue)")
             completedDates_ = newValue
         }
     }
@@ -140,11 +161,9 @@ extension Habit {
     /// The daily counters for counter-type habits
     var dailyCounters: [Date: Int] {
         get {
-            print("DEBUG: Getting dailyCounters, raw value: \(String(describing: dailyCounters_))")
             return dailyCounters_ ?? [:]
         }
         set {
-            print("DEBUG: Setting dailyCounters to: \(newValue)")
             dailyCounters_ = newValue
         }
     }
@@ -153,23 +172,31 @@ extension Habit {
     func counterValue(for date: Date) -> Int {
         let normalizedDate = Calendar.current.startOfDay(for: date)
         let value = dailyCounters[normalizedDate] ?? 0
-        print("DEBUG: Getting counter value for \(normalizedDate): \(value)")
         return value
     }
     
     /// Set the counter value for a specific date
     func setCounterValue(_ value: Int, for date: Date) {
         let normalizedDate = Calendar.current.startOfDay(for: date)
-        print("DEBUG: Setting counter value to \(value) for \(normalizedDate)")
         var counters = dailyCounters
         counters[normalizedDate] = value
         dailyCounters = counters
+        
+        // Sync with completedDates
+        if value > 0 {
+            // Add to completedDates if not already there
+            if !completedDates.contains(where: { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }) {
+                completedDates.append(normalizedDate)
+            }
+        } else {
+            // Remove from completedDates if counter is 0
+            completedDates.removeAll { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }
+        }
     }
     
     /// Increment the counter for a specific date
     func incrementCounter(for date: Date) {
         let normalizedDate = Calendar.current.startOfDay(for: date)
-        print("DEBUG: Incrementing counter for \(normalizedDate)")
         let currentValue = counterValue(for: normalizedDate)
         setCounterValue(currentValue + 1, for: normalizedDate)
         
@@ -248,5 +275,215 @@ extension Habit {
         }
         
         return habit
+    }
+    
+    /// The history of durations for this habit
+    var durationHistory: [HabitDuration] {
+        get {
+            guard let jsonString = durationHistory_ else { return [] }
+            guard let jsonData = jsonString.data(using: .utf8) else { return [] }
+            do {
+                return try JSONDecoder().decode([HabitDuration].self, from: jsonData)
+            } catch {
+                print("Error decoding duration history: \(error)")
+                return []
+            }
+        }
+        set {
+            do {
+                let jsonData = try JSONEncoder().encode(newValue)
+                durationHistory_ = String(data: jsonData, encoding: .utf8)
+            } catch {
+                print("Error encoding duration history: \(error)")
+                durationHistory_ = nil
+            }
+        }
+    }
+    
+    /// The current duration of the habit in minutes
+    var currentDuration: Int {
+        durationHistory.first { $0.isActive }?.minutes ?? 0
+    }
+    
+    /// Set a new duration for the habit
+    func setDuration(_ minutes: Int, effectiveDate: Date = Date()) {
+        print("DEBUG: Setting duration to \(minutes) minutes, effective from \(effectiveDate)")
+        
+        // Get current history
+        var history = durationHistory
+        
+        // Set expiration date for the previous duration if it exists
+        if let lastDuration = history.first(where: { $0.isActive }) {
+            print("DEBUG: Found existing active duration: minutes=\(lastDuration.minutes), effectiveDate=\(lastDuration.effectiveDate), expirationDate=\(String(describing: lastDuration.expirationDate))")
+            
+            // Create a new duration with the updated expiration date
+            let updatedDuration = HabitDuration(
+                minutes: lastDuration.minutes,
+                effectiveDate: lastDuration.effectiveDate,
+                expirationDate: effectiveDate
+            )
+            
+            // Replace the old duration with the updated one
+            if let index = history.firstIndex(where: { $0.effectiveDate == lastDuration.effectiveDate }) {
+                history[index] = updatedDuration
+                print("DEBUG: Updated previous duration with expiration date: \(effectiveDate)")
+            }
+        } else {
+            print("DEBUG: No existing active duration found")
+        }
+        
+        // Add new duration
+        let newDuration = HabitDuration(minutes: minutes, effectiveDate: effectiveDate)
+        history.append(newDuration)
+        print("DEBUG: Added new duration: minutes=\(newDuration.minutes), effectiveDate=\(newDuration.effectiveDate), expirationDate=\(String(describing: newDuration.expirationDate))")
+        
+        // Save the updated history
+        durationHistory = history
+        print("DEBUG: Current duration history:")
+        for (index, duration) in durationHistory.enumerated() {
+            print("  [\(index)] minutes=\(duration.minutes), effectiveDate=\(duration.effectiveDate), expirationDate=\(String(describing: duration.expirationDate))")
+        }
+        
+        // Force save to Core Data
+        if let context = managedObjectContext {
+            do {
+                try context.save()
+                print("DEBUG: Successfully saved duration history to Core Data")
+            } catch {
+                print("DEBUG: Error saving duration history: \(error)")
+            }
+        }
+    }
+    
+    /// Get the duration that was active on a specific date
+    func durationOn(_ date: Date) -> Int {
+        durationHistory.first { $0.isActiveOn(date) }?.minutes ?? 0
+    }
+    
+    /// Calculate total time spent on the habit for a given period
+    func totalTimeSpent(from startDate: Date, to endDate: Date) -> Int {
+        let calendar = Calendar.current
+        var totalMinutes = 0
+        
+        // For each day in the period
+        var currentDate = startDate
+        while currentDate <= endDate {
+            if isCompleted(for: currentDate) {
+                // Add the duration that was active on this day
+                totalMinutes += durationOn(currentDate)
+            }
+            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? endDate
+        }
+        
+        return totalMinutes
+    }
+    
+    /// Calculate total time spent on the habit for the current week
+    func totalTimeSpentThisWeek() -> Int {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        // Get the weekday of today (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+        let weekday = calendar.component(.weekday, from: today)
+        
+        // Calculate the offset to get to Monday (2)
+        let daysToMonday = (weekday + 5) % 7
+        
+        // Get the date of Monday
+        let monday = calendar.date(byAdding: .day, value: -daysToMonday, to: today)!
+        
+        // Get the date of Sunday
+        let sunday = calendar.date(byAdding: .day, value: 6, to: monday)!
+        
+        return totalTimeSpent(from: monday, to: sunday)
+    }
+    
+    /// Calculate total time spent on the habit for the current month
+    func totalTimeSpentThisMonth() -> Int {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        // Get the first day of the current month
+        let components = calendar.dateComponents([.year, .month], from: today)
+        let firstDayOfMonth = calendar.date(from: components)!
+        
+        // Get the last day of the current month
+        let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: firstDayOfMonth)!
+        
+        return totalTimeSpent(from: firstDayOfMonth, to: lastDayOfMonth)
+    }
+
+    // MARK: - Time Tracking
+    func effectiveDuration(for date: Date) -> Int {
+        let calendar = Calendar.current
+        let normalizedDate = calendar.startOfDay(for: date)
+        
+        // Get all durations that were active on this date
+        let activeDurations = durationHistory.filter { duration in
+            let effectiveDate = calendar.startOfDay(for: duration.effectiveDate)
+            let expirationDate = duration.expirationDate.map { calendar.startOfDay(for: $0) } ?? .distantFuture
+            return normalizedDate >= effectiveDate && normalizedDate < expirationDate
+        }
+        
+        // If no durations were active, return 0
+        guard let lastActiveDuration = activeDurations.last else {
+            print("DEBUG: No active duration found for date: \(normalizedDate)")
+            print("DEBUG: Available durations:")
+            for (index, duration) in durationHistory.enumerated() {
+                let effectiveDate = calendar.startOfDay(for: duration.effectiveDate)
+                let expirationDate = duration.expirationDate.map { calendar.startOfDay(for: $0) }
+                print("  [\(index)] minutes=\(duration.minutes), effectiveDate=\(effectiveDate), expirationDate=\(String(describing: expirationDate))")
+            }
+            return 0
+        }
+        
+        print("DEBUG: Found active duration: minutes=\(lastActiveDuration.minutes), effectiveDate=\(calendar.startOfDay(for: lastActiveDuration.effectiveDate)), expirationDate=\(String(describing: lastActiveDuration.expirationDate.map { calendar.startOfDay(for: $0) })) for date: \(normalizedDate)")
+        return lastActiveDuration.minutes
+    }
+    
+    func getTotalTimeSpent() -> Int {
+        print("DEBUG: Calculating total time spent")
+        print("DEBUG: Completed dates: \(completedDates)")
+        print("DEBUG: Duration history:")
+        for (index, duration) in durationHistory.enumerated() {
+            print("  [\(index)] minutes=\(duration.minutes), effectiveDate=\(duration.effectiveDate), expirationDate=\(String(describing: duration.expirationDate))")
+        }
+        
+        // For each completed date, calculate the time spent
+        let total = completedDates.reduce(0) { total, date in
+            let duration = effectiveDuration(for: date)
+            let count = type == .counter ? counterValue(for: date) : 1
+            print("DEBUG: Date: \(date), Duration: \(duration), Count: \(count)")
+            return total + (duration * count)
+        }
+        
+        print("DEBUG: Total time spent: \(total) minutes")
+        return total
+    }
+    
+    func getTotalTimeSpentInLastMonth() -> Int {
+        let calendar = Calendar.current
+        let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        
+        return completedDates
+            .filter { $0 >= thirtyDaysAgo }
+            .reduce(0) { total, date in
+                let duration = effectiveDuration(for: date)
+                let count = type == .counter ? counterValue(for: date) : 1
+                return total + (duration * count)
+            }
+    }
+    
+    func getTotalTimeSpentInLastYear() -> Int {
+        let calendar = Calendar.current
+        let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: Date()) ?? Date()
+        
+        return completedDates
+            .filter { $0 >= oneYearAgo }
+            .reduce(0) { total, date in
+                let duration = effectiveDuration(for: date)
+                let count = type == .counter ? counterValue(for: date) : 1
+                return total + (duration * count)
+            }
     }
 }
