@@ -14,6 +14,8 @@ struct DetailView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
     @State private var isPresentingEditHabitView = false
+    @State private var isPresentingEditDurationView = false
+    @State private var selectedDuration: HabitDuration? = nil
     
     private var habitInstance: Habit {
         habit
@@ -45,6 +47,63 @@ struct DetailView: View {
                 )
                     .frame(height: 200)
                     .padding()
+                
+                // Duration History Section
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("DURATION HISTORY")
+                            .font(.caption.bold())
+                        Spacer()
+                        Button(action: {
+                            selectedDuration = nil
+                            isPresentingEditDurationView = true
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(Color(habit.color))
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    ForEach(habit.durationHistory.sorted(by: { $0.effectiveDate > $1.effectiveDate }), id: \.effectiveDate) { duration in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(duration.minutes) minutes")
+                                    .font(.headline)
+                                Text("From: \(duration.effectiveDate.formatted(date: .abbreviated, time: .omitted))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                if let expirationDate = duration.expirationDate {
+                                    Text("To: \(expirationDate.formatted(date: .abbreviated, time: .omitted))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text("Current")
+                                        .font(.subheadline)
+                                        .foregroundColor(.green)
+                                }
+                            }
+                            Spacer()
+                            Button(action: {
+                                selectedDuration = duration
+                                isPresentingEditDurationView = true
+                            }) {
+                                Image(systemName: "pencil.circle.fill")
+                                    .foregroundColor(Color(habit.color))
+                            }
+                        }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .cornerRadius(10)
+                        .shadow(radius: 1)
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.vertical)
+                .sheet(isPresented: $isPresentingEditDurationView, onDismiss: {
+                    selectedDuration = nil
+                }) {
+                    EditDurationView(habit: habit, existingDuration: selectedDuration)
+                }
                 
                 CalendarView(
                     dateInterval: DateInterval(start: .distantPast, end: Date()),
@@ -237,6 +296,145 @@ struct DetailView_Previews: PreviewProvider {
                 .previewDisplayName("Counter Habit")
         }
         .previewLayout(.sizeThatFits)
+    }
+}
+
+struct EditDurationView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    
+    @ObservedObject var habit: Habit
+    let existingDuration: HabitDuration?
+    
+    @State private var minutes: Int
+    @State private var effectiveDate: Date
+    @State private var expirationDate: Date
+    @State private var hasExpirationDate: Bool
+    @State private var showingDateError = false
+    
+    init(habit: Habit, existingDuration: HabitDuration? = nil) {
+        self.habit = habit
+        self.existingDuration = existingDuration
+        
+        _minutes = State(initialValue: existingDuration?.minutes ?? 0)
+        _effectiveDate = State(initialValue: existingDuration?.effectiveDate ?? Date())
+        _expirationDate = State(initialValue: existingDuration?.expirationDate ?? Date().addingTimeInterval(86400)) // Default to tomorrow
+        _hasExpirationDate = State(initialValue: existingDuration?.expirationDate != nil)
+    }
+    
+    private var isDateValid: Bool {
+        !hasExpirationDate || expirationDate > effectiveDate
+    }
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    Stepper("Duration: \(minutes) minutes", value: $minutes, in: 0...1440, step: 5)
+                    DatePicker("Effective Date", selection: $effectiveDate, displayedComponents: .date)
+                    Toggle("Has End Date", isOn: $hasExpirationDate)
+                    if hasExpirationDate {
+                        DatePicker("End Date", selection: $expirationDate, displayedComponents: .date)
+                            .onChange(of: expirationDate) { _ in
+                                if !isDateValid {
+                                    showingDateError = true
+                                }
+                            }
+                    }
+                }
+                
+                if existingDuration != nil {
+                    Section {
+                        Button(role: .destructive) {
+                            deleteDuration()
+                        } label: {
+                            Text("Delete Duration")
+                        }
+                    }
+                }
+            }
+            .navigationTitle(existingDuration == nil ? "Add Duration" : "Edit Duration")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if isDateValid {
+                            save()
+                        } else {
+                            showingDateError = true
+                        }
+                    }
+                }
+            }
+            .alert("Invalid Date", isPresented: $showingDateError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("The end date must be after the effective date.")
+            }
+        }
+    }
+    
+    private func save() {
+        var history = habit.durationHistory
+        
+        if let existingDuration = existingDuration {
+            // Find and update the existing duration
+            if let index = history.firstIndex(where: { $0.effectiveDate == existingDuration.effectiveDate }) {
+                let updatedDuration = HabitDuration(
+                    minutes: minutes,
+                    effectiveDate: effectiveDate,
+                    expirationDate: hasExpirationDate ? expirationDate : nil
+                )
+                history[index] = updatedDuration
+            }
+        } else {
+            // Add new duration
+            let newDuration = HabitDuration(
+                minutes: minutes,
+                effectiveDate: effectiveDate,
+                expirationDate: hasExpirationDate ? expirationDate : nil
+            )
+            history.append(newDuration)
+        }
+        
+        // Sort by effective date
+        history.sort { $0.effectiveDate < $1.effectiveDate }
+        
+        // Update the habit
+        habit.durationHistory = history
+        
+        do {
+            try viewContext.save()
+            // Force a UI update by triggering objectWillChange
+            habit.objectWillChange.send()
+        } catch {
+            print("Error saving duration history: \(error)")
+        }
+        
+        dismiss()
+    }
+    
+    private func deleteDuration() {
+        guard let existingDuration = existingDuration else { return }
+        
+        var history = habit.durationHistory
+        history.removeAll { $0.effectiveDate == existingDuration.effectiveDate }
+        habit.durationHistory = history
+        
+        do {
+            try viewContext.save()
+            // Force a UI update by triggering objectWillChange
+            habit.objectWillChange.send()
+        } catch {
+            print("Error deleting duration: \(error)")
+        }
+        
+        dismiss()
     }
 }
 
