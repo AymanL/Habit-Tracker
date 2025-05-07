@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import CoreData
 
 @main
 struct HabitApp: App {
-    @StateObject var dataController = DataController.shared
-
+    let dataController = DataController.shared
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
