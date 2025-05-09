@@ -2,23 +2,13 @@ import UIKit
 import BackgroundTasks
 import UserNotifications
 
-public class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate {
     private let backgroundTaskIdentifier = "com.ayman.habit.weeklyexport"
     
-    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         registerBackgroundTasks()
         requestNotificationPermission()
         return true
-    }
-    
-    public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        let sceneConfig = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
-        sceneConfig.delegateClass = SceneDelegate.self
-        return sceneConfig
-    }
-    
-    public func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Handle discarded scenes if needed
     }
     
     func registerBackgroundTasks() {
