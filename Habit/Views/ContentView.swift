@@ -9,6 +9,160 @@ import SwiftUI
 import CoreData
 import UserNotifications
 import BackgroundTasks
+import MessageUI
+
+class MailComposerDelegate: NSObject, MFMailComposeViewControllerDelegate {
+    static let shared = MailComposerDelegate()
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        // Dismiss the mail composer
+        controller.dismiss(animated: true)
+        
+        // Log the result
+        switch result {
+        case .sent:
+            print("Email sent successfully")
+        case .saved:
+            print("Email saved as draft")
+        case .failed:
+            print("Email sending failed: \(error?.localizedDescription ?? "Unknown error")")
+        case .cancelled:
+            print("Email sending cancelled")
+        @unknown default:
+            print("Unknown email result")
+        }
+    }
+}
+
+struct MailView: UIViewControllerRepresentable {
+    @Binding var isShowing: Bool
+    let recipientEmail: String
+    let attachmentURL: URL
+    @State private var showMailError = false
+    
+    func makeUIViewController(context: Context) -> UIViewController {
+        if MFMailComposeViewController.canSendMail() {
+            let vc = MFMailComposeViewController()
+            vc.mailComposeDelegate = context.coordinator
+            vc.setToRecipients([recipientEmail])
+            vc.setSubject("Weekly Habit Export")
+            vc.setMessageBody("Please find attached your weekly habit export.", isHTML: false)
+            
+            do {
+                let attachmentData = try Data(contentsOf: attachmentURL)
+                vc.addAttachmentData(attachmentData, mimeType: "application/json", fileName: "habits-export.json")
+            } catch {
+                print("Error attaching file: \(error.localizedDescription)")
+            }
+            
+            return vc
+        } else {
+            // If mail is not available, show an alert
+            DispatchQueue.main.async {
+                showMailError = true
+            }
+            return UIViewController()
+        }
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(isShowing: $isShowing, showMailError: $showMailError)
+    }
+    
+    class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
+        @Binding var isShowing: Bool
+        @Binding var showMailError: Bool
+        
+        init(isShowing: Binding<Bool>, showMailError: Binding<Bool>) {
+            _isShowing = isShowing
+            _showMailError = showMailError
+        }
+        
+        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+            // Always dismiss the mail composer
+            DispatchQueue.main.async {
+                self.isShowing = false
+            }
+            
+            // Log the result
+            switch result {
+            case .sent:
+                print("Email sent successfully")
+            case .saved:
+                print("Email saved as draft")
+            case .failed:
+                print("Email sending failed: \(error?.localizedDescription ?? "Unknown error")")
+            case .cancelled:
+                print("Email sending cancelled")
+            @unknown default:
+                print("Unknown email result")
+            }
+        }
+    }
+}
+
+class MailComposerViewController: UIViewController, MFMailComposeViewControllerDelegate {
+    var recipientEmail: String?
+    var attachmentURL: URL?
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        presentMailComposer()
+    }
+    
+    private func presentMailComposer() {
+        guard MFMailComposeViewController.canSendMail() else {
+            print("Mail services are not available")
+            dismiss(animated: true)
+            return
+        }
+        
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.mailComposeDelegate = self
+        
+        if let email = recipientEmail {
+            mailComposer.setToRecipients([email])
+        }
+        
+        mailComposer.setSubject("Weekly Habit Export")
+        mailComposer.setMessageBody("Please find attached your weekly habit export.", isHTML: false)
+        
+        if let url = attachmentURL {
+            do {
+                let attachmentData = try Data(contentsOf: url)
+                mailComposer.addAttachmentData(attachmentData, mimeType: "application/json", fileName: "habits-export.json")
+            } catch {
+                print("Error attaching file: \(error.localizedDescription)")
+            }
+        }
+        
+        present(mailComposer, animated: true)
+    }
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        // First dismiss the mail composer
+        controller.dismiss(animated: true) {
+            // Then dismiss this view controller
+            self.dismiss(animated: true)
+        }
+        
+        // Log the result
+        switch result {
+        case .sent:
+            print("Email sent successfully")
+        case .saved:
+            print("Email saved as draft")
+        case .failed:
+            print("Email sending failed: \(error?.localizedDescription ?? "Unknown error")")
+        case .cancelled:
+            print("Email sending cancelled")
+        @unknown default:
+            print("Unknown email result")
+        }
+    }
+}
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -25,6 +179,9 @@ struct SettingsView: View {
     @AppStorage("autoExportEnabled") private var autoExportEnabled = false
     @AppStorage("autoExportEmail") private var autoExportEmail = ""
     @EnvironmentObject var dataController: DataController
+    @State private var isShowingMailView = false
+    @State private var showMailError = false
+    @State private var mailComposerVC: UIViewController?
     
     var body: some View {
         NavigationView {
@@ -64,6 +221,19 @@ struct SettingsView: View {
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
+                            
+                            Button {
+                                print("Email Export Now button tapped")
+                                exportAllHabits { success in
+                                    print("Export completed with success: \(success)")
+                                    if success {
+                                        isShowingMailView = true
+                                    }
+                                }
+                            } label: {
+                                Label("Email Export Now", systemImage: "envelope")
+                            }
+                            .disabled(isExporting || isImporting)
                         }
                     } header: {
                         Text("Automatic Export")
@@ -171,6 +341,18 @@ struct SettingsView: View {
             } message: {
                 Text("Your habits have been successfully imported.")
             }
+            .sheet(isPresented: $isShowingMailView) {
+                if let url = exportURL {
+                    MailView(isShowing: $isShowingMailView, recipientEmail: autoExportEmail, attachmentURL: url)
+                }
+            }
+            .alert("Cannot Send Email", isPresented: $showMailError) {
+                Button("OK", role: .cancel) {
+                    isShowingMailView = false
+                }
+            } message: {
+                Text("Please set up a mail account in the Mail app to send emails.")
+            }
             .onAppear {
                 if autoExportEnabled {
                     requestNotificationPermission()
@@ -210,21 +392,13 @@ struct SettingsView: View {
             }
         }
         
-        // Schedule the background task
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.yourapp.weeklyexport", using: nil) { task in
-            self.handleWeeklyExport(task: task as! BGProcessingTask)
-        }
-        
-        scheduleNextWeeklyExport()
-    }
-    
-    private func scheduleNextWeeklyExport() {
-        let request = BGProcessingTaskRequest(identifier: "com.yourapp.weeklyexport")
-        request.requiresNetworkConnectivity = true
-        request.requiresExternalPower = false
+        // Schedule the next export
+        let bgRequest = BGProcessingTaskRequest(identifier: "com.ayman.habit.weeklyexport")
+        bgRequest.requiresNetworkConnectivity = true
+        bgRequest.requiresExternalPower = false
         
         do {
-            try BGTaskScheduler.shared.submit(request)
+            try BGTaskScheduler.shared.submit(bgRequest)
         } catch {
             print("Could not schedule weekly export: \(error)")
         }
@@ -232,7 +406,7 @@ struct SettingsView: View {
     
     private func handleWeeklyExport(task: BGProcessingTask) {
         // Schedule the next export
-        scheduleNextWeeklyExport()
+        scheduleWeeklyExport()
         
         // Create a task expiration handler
         task.expirationHandler = {
@@ -262,22 +436,55 @@ struct SettingsView: View {
     }
     
     private func sendExportEmail() {
-        guard let url = exportURL else { return }
+        print("Starting sendExportEmail")
+        guard let url = exportURL else {
+            print("No export URL available")
+            return
+        }
+        print("Export URL: \(url.path)")
         
-        let mailtoUrl = URL(string: "mailto:\(autoExportEmail)?subject=Weekly%20Habit%20Export&body=Your%20weekly%20habit%20export%20is%20attached.")!
+        // Create a temporary file URL for the attachment
+        let tempDir = FileManager.default.temporaryDirectory
+        let attachmentURL = tempDir.appendingPathComponent("habits-export.json")
+        print("Attachment URL: \(attachmentURL.path)")
         
-        if UIApplication.shared.canOpenURL(mailtoUrl) {
-            UIApplication.shared.open(mailtoUrl)
+        do {
+            // Copy the export file to the attachment location
+            if FileManager.default.fileExists(atPath: attachmentURL.path) {
+                try FileManager.default.removeItem(at: attachmentURL)
+            }
+            try FileManager.default.copyItem(at: url, to: attachmentURL)
+            print("Successfully copied file for attachment")
+            
+            // Create and configure the mail composer view controller
+            let mailVC = MailComposerViewController()
+            mailVC.recipientEmail = autoExportEmail
+            mailVC.attachmentURL = attachmentURL
+            
+            // Present the mail composer
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first,
+               let rootVC = window.rootViewController {
+                rootVC.present(mailVC, animated: true)
+            }
+        } catch {
+            print("Error preparing email: \(error.localizedDescription)")
+            // Reset the button state
+            DispatchQueue.main.async {
+                self.isExporting = false
+            }
         }
     }
     
     private func exportAllHabits(completion: ((Bool) -> Void)? = nil) {
+        print("Starting exportAllHabits")
         isExporting = true
         exportProgress = "Preparing export..."
         
         // Use async to not block the UI
         DispatchQueue.global(qos: .userInitiated).async {
             let habits = dataController.getAllHabits()
+            print("Found \(habits.count) habits to export")
             
             DispatchQueue.main.async {
                 exportProgress = "Processing \(habits.count) habits..."
@@ -306,10 +513,6 @@ struct SettingsView: View {
                 ]
             }
             
-            DispatchQueue.main.async {
-                exportProgress = "Creating export file..."
-            }
-            
             let exportData: [String: Any] = [
                 "version": "1.0",
                 "exportDate": Date().timeIntervalSince1970,
@@ -323,23 +526,20 @@ struct SettingsView: View {
                 let dateString = dateFormatter.string(from: Date())
                 let fileName = "habits-\(dateString).json"
                 
-                // Create a temporary file with the .json extension
                 let tempDir = FileManager.default.temporaryDirectory
                 let tempFile = tempDir.appendingPathComponent(fileName)
                 try jsonData.write(to: tempFile)
+                print("Successfully wrote export file to: \(tempFile.path)")
                 
                 DispatchQueue.main.async {
                     self.exportURL = tempFile
                     self.isExporting = false
-                    if completion == nil {
-                        self.isShowingShareSheet = true
-                    }
+                    print("Export completed, calling completion handler")
                     completion?(true)
                 }
             } catch {
+                print("Error in export: \(error)")
                 DispatchQueue.main.async {
-                    self.importErrorMessage = "Error exporting habits: \(error.localizedDescription)"
-                    self.showingImportError = true
                     self.isExporting = false
                     completion?(false)
                 }
@@ -419,6 +619,8 @@ struct SettingsView: View {
 struct ContentView: View {
     @State private var isPresentingEditHabitView = false
     @State private var isPresentingSettingsView = false
+    @State private var isShowingMailView = false
+    @State private var exportURL: URL?
     @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
     @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
     @EnvironmentObject var dataController: DataController
@@ -440,6 +642,11 @@ struct ContentView: View {
             }
             .sheet(isPresented: $isPresentingSettingsView) {
                 SettingsView()
+            }
+            .sheet(isPresented: $isShowingMailView) {
+                if let url = exportURL {
+                    MailView(isShowing: $isShowingMailView, recipientEmail: "", attachmentURL: url)
+                }
             }
         }
     }
