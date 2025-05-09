@@ -28,7 +28,7 @@ struct EditHabitView: View {
         _title = State(initialValue: habit?.title ?? "")
         _motivation = State(initialValue: habit?.motivation ?? "")
         _selectedColor = State(initialValue: habit?.color ?? .blue)
-        _selectedType = State(initialValue: habit?.type ?? .boolean)
+        _selectedType = State(initialValue: habit?.type ?? .counter)
         _startDate = State(initialValue: habit?.creationDate ?? Date())
         _isWeekly = State(initialValue: habit?.isWeekly ?? false)
         _duration = State(initialValue: habit?.currentDuration ?? 0)
