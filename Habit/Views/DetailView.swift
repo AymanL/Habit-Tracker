@@ -16,6 +16,8 @@ struct DetailView: View {
     @State private var isPresentingEditHabitView = false
     @State private var isPresentingEditDurationView = false
     @State private var selectedDuration: HabitDuration? = nil
+    @State private var exportData: Data?
+    @State private var isShowingShareSheet = false
     
     private var habitInstance: Habit {
         habit
@@ -131,9 +133,22 @@ struct DetailView: View {
                     }
                     .foregroundColor(.black)
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {
+                        exportHabitData()
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.black)
+                    }
+                }
             }
             .onAppear {
                 setupAppearance()
+            }
+            .sheet(isPresented: $isShowingShareSheet) {
+                if let data = exportData {
+                    ShareSheet(items: [data])
+                }
             }
         }
     }
@@ -282,6 +297,38 @@ struct DetailView: View {
                 }
             }
             .padding()
+        }
+    }
+    
+    private func exportHabitData() {
+        // Create a dictionary with all habit data
+        let habitData: [String: Any] = [
+            "id": habit.id.uuidString,
+            "title": habit.title,
+            "motivation": habit.motivation,
+            "color": habit.color.rawValue,
+            "type": habit.type.rawValue,
+            "isWeekly": habit.isWeekly,
+            "creationDate": habit.creationDate.timeIntervalSince1970,
+            "completedDates": habit.completedDates.map { $0.timeIntervalSince1970 },
+            "dailyCounters": Dictionary(uniqueKeysWithValues: habit.dailyCounters.map { 
+                (String($0.key.timeIntervalSince1970), $0.value)
+            }),
+            "durationHistory": habit.durationHistory.map { duration in
+                [
+                    "minutes": duration.minutes,
+                    "effectiveDate": duration.effectiveDate.timeIntervalSince1970,
+                    "expirationDate": duration.expirationDate?.timeIntervalSince1970
+                ]
+            }
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: habitData, options: .prettyPrinted)
+            exportData = jsonData
+            isShowingShareSheet = true
+        } catch {
+            print("Error exporting habit data: \(error)")
         }
     }
 }
@@ -436,6 +483,17 @@ struct EditDurationView: View {
         
         dismiss()
     }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 

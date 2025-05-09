@@ -10,6 +10,7 @@ import CoreData
 
 @main
 struct HabitApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let dataController = DataController.shared
     
     var body: some Scene {
