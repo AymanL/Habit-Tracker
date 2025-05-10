@@ -61,7 +61,7 @@ extension Habit {
     ///   - color: The color associated with the habit.
     ///   - type: The type of habit tracking (boolean or counter).
     ///   - isWeekly: Whether the habit is weekly.
-    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor, type: HabitType = .boolean, isWeekly: Bool = false) {
+    convenience init(context: NSManagedObjectContext, title: String, motivation: String, color: HabitColor, type: HabitType = .boolean, isWeekly: Bool = false, category: Category? = nil) {
         self.init(context: context)
         self.id = UUID()
         self.title = title
@@ -71,6 +71,7 @@ extension Habit {
         self.isWeekly = isWeekly
         self.creationDate = Date()
         self.completedDates = []
+        self.category = category
         
         // Set initial order to be the last in the list
         let request: NSFetchRequest<Habit> = Habit.fetchRequest()
@@ -78,9 +79,9 @@ extension Habit {
         request.fetchLimit = 1
         
         if let lastHabit = try? context.fetch(request).first {
-            self.order = Int(lastHabit.order_) + 1
+            self.order_ = Int64(lastHabit.order_) + 1
         } else {
-            self.order = 0
+            self.order_ = 0
         }
     }
     
@@ -477,5 +478,10 @@ extension Habit {
                 let count = type == .counter ? counterValue(for: date) : 1
                 return total + (duration * count)
             }
+    }
+    
+    var category: Category? {
+        get { category_ }
+        set { category_ = newValue }
     }
 }
