@@ -20,6 +20,12 @@ struct EditHabitView: View {
     @State private var isWeekly: Bool
     @State private var duration: Int
     @State private var durationEffectiveDate: Date
+    @State private var selectedCategory: Category?
+    
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Category.order_, ascending: true)],
+        animation: .default)
+    private var categories: FetchedResults<Category>
     
     private let habit: Habit?
     
@@ -33,65 +39,36 @@ struct EditHabitView: View {
         _isWeekly = State(initialValue: habit?.isWeekly ?? false)
         _duration = State(initialValue: habit?.currentDuration ?? 0)
         _durationEffectiveDate = State(initialValue: Date())
+        _selectedCategory = State(initialValue: habit?.category)
     }
     
     var body: some View {
         NavigationView {
             Form {
-                Section {
-                    TextField("Name", text: $title)
-                        .textInputAutocapitalization(.words)
-                    TextField("Motivation", text: $motivation)
-                        .textInputAutocapitalization(.sentences)
-                }
+                BasicInfoSection(
+                    title: $title,
+                    motivation: $motivation,
+                    selectedCategory: $selectedCategory,
+                    selectedColor: $selectedColor,
+                    categories: categories
+                )
                 
-                Section {
-                    Toggle("Weekly Habit", isOn: $isWeekly)
-                        .tint(Color(selectedColor))
-                } header: {
-                    Text("Frequency")
-                } footer: {
-                    Text("Weekly habits count as completed when any day in the week is completed. Streaks are counted by weeks instead of days.")
-                }
+                SettingsSection(
+                    selectedType: $selectedType,
+                    isWeekly: $isWeekly,
+                    startDate: $startDate
+                )
                 
-                Section {
-                    ColorsPickerView(selectedColor: $selectedColor)
-                } header: {
-                    Text("Color")
-                }
-                
-                Section {
-                    Stepper("Duration: \(duration) minutes", value: $duration, in: 0...1440, step: 5)
-                    if duration > 0 {
-                        DatePicker("Effective Date", selection: $durationEffectiveDate, displayedComponents: .date)
-                    }
-                } header: {
-                    Text("Duration")
-                } footer: {
-                    Text("Set the expected duration for this habit. The duration will be applied from the effective date onwards.")
-                }
-                
-                if habit == nil {
-                    Section {
-                        Picker("Type", selection: $selectedType) {
-                            Text("Yes/No").tag(Habit.HabitType.boolean)
-                            Text("Counter").tag(Habit.HabitType.counter)
-                        }
-                        .pickerStyle(.segmented)
-                    } header: {
-                        Text("Type")
-                    }
-                }
-                
-                Section(header: Text("Start Date")) {
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
-                }
+                DurationSection(
+                    duration: $duration,
+                    durationEffectiveDate: $durationEffectiveDate
+                )
             }
-            .navigationTitle(habit == nil ? "Add New Habit" : "Edit a Habit")
+            .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
@@ -99,6 +76,7 @@ struct EditHabitView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         save()
+                        dismiss()
                     }
                     .disabled(title.isEmpty)
                 }
@@ -109,90 +87,88 @@ struct EditHabitView: View {
     
     private func save() {
         if let habit = habit {
+            // Update existing habit
             habit.title = title
             habit.motivation = motivation
             habit.color = selectedColor
             habit.type = selectedType
             habit.isWeekly = isWeekly
-            
-            // If the start date changed, initialize dates
-            if habit.creationDate != startDate {
-                if selectedType == .counter {
-                    initializeCounters(for: habit)
-                    habit.cleanupDailyCounters()
-                } else {
-                    initializeBooleanDates(for: habit)
-                }
-            }
-            
             habit.creationDate = startDate
+            habit.category = selectedCategory
             
             // Update duration if changed
             if duration != habit.currentDuration {
-                habit.setDuration(duration, effectiveDate: durationEffectiveDate)
+                var history = habit.durationHistory
+                history.append(HabitDuration(minutes: duration, effectiveDate: durationEffectiveDate))
+                habit.durationHistory = history
             }
         } else {
             // Create new habit
-            let newHabit = Habit(context: viewContext)
-            newHabit.id = UUID()
-            newHabit.title = title
-            newHabit.motivation = motivation
-            newHabit.color = selectedColor
-            newHabit.type = selectedType
+            let newHabit = Habit(context: viewContext, title: title, motivation: motivation, color: selectedColor, type: selectedType, isWeekly: isWeekly, category: selectedCategory)
             newHabit.creationDate = startDate
-            newHabit.completedDates = []
-            newHabit.dailyCounters = [:]  // Initialize empty dictionary
-            newHabit.isWeekly = isWeekly
             
-            // Set initial duration if specified
+            // Set initial duration
             if duration > 0 {
-                newHabit.setDuration(duration, effectiveDate: durationEffectiveDate)
-            }
-            
-            // Initialize dates based on habit type
-            if selectedType == .counter {
-                initializeCounters(for: newHabit)
-                newHabit.cleanupDailyCounters()
-            } else {
-                initializeBooleanDates(for: newHabit)
+                newHabit.durationHistory = [HabitDuration(minutes: duration, effectiveDate: durationEffectiveDate)]
             }
         }
         
-        do {
-            try viewContext.save()
-            dismiss()
-        } catch {
-            print("Error saving habit: \(error)")
+        try? viewContext.save()
+    }
+}
+
+private struct BasicInfoSection: View {
+    @Binding var title: String
+    @Binding var motivation: String
+    @Binding var selectedCategory: Category?
+    @Binding var selectedColor: HabitColor
+    let categories: FetchedResults<Category>
+    
+    var body: some View {
+        Section(header: Text("Basic Info")) {
+            TextField("Habit Title", text: $title)
+            TextField("Motivation", text: $motivation)
+            
+            Picker("Category", selection: $selectedCategory) {
+                Text("None").tag(nil as Category?)
+                ForEach(Array(categories)) { category in
+                    Text(category.name_ ?? "").tag(category as Category?)
+                }
+            }
+            
+            ColorsPickerView(selectedColor: $selectedColor)
         }
     }
+}
+
+private struct SettingsSection: View {
+    @Binding var selectedType: Habit.HabitType
+    @Binding var isWeekly: Bool
+    @Binding var startDate: Date
     
-    private func initializeCounters(for habit: Habit) {
-        let calendar = Calendar.current
-        var currentDate = startDate
-        
-        while currentDate <= Date() {
-            // Set counter value
-            habit.setCounterValue(1, for: currentDate)
-            
-            // Add to completed dates if not already there
-            if !habit.completedDates.contains(where: { calendar.isDate($0, inSameDayAs: currentDate) }) {
-                habit.completedDates.append(currentDate)
+    var body: some View {
+        Section(header: Text("Settings")) {
+            Picker("Type", selection: $selectedType) {
+                Text("Boolean").tag(Habit.HabitType.boolean)
+                Text("Counter").tag(Habit.HabitType.counter)
             }
+            .pickerStyle(.segmented)
             
-            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+            Toggle("Weekly Habit", isOn: $isWeekly)
+            
+            DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
         }
-        
-        // Clean up any dates that don't have counters
-        habit.cleanupDailyCounters()
     }
+}
+
+private struct DurationSection: View {
+    @Binding var duration: Int
+    @Binding var durationEffectiveDate: Date
     
-    private func initializeBooleanDates(for habit: Habit) {
-        let calendar = Calendar.current
-        var currentDate = startDate
-        
-        while currentDate <= Date() {
-            habit.addCompletedDate(currentDate)
-            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+    var body: some View {
+        Section(header: Text("Duration")) {
+            Stepper("Duration: \(duration) minutes", value: $duration, in: 0...1440, step: 5)
+            DatePicker("Effective Date", selection: $durationEffectiveDate, displayedComponents: .date)
         }
     }
 }
@@ -200,7 +176,7 @@ struct EditHabitView: View {
 struct HabitView_Previews: PreviewProvider {
     static var previews: some View {
         EditHabitView(habit: Habit.example)
-            .previewLayout(.sizeThatFits) // Apparently, without this, preview crashes -_-
+            .previewLayout(.sizeThatFits)
     }
 }
 

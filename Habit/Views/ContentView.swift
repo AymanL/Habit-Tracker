@@ -617,13 +617,14 @@ struct SettingsView: View {
 }
 
 struct ContentView: View {
-    @State private var isPresentingEditHabitView = false
+    @EnvironmentObject var dataController: DataController
+    @State private var showingAddHabit = false
+    @State private var showingCategories = false
     @State private var isPresentingSettingsView = false
     @State private var isShowingMailView = false
     @State private var exportURL: URL?
     @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
     @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
-    @EnvironmentObject var dataController: DataController
     
     var body: some View {
         NavigationView {
@@ -632,13 +633,56 @@ struct ContentView: View {
                 HeaderView()
                 HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
             }
+            .navigationTitle("Habits")
             .toolbar {
-                addHabitToolbarItem
-                sortMenuToolbarItem
-                settingsToolbarItem
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Menu {
+                        Button(action: { sortingOption = .byDate }) {
+                            Label("Sort by Date", systemImage: "calendar")
+                        }
+                        Button(action: { sortingOption = .byName }) {
+                            Label("Sort by Name", systemImage: "textformat")
+                        }
+                        Button(action: { sortingOption = .byOrder }) {
+                            Label("Sort by Order", systemImage: "arrow.up.arrow.down")
+                        }
+                        
+                        Divider()
+                        
+                        Button(action: { isSortingOrderAscending.toggle() }) {
+                            Label(isSortingOrderAscending ? "Sort Descending" : "Sort Ascending",
+                                  systemImage: isSortingOrderAscending ? "arrow.down" : "arrow.up")
+                        }
+                    } label: {
+                        Label("Sort", systemImage: "arrow.up.arrow.down")
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: { showingCategories = true }) {
+                            Label("Categories", systemImage: "folder")
+                        }
+                        
+                        Button(action: { showingAddHabit = true }) {
+                            Label("Add Habit", systemImage: "plus")
+                        }
+                        
+                        Button(action: { isPresentingSettingsView = true }) {
+                            Label("Settings", systemImage: "gear")
+                        }
+                    }
+                }
             }
-            .sheet(isPresented: $isPresentingEditHabitView) {
-                EditHabitView(habit: nil)
+            .sheet(isPresented: $showingAddHabit) {
+                NavigationView {
+                    EditHabitView()
+                }
+            }
+            .sheet(isPresented: $showingCategories) {
+                NavigationView {
+                    CategoryListView()
+                }
             }
             .sheet(isPresented: $isPresentingSettingsView) {
                 SettingsView()
@@ -648,40 +692,6 @@ struct ContentView: View {
                     MailView(isShowing: $isShowingMailView, recipientEmail: "", attachmentURL: url)
                 }
             }
-        }
-    }
-    
-    var addHabitToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button {
-                isPresentingEditHabitView = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 19).weight(.light))
-                    .tint(.primary)
-            }
-            .accessibilityLabel("Add Habit")
-            .accessibilityIdentifier("addHabit")
-        }
-    }
-    
-    var sortMenuToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            SortMenuView(selectedSortingOption: $sortingOption, isSortingOrderAscending: $isSortingOrderAscending)
-                .tint(.primary)
-        }
-    }
-    
-    var settingsToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button {
-                isPresentingSettingsView = true
-            } label: {
-                Image(systemName: "gear")
-                    .font(.system(size: 19).weight(.light))
-                    .tint(.primary)
-            }
-            .accessibilityLabel("Settings")
         }
     }
 }
