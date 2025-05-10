@@ -6,47 +6,65 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct ContentView: View {
-    @State private var isPresentingEditHabitView = false
-    @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
-    @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
+    @EnvironmentObject var dataController: DataController
+    @State private var showingAddHabit = false
+    @State private var showingCategories = false
+    @State private var sortingOption: SortingOption = .byOrder
+    @State private var isSortingOrderAscending = true
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                Divider()
-                HeaderView()
-                HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
-            }
-            .toolbar {
-                addHabitToolbarItem
-                sortMenuToolbarItem
-            }
-            .sheet(isPresented: $isPresentingEditHabitView) {
-                EditHabitView(habit: nil)
-            }
-        }
-    }
-    
-    var addHabitToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button {
-                isPresentingEditHabitView = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 19).weight(.light))
-                    .tint(.primary)
-            }
-            .accessibilityLabel("Add Habit")
-            .accessibilityIdentifier("addHabit")
-        }
-    }
-    
-    var sortMenuToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            SortMenuView(selectedSortingOption: $sortingOption, isSortingOrderAscending: $isSortingOrderAscending)
-                .tint(.primary)
+            HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
+                .navigationTitle("Habits")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Menu {
+                            Button(action: { sortingOption = .byDate }) {
+                                Label("Sort by Date", systemImage: "calendar")
+                            }
+                            Button(action: { sortingOption = .byName }) {
+                                Label("Sort by Name", systemImage: "textformat")
+                            }
+                            Button(action: { sortingOption = .byOrder }) {
+                                Label("Sort by Order", systemImage: "arrow.up.arrow.down")
+                            }
+                            
+                            Divider()
+                            
+                            Button(action: { isSortingOrderAscending.toggle() }) {
+                                Label(isSortingOrderAscending ? "Sort Descending" : "Sort Ascending",
+                                      systemImage: isSortingOrderAscending ? "arrow.down" : "arrow.up")
+                            }
+                        } label: {
+                            Label("Sort", systemImage: "arrow.up.arrow.down")
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        HStack {
+                            Button(action: { showingCategories = true }) {
+                                Label("Categories", systemImage: "folder")
+                            }
+                            
+                            Button(action: { showingAddHabit = true }) {
+                                Label("Add Habit", systemImage: "plus")
+                            }
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingAddHabit) {
+                    NavigationView {
+                        EditHabitView()
+                    }
+                }
+                .sheet(isPresented: $showingCategories) {
+                    NavigationView {
+                        CategoryListView()
+                    }
+                }
         }
     }
 }
