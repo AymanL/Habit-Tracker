@@ -43,46 +43,44 @@ struct EditHabitView: View {
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                BasicInfoSection(
-                    title: $title,
-                    motivation: $motivation,
-                    selectedCategory: $selectedCategory,
-                    selectedColor: $selectedColor,
-                    categories: categories
-                )
-                
-                SettingsSection(
-                    selectedType: $selectedType,
-                    isWeekly: $isWeekly,
-                    startDate: $startDate
-                )
-                
-                DurationSection(
-                    duration: $duration,
-                    durationEffectiveDate: $durationEffectiveDate
-                )
-            }
-            .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        save()
-                        dismiss()
-                    }
-                    .disabled(title.isEmpty)
-                }
-            }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+        Form {
+            BasicInfoSection(
+                title: $title,
+                motivation: $motivation,
+                selectedCategory: $selectedCategory,
+                selectedColor: $selectedColor,
+                categories: categories
+            )
+            
+            SettingsSection(
+                selectedType: $selectedType,
+                isWeekly: $isWeekly,
+                startDate: $startDate
+            )
+            
+            DurationSection(
+                duration: $duration,
+                durationEffectiveDate: $durationEffectiveDate
+            )
         }
+        .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    save()
+                    dismiss()
+                }
+                .disabled(title.isEmpty)
+            }
+        }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     private func save() {
