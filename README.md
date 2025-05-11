@@ -9,6 +9,11 @@
 - Be able to move a habit up or down by pressing it down
 - Export to CSV to save data
   - Be able to load data from CSV in case data was previously lost
+ 
+# Bugs:
+- Export feature doesn't work, only by mail
+- Editing a duration opens first the add duration before being able to add
+- Adding a past weekly habit doesn't trigger the whole week 
 
 ## Overview
 
