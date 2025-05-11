@@ -43,46 +43,44 @@ struct EditHabitView: View {
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                BasicInfoSection(
-                    title: $title,
-                    motivation: $motivation,
-                    selectedCategory: $selectedCategory,
-                    selectedColor: $selectedColor,
-                    categories: categories
-                )
-                
-                SettingsSection(
-                    selectedType: $selectedType,
-                    isWeekly: $isWeekly,
-                    startDate: $startDate
-                )
-                
-                DurationSection(
-                    duration: $duration,
-                    durationEffectiveDate: $durationEffectiveDate
-                )
-            }
-            .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        save()
-                        dismiss()
-                    }
-                    .disabled(title.isEmpty)
-                }
-            }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+        Form {
+            BasicInfoSection(
+                title: $title,
+                motivation: $motivation,
+                selectedCategory: $selectedCategory,
+                selectedColor: $selectedColor,
+                categories: categories
+            )
+            
+            SettingsSection(
+                selectedType: $selectedType,
+                isWeekly: $isWeekly,
+                startDate: $startDate
+            )
+            
+            DurationSection(
+                duration: $duration,
+                durationEffectiveDate: $durationEffectiveDate
+            )
         }
+        .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    save()
+                    dismiss()
+                }
+                .disabled(title.isEmpty)
+            }
+        }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     private func save() {
@@ -102,6 +100,18 @@ struct EditHabitView: View {
                 history.append(HabitDuration(minutes: duration, effectiveDate: durationEffectiveDate))
                 habit.durationHistory = history
             }
+            
+            // Add all dates between startDate and today to completedDates
+            let calendar = Calendar.current
+            var currentDate = startDate
+            let today = Date()
+            
+            while currentDate <= today {
+                if !habit.isCompleted(for: currentDate) {
+                    habit.addCompletedDate(currentDate)
+                }
+                currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? today
+            }
         } else {
             // Create new habit
             let newHabit = Habit(context: viewContext, title: title, motivation: motivation, color: selectedColor, type: selectedType, isWeekly: isWeekly, category: selectedCategory)
@@ -110,6 +120,16 @@ struct EditHabitView: View {
             // Set initial duration
             if duration > 0 {
                 newHabit.durationHistory = [HabitDuration(minutes: duration, effectiveDate: durationEffectiveDate)]
+            }
+            
+            // Add all dates between startDate and today to completedDates
+            let calendar = Calendar.current
+            var currentDate = startDate
+            let today = Date()
+            
+            while currentDate <= today {
+                newHabit.addCompletedDate(currentDate)
+                currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? today
             }
         }
         
