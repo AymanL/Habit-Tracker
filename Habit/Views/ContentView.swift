@@ -8,63 +8,367 @@
 import SwiftUI
 import CoreData
 
+
+
+struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var exportURL: URL?
+    @State private var isShowingShareSheet = false
+    @State private var isShowingImportPicker = false
+    @State private var showingImportError = false
+    @State private var showingImportSuccess = false
+    @State private var importErrorMessage = ""
+    @State private var isExporting = false
+    @State private var isImporting = false
+    @State private var exportProgress = ""
+    @State private var importProgress = ""
+    @EnvironmentObject var dataController: DataController
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                List {
+                    Section {
+                        Button {
+                            exportAllHabits()
+                        } label: {
+                            Label("Export Habits", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(isExporting || isImporting)
+                        
+                        Button {
+                            isShowingImportPicker = true
+                        } label: {
+                            Label("Import Habits", systemImage: "square.and.arrow.down")
+                        }
+                        .disabled(isExporting || isImporting)
+                    } header: {
+                        Text("Data Management")
+                    } footer: {
+                        Text("Export your habits to back them up or transfer them to another device. Import previously exported habits to restore your data.")
+                    }
+                    
+
+                }
+                
+                if isExporting || isImporting {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text(isExporting ? exportProgress : importProgress)
+                            .foregroundColor(.white)
+                            .font(.headline)
+                    }
+                    .padding(30)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(15)
+                    .shadow(radius: 10)
+                }
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingShareSheet) {
+                if let url = exportURL {
+                    ShareSheet(items: [url])
+                }
+            }
+            .fileImporter(
+                isPresented: $isShowingImportPicker,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let files):
+                    guard let selectedFile = files.first else { return }
+                    
+                    isImporting = true
+                    importProgress = "Reading import file..."
+                    
+                    // Use async to not block the UI
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        do {
+                            // Start accessing the security-scoped resource
+                            guard selectedFile.startAccessingSecurityScopedResource() else {
+                                DispatchQueue.main.async {
+                                    importErrorMessage = "Permission denied to access the file"
+                                    showingImportError = true
+                                    isImporting = false
+                                }
+                                return
+                            }
+                            
+                            defer {
+                                // Make sure we release the security-scoped resource when finished
+                                selectedFile.stopAccessingSecurityScopedResource()
+                            }
+                            
+                            let data = try Data(contentsOf: selectedFile)
+                            
+                            DispatchQueue.main.async {
+                                importProgress = "Processing imported data..."
+                            }
+                            
+                            try importData(from: data)
+                            
+                            DispatchQueue.main.async {
+                                isImporting = false
+                                showingImportSuccess = true
+                            }
+                        } catch {
+                            DispatchQueue.main.async {
+                                importErrorMessage = "Error reading file: \(error.localizedDescription)"
+                                showingImportError = true
+                                isImporting = false
+                            }
+                        }
+                    }
+                    
+                case .failure(let error):
+                    importErrorMessage = "Error selecting file: \(error.localizedDescription)"
+                    showingImportError = true
+                }
+            }
+            .alert("Import Error", isPresented: $showingImportError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(importErrorMessage)
+            }
+            .alert("Import Successful", isPresented: $showingImportSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Your habits have been successfully imported.")
+            }
+
+        }
+    }
+    
+
+    
+
+    
+    private func exportAllHabits(completion: ((Bool) -> Void)? = nil) {
+        print("Starting exportAllHabits")
+        isExporting = true
+        exportProgress = "Preparing export..."
+        
+        // Use async to not block the UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            let habits = dataController.getAllHabits()
+            print("Found \(habits.count) habits to export")
+            
+            DispatchQueue.main.async {
+                exportProgress = "Processing \(habits.count) habits..."
+            }
+            
+            let habitsData = habits.map { habit -> [String: Any] in
+                [
+                    "id": habit.id.uuidString,
+                    "title": habit.title,
+                    "motivation": habit.motivation,
+                    "color": habit.color.rawValue,
+                    "type": habit.type.rawValue,
+                    "isWeekly": habit.isWeekly,
+                    "creationDate": habit.creationDate.timeIntervalSince1970,
+                    "completedDates": habit.completedDates.map { $0.timeIntervalSince1970 },
+                    "dailyCounters": Dictionary(uniqueKeysWithValues: habit.dailyCounters.map { 
+                        (String($0.key.timeIntervalSince1970), $0.value)
+                    }),
+                    "durationHistory": habit.durationHistory.map { duration in
+                        [
+                            "minutes": duration.minutes,
+                            "effectiveDate": duration.effectiveDate.timeIntervalSince1970,
+                            "expirationDate": duration.expirationDate?.timeIntervalSince1970
+                        ]
+                    }
+                ]
+            }
+            
+            let exportData: [String: Any] = [
+                "version": "1.0",
+                "exportDate": Date().timeIntervalSince1970,
+                "habits": habitsData
+            ]
+            
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: exportData, options: .prettyPrinted)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let dateString = dateFormatter.string(from: Date())
+                let fileName = "habits-\(dateString).json"
+                
+                let tempDir = FileManager.default.temporaryDirectory
+                let tempFile = tempDir.appendingPathComponent(fileName)
+                try jsonData.write(to: tempFile)
+                print("Successfully wrote export file to: \(tempFile.path)")
+                
+                DispatchQueue.main.async {
+                    self.exportURL = tempFile
+                    self.isExporting = false
+                    self.isShowingShareSheet = true
+                    print("Export completed, calling completion handler")
+                    completion?(true)
+                }
+            } catch {
+                print("Error in export: \(error)")
+                DispatchQueue.main.async {
+                    self.isExporting = false
+                    completion?(false)
+                }
+            }
+        }
+    }
+    
+    private func importData(from data: Data) throws {
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let habitsData = json["habits"] as? [[String: Any]] else {
+            throw NSError(domain: "ImportError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid file format"])
+        }
+        
+        // Delete existing habits
+        dataController.deleteAll()
+        
+        // Import new habits
+        for habitData in habitsData {
+            guard let id = habitData["id"] as? String,
+                  let title = habitData["title"] as? String,
+                  let motivation = habitData["motivation"] as? String,
+                  let colorRaw = habitData["color"] as? String,
+                  let typeRaw = habitData["type"] as? String,
+                  let isWeekly = habitData["isWeekly"] as? Bool,
+                  let creationDateTimestamp = habitData["creationDate"] as? TimeInterval,
+                  let completedDatesTimestamps = habitData["completedDates"] as? [TimeInterval],
+                  let dailyCountersData = habitData["dailyCounters"] as? [String: Int],
+                  let durationHistoryData = habitData["durationHistory"] as? [[String: Any]] else {
+                continue
+            }
+            
+            let habit = Habit(context: dataController.container.viewContext)
+            habit.id = UUID(uuidString: id) ?? UUID()
+            habit.title = title
+            habit.motivation = motivation
+            habit.color = HabitColor(rawValue: colorRaw) ?? .blue
+            habit.type = Habit.HabitType(rawValue: typeRaw) ?? .counter
+            habit.isWeekly = isWeekly
+            habit.creationDate = Date(timeIntervalSince1970: creationDateTimestamp)
+            
+            // Convert timestamps back to dates
+            habit.completedDates = completedDatesTimestamps.map { Date(timeIntervalSince1970: $0) }
+            
+            // Convert daily counters
+            var dailyCounters: [Date: Int] = [:]
+            for (timestampStr, value) in dailyCountersData {
+                if let timestamp = Double(timestampStr) {
+                    dailyCounters[Date(timeIntervalSince1970: timestamp)] = value
+                }
+            }
+            habit.dailyCounters = dailyCounters
+            
+            // Convert duration history
+            var durationHistory: [HabitDuration] = []
+            for durationData in durationHistoryData {
+                guard let minutes = durationData["minutes"] as? Int,
+                      let effectiveDateTimestamp = durationData["effectiveDate"] as? TimeInterval else {
+                    continue
+                }
+                
+                let effectiveDate = Date(timeIntervalSince1970: effectiveDateTimestamp)
+                let expirationDate = (durationData["expirationDate"] as? TimeInterval).map { Date(timeIntervalSince1970: $0) }
+                
+                durationHistory.append(HabitDuration(
+                    minutes: minutes,
+                    effectiveDate: effectiveDate,
+                    expirationDate: expirationDate
+                ))
+            }
+            habit.durationHistory = durationHistory
+        }
+        
+        try dataController.container.viewContext.save()
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var dataController: DataController
     @State private var showingAddHabit = false
     @State private var showingCategories = false
-    @State private var sortingOption: SortingOption = .byOrder
-    @State private var isSortingOrderAscending = true
+    @State private var isPresentingSettingsView = false
+
+    @State private var exportURL: URL?
+    @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
+    @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
     
     var body: some View {
         NavigationView {
-            HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
-                .navigationTitle("Habits")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Menu {
-                            Button(action: { sortingOption = .byDate }) {
-                                Label("Sort by Date", systemImage: "calendar")
-                            }
-                            Button(action: { sortingOption = .byName }) {
-                                Label("Sort by Name", systemImage: "textformat")
-                            }
-                            Button(action: { sortingOption = .byOrder }) {
-                                Label("Sort by Order", systemImage: "arrow.up.arrow.down")
-                            }
-                            
-                            Divider()
-                            
-                            Button(action: { isSortingOrderAscending.toggle() }) {
-                                Label(isSortingOrderAscending ? "Sort Descending" : "Sort Ascending",
-                                      systemImage: isSortingOrderAscending ? "arrow.down" : "arrow.up")
-                            }
-                        } label: {
-                            Label("Sort", systemImage: "arrow.up.arrow.down")
+            VStack(spacing: 0) {
+                Divider()
+                HeaderView()
+                HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
+            }
+            .navigationTitle("Habits")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Menu {
+                        Button(action: { sortingOption = .byDate }) {
+                            Label("Sort by Date", systemImage: "calendar")
+                        }
+                        Button(action: { sortingOption = .byName }) {
+                            Label("Sort by Name", systemImage: "textformat")
+                        }
+                        Button(action: { sortingOption = .byOrder }) {
+                            Label("Sort by Order", systemImage: "arrow.up.arrow.down")
+                        }
+                        
+                        Divider()
+                        
+                        Button(action: { isSortingOrderAscending.toggle() }) {
+                            Label(isSortingOrderAscending ? "Sort Descending" : "Sort Ascending",
+                                  systemImage: isSortingOrderAscending ? "arrow.down" : "arrow.up")
+                        }
+                    } label: {
+                        Label("Sort", systemImage: "arrow.up.arrow.down")
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: { showingCategories = true }) {
+                            Label("Categories", systemImage: "folder")
+                        }
+                        
+                        Button(action: { showingAddHabit = true }) {
+                            Label("Add Habit", systemImage: "plus")
+                        }
+                        
+                        Button(action: { isPresentingSettingsView = true }) {
+                            Label("Settings", systemImage: "gear")
                         }
                     }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        HStack {
-                            Button(action: { showingCategories = true }) {
-                                Label("Categories", systemImage: "folder")
-                            }
-                            
-                            Button(action: { showingAddHabit = true }) {
-                                Label("Add Habit", systemImage: "plus")
-                            }
-                        }
-                    }
                 }
-                .sheet(isPresented: $showingAddHabit) {
-                    NavigationView {
-                        EditHabitView()
-                    }
+            }
+            .sheet(isPresented: $showingAddHabit) {
+                NavigationView {
+                    EditHabitView()
                 }
-                .sheet(isPresented: $showingCategories) {
-                    NavigationView {
-                        CategoryListView()
-                    }
+            }
+            .sheet(isPresented: $showingCategories) {
+                NavigationView {
+                    CategoryListView()
                 }
+            }
+            .sheet(isPresented: $isPresentingSettingsView) {
+                SettingsView()
+            }
+
         }
     }
 }

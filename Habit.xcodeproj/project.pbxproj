@@ -133,6 +133,7 @@
 		CD606A272CA1CD1900544BAE /* HabitWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		E326B14E2DCE5B1E007D351A /* CategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListView.swift; sourceTree = "<group>"; };
 		E326B1502DCE5B88007D351A /* EditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCategoryView.swift; sourceTree = "<group>"; };
+		E326B14C2DCCA9B0007D351A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E334A4682DC56ECB00AA1092 /* Habit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habit.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -204,6 +205,7 @@
 		02C3A87B2A0FBA780044D090 = {
 			isa = PBXGroup;
 			children = (
+				E326B14C2DCCA9B0007D351A /* Info.plist */,
 				CD2154B02CBD59A4004BE691 /* HabitWidgetExtension.entitlements */,
 				CD606A272CA1CD1900544BAE /* HabitWidgetExtensionDebug.entitlements */,
 				0220B20D2A97A7B000C29248 /* .gitignore */,
@@ -707,6 +709,7 @@
 				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -742,6 +745,7 @@
 				ENABLE_PREVIEWS = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
