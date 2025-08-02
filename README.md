@@ -1,6 +1,19 @@
-(Originally forked from Forked from yerenutku/Habit-Tracker)
-
 # Habit
+
+# Features I want to add:
+- Choose for each habit the time it takes
+  - Have for each habit the cumulative time that was spent on it
+  - Overview of time spent with spheres of different sizes
+- Have habit group categories
+- Weekly habits
+- Be able to move a habit up or down by pressing it down
+- Export to CSV to save data
+  - Be able to load data from CSV in case data was previously lost
+ 
+# Bugs:
+- Export feature doesn't work, only by mail
+- Editing a duration opens first the add duration before being able to add
+- Adding a past weekly habit doesn't trigger the whole week 
 
 ## Overview
 
