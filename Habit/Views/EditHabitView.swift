@@ -208,9 +208,9 @@ private struct HiddenSection: View {
     var body: some View {
         Section(header: Text("Visibility")) {
             Toggle("Hide Habit", isOn: Binding(
-                get: { habit.isHidden_ },
+                get: { habit.value(forKey: "isHidden_") as? Bool ?? false },
                 set: { newValue in
-                    habit.isHidden_ = newValue
+                    habit.setValue(newValue, forKey: "isHidden_")
                     try? viewContext.save()
                 }
             ))

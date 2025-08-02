@@ -60,12 +60,14 @@ struct HabitRowView: View {
             DetailView(habit: habit)
         }
         .contextMenu {
-            Button(action: {
-                habit.isHidden_.toggle()
-                try? viewContext.save()
-            }) {
-                Label(habit.isHidden_ ? "Unhide" : "Hide", systemImage: habit.isHidden_ ? "eye" : "eye.slash")
-            }
+                                        Button(action: {
+                                let currentValue = habit.value(forKey: "isHidden_") as? Bool ?? false
+                                habit.setValue(!currentValue, forKey: "isHidden_")
+                                try? viewContext.save()
+                            }) {
+                                let isHidden = habit.value(forKey: "isHidden_") as? Bool ?? false
+                                Label(isHidden ? "Unhide" : "Hide", systemImage: isHidden ? "eye" : "eye.slash")
+                            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(habit.title), \(habit.strengthPercentage)% strength, \(habit.isCompleted(for: currentDate) ? "completed" : "not completed") for today.")

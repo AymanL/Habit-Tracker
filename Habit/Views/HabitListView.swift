@@ -34,7 +34,7 @@ struct HabitListView: View {
     }
     
     var body: some View {
-        let visibleHabits = habits.filter { !$0.isHidden_ }
+        let visibleHabits = habits.filter { !($0.value(forKey: "isHidden_") as? Bool ?? false) }
         List {
             UncategorizedHabitsSection(habits: visibleHabits, dataController: dataController)
             CategorizedHabitsSection(habits: visibleHabits, categories: categories, dataController: dataController)

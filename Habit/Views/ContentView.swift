@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import UserNotifications
 
 
 
@@ -49,6 +50,8 @@ struct SettingsView: View {
                     }
                     
                     HiddenHabitsSection()
+                    
+                    NotificationSettingsSection()
                     
 
                 }
@@ -189,7 +192,7 @@ struct SettingsView: View {
                         [
                             "minutes": duration.minutes,
                             "effectiveDate": duration.effectiveDate.timeIntervalSince1970,
-                            "expirationDate": duration.expirationDate?.timeIntervalSince1970
+                            "expirationDate": duration.expirationDate?.timeIntervalSince1970 as Any
                         ]
                     }
                 ]
@@ -299,6 +302,117 @@ struct SettingsView: View {
     }
 }
 
+struct NotificationSettingsSection: View {
+    @AppStorage("dailyReminderEnabled") private var dailyReminderEnabled = false
+    @State private var dailyReminderTime: Date
+    @State private var showingPermissionAlert = false
+    
+    init() {
+        let defaultTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
+        let savedTime = UserDefaults.standard.object(forKey: "dailyReminderTime") as? Date ?? defaultTime
+        _dailyReminderTime = State(initialValue: savedTime)
+    }
+    
+    var body: some View {
+        Section {
+            Toggle("Daily Reminder", isOn: $dailyReminderEnabled)
+                .onChange(of: dailyReminderEnabled) { newValue in
+                    if newValue {
+                        requestNotificationPermission()
+                    } else {
+                        cancelDailyReminder()
+                    }
+                }
+            
+            if dailyReminderEnabled {
+                DatePicker("Reminder Time", selection: $dailyReminderTime, displayedComponents: .hourAndMinute)
+                    .onChange(of: dailyReminderTime) { newTime in
+                        UserDefaults.standard.set(newTime, forKey: "dailyReminderTime")
+                                                        if dailyReminderEnabled {
+                                    self.scheduleDailyReminder(at: newTime)
+                                }
+                    }
+                
+
+            }
+        } header: {
+            Text("Notifications")
+        } footer: {
+            Text("Receive a daily reminder to check and complete your habits.")
+        }
+        .alert("Notification Permission Required", isPresented: $showingPermissionAlert) {
+            Button("Open Settings") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                dailyReminderEnabled = false
+            }
+        } message: {
+            Text("Please enable notifications in Settings to receive daily reminders.")
+        }
+    }
+    
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            DispatchQueue.main.async {
+                if granted {
+                    print("✅ Notification permission granted")
+                                            self.scheduleDailyReminder(at: dailyReminderTime)
+                } else {
+                    print("❌ Notification permission denied")
+                    showingPermissionAlert = true
+                }
+            }
+        }
+    }
+    
+
+    
+
+    
+    private func cancelDailyReminder() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+    
+    private func scheduleDailyReminder(at time: Date) {
+        let center = UNUserNotificationCenter.current()
+        
+        // Remove existing notifications
+        center.removeAllPendingNotificationRequests()
+        
+        // Create notification content
+        let content = UNMutableNotificationContent()
+        content.title = "Time for Habits!"
+        content.body = "Don't forget to check and complete your daily habits."
+        content.sound = .default
+        
+        // Create date components for the specified time
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: time)
+        
+        // Create trigger
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        
+        // Create request
+        let request = UNNotificationRequest(
+            identifier: "dailyHabitReminder",
+            content: content,
+            trigger: trigger
+        )
+        
+        // Schedule notification
+        center.add(request) { error in
+            if let error = error {
+                print("Error scheduling daily reminder: \(error)")
+            }
+        }
+    }
+    
+
+}
+
 struct HiddenHabitsSection: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
@@ -329,7 +443,7 @@ struct HiddenHabitsSection: View {
                         }
                         Spacer()
                         Button(action: {
-                            habit.isHidden_ = false
+                            habit.setValue(false, forKey: "isHidden_")
                             try? viewContext.save()
                         }) {
                             Image(systemName: "eye")
@@ -422,6 +536,7 @@ struct ContentView: View {
             }
             .onAppear {
                 startDateRefreshTimer()
+                checkNotificationSettings()
             }
             .onDisappear {
                 stopDateRefreshTimer()
@@ -457,6 +572,14 @@ struct ContentView: View {
         timer?.invalidate()
         timer = nil
     }
+    
+    private func checkNotificationSettings() {
+        // Note: Notification scheduling is now handled within NotificationSettingsSection
+        // This function is kept for potential future use
+    }
+    
+
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
