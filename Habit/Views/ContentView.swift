@@ -7,8 +7,6 @@
 
 import SwiftUI
 import CoreData
-import UserNotifications
-import BackgroundTasks
 import MessageUI
 
 class MailComposerDelegate: NSObject, MFMailComposeViewControllerDelegate {
@@ -176,12 +174,7 @@ struct SettingsView: View {
     @State private var isImporting = false
     @State private var exportProgress = ""
     @State private var importProgress = ""
-    @AppStorage("autoExportEnabled") private var autoExportEnabled = false
-    @AppStorage("autoExportEmail") private var autoExportEmail = ""
     @EnvironmentObject var dataController: DataController
-    @State private var isShowingMailView = false
-    @State private var showMailError = false
-    @State private var mailComposerVC: UIViewController?
     
     var body: some View {
         NavigationView {
@@ -207,41 +200,7 @@ struct SettingsView: View {
                         Text("Export your habits to back them up or transfer them to another device. Import previously exported habits to restore your data.")
                     }
                     
-                    Section {
-                        Toggle("Automatic Weekly Export", isOn: $autoExportEnabled)
-                            .onChange(of: autoExportEnabled) { newValue in
-                                if newValue {
-                                    requestNotificationPermission()
-                                    scheduleWeeklyExport()
-                                }
-                            }
-                        
-                        if autoExportEnabled {
-                            TextField("Email for Export", text: $autoExportEmail)
-                                .textContentType(.emailAddress)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                            
-                            Button {
-                                print("Email Export Now button tapped")
-                                exportAllHabits { success in
-                                    print("Export completed with success: \(success)")
-                                    if success {
-                                        isShowingMailView = true
-                                    }
-                                }
-                            } label: {
-                                Label("Email Export Now", systemImage: "envelope")
-                            }
-                            .disabled(isExporting || isImporting)
-                        }
-                    } header: {
-                        Text("Automatic Export")
-                    } footer: {
-                        if autoExportEnabled {
-                            Text("Your habits will be automatically exported every Monday and sent to your email.")
-                        }
-                    }
+
                 }
                 
                 if isExporting || isImporting {
@@ -361,79 +320,7 @@ struct SettingsView: View {
         }
     }
     
-    private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-            if granted {
-                print("Notification permission granted")
-            } else if let error = error {
-                print("Error requesting notification permission: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func scheduleWeeklyExport() {
-        let content = UNMutableNotificationContent()
-        content.title = "Weekly Habit Export"
-        content.body = "Your habits have been automatically exported and sent to your email."
-        content.sound = .default
-        
-        // Create a date components for Monday at 9:00 AM
-        var dateComponents = DateComponents()
-        dateComponents.weekday = 2 // Monday
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "weeklyExport", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error.localizedDescription)")
-            }
-        }
-        
-        // Schedule the next export
-        let bgRequest = BGProcessingTaskRequest(identifier: "com.ayman.habit.weeklyexport")
-        bgRequest.requiresNetworkConnectivity = true
-        bgRequest.requiresExternalPower = false
-        
-        do {
-            try BGTaskScheduler.shared.submit(bgRequest)
-        } catch {
-            print("Could not schedule weekly export: \(error)")
-        }
-    }
-    
-    private func handleWeeklyExport(task: BGProcessingTask) {
-        // Schedule the next export
-        scheduleWeeklyExport()
-        
-        // Create a task expiration handler
-        task.expirationHandler = {
-            task.setTaskCompleted(success: false)
-        }
-        
-        // Perform the export
-        exportAllHabits { success in
-            if success {
-                // Send email if configured
-                if !autoExportEmail.isEmpty {
-                    sendExportEmail()
-                }
-                
-                // Schedule notification
-                let content = UNMutableNotificationContent()
-                content.title = "Weekly Habit Export"
-                content.body = "Your habits have been automatically exported and sent to your email."
-                content.sound = .default
-                
-                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-                UNUserNotificationCenter.current().add(request)
-            }
-            
-            task.setTaskCompleted(success: success)
-        }
-    }
+
     
     private func sendExportEmail() {
         print("Starting sendExportEmail")

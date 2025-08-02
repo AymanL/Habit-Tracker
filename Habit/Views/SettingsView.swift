@@ -1,8 +1,5 @@
 import SwiftUI
 import CoreData
-import UserNotifications
-import BackgroundTasks
-import MessageUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,11 +13,7 @@ struct SettingsView: View {
     @State private var isImporting = false
     @State private var exportProgress = ""
     @State private var importProgress = ""
-    @AppStorage("autoExportEnabled") private var autoExportEnabled = false
-    @AppStorage("autoExportEmail") private var autoExportEmail = ""
     @EnvironmentObject var dataController: DataController
-    @State private var isShowingMailView = false
-    @State private var showMailError = false
     @State private var minimumLoadingTime: TimeInterval = 1.5 // Minimum time to show loader
     
     var body: some View {
@@ -54,41 +47,7 @@ struct SettingsView: View {
                         Text("Export your habits to back them up or transfer them to another device. Import previously exported habits to restore your data.")
                     }
                     
-                    Section {
-                        Toggle("Automatic Weekly Export", isOn: $autoExportEnabled)
-                            .onChange(of: autoExportEnabled) { newValue in
-                                if newValue {
-                                    requestNotificationPermission()
-                                    scheduleWeeklyExport()
-                                }
-                            }
-                        
-                        if autoExportEnabled {
-                            TextField("Email for Export", text: $autoExportEmail)
-                                .textContentType(.emailAddress)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                            
-                            Button {
-                                print("Email Export Now button tapped")
-                                exportAllHabits { success in
-                                    print("Export completed with success: \(success)")
-                                    if success {
-                                        isShowingMailView = true
-                                    }
-                                }
-                            } label: {
-                                Label("Email Export Now", systemImage: "envelope")
-                            }
-                            .disabled(isExporting || isImporting)
-                        }
-                    } header: {
-                        Text("Automatic Export")
-                    } footer: {
-                        if autoExportEnabled {
-                            Text("Your habits will be automatically exported every Monday and sent to your email.")
-                        }
-                    }
+
                 }
                 
                 if isExporting || isImporting {
@@ -138,23 +97,7 @@ struct SettingsView: View {
                     print("DEBUG: ShareSheet triggered but exportURL is nil")
                 }
             }
-            .sheet(isPresented: $isShowingMailView) {
-                if let url = exportURL {
-                    MailView(isShowing: $isShowingMailView, recipientEmail: autoExportEmail, attachmentURL: url)
-                }
-            }
-            .alert("Cannot Send Email", isPresented: $showMailError) {
-                Button("OK", role: .cancel) {
-                    isShowingMailView = false
-                }
-            } message: {
-                Text("Please set up a mail account in the Mail app to send emails.")
-            }
-            .onAppear {
-                if autoExportEnabled {
-                    requestNotificationPermission()
-                }
-            }
+
         }
     }
 
@@ -277,90 +220,10 @@ struct SettingsView: View {
         }
     }
 
-    private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-            if granted {
-                print("Notification permission granted")
-            } else if let error = error {
-                print("Error requesting notification permission: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func scheduleWeeklyExport() {
-        let content = UNMutableNotificationContent()
-        content.title = "Weekly Habit Export"
-        content.body = "Your habits have been automatically exported and sent to your email."
-        content.sound = .default
-        
-        // Create a date components for Monday at 9:00 AM
-        var dateComponents = DateComponents()
-        dateComponents.weekday = 2 // Monday
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "weeklyExport", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error.localizedDescription)")
-            }
-        }
-        
-        // Schedule the next export
-        let bgRequest = BGProcessingTaskRequest(identifier: "com.ayman.habit.weeklyexport")
-        bgRequest.requiresNetworkConnectivity = true
-        bgRequest.requiresExternalPower = false
-        
-        do {
-            try BGTaskScheduler.shared.submit(bgRequest)
-        } catch {
-            print("Could not schedule weekly export: \(error)")
-        }
-    }
+
 }
 
-struct MailView: UIViewControllerRepresentable {
-    @Binding var isShowing: Bool
-    let recipientEmail: String
-    let attachmentURL: URL
-    
-    func makeUIViewController(context: Context) -> MFMailComposeViewController {
-        let vc = MFMailComposeViewController()
-        vc.mailComposeDelegate = context.coordinator
-        vc.setToRecipients([recipientEmail])
-        vc.setSubject("Weekly Habit Export")
-        vc.setMessageBody("Please find attached your weekly habit export.", isHTML: false)
-        
-        do {
-            let attachmentData = try Data(contentsOf: attachmentURL)
-            vc.addAttachmentData(attachmentData, mimeType: "application/json", fileName: "habits-export.json")
-        } catch {
-            print("Error attaching file: \(error.localizedDescription)")
-        }
-        
-        return vc
-    }
-    
-    func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(isShowing: $isShowing)
-    }
-    
-    class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
-        @Binding var isShowing: Bool
-        
-        init(isShowing: Binding<Bool>) {
-            _isShowing = isShowing
-        }
-        
-        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-            isShowing = false
-        }
-    }
-}
+
 
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
