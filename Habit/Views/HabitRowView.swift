@@ -14,6 +14,7 @@ struct HabitRowView: View {
     @Environment(\.scenePhase) var scenePhase
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var currentDate = Date()
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -59,10 +60,22 @@ struct HabitRowView: View {
             DetailView(habit: habit)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(habit.title), \(habit.strengthPercentage)% strength, \(habit.isCompleted(for: Date()) ? "completed" : "not completed") for today.")
+        .accessibilityLabel("\(habit.title), \(habit.strengthPercentage)% strength, \(habit.isCompleted(for: currentDate) ? "completed" : "not completed") for today.")
         .accessibilityAction(named: "Toggle completion for today") {
-            toggleCompletion(for: Date())
-            UIAccessibility.post(notification: .announcement, argument: "\(habit.isCompleted(for: Date()) ? "completed" : "not completed")")
+            toggleCompletion(for: currentDate)
+            UIAccessibility.post(notification: .announcement, argument: "\(habit.isCompleted(for: currentDate) ? "completed" : "not completed")")
+        }
+        .onAppear {
+            currentDate = Date()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                currentDate = Date()
+            }
+        }
+        .onReceive(dataController.objectWillChange) {
+            // Update current date when data controller changes (day change)
+            currentDate = Date()
         }
     }
     
@@ -84,12 +97,12 @@ struct HabitRowView: View {
     var counterControls: some View {
         HStack(spacing: 8) {
             Button(action: {
-                let currentValue = habit.counterValue(for: Date())
+                let currentValue = habit.counterValue(for: currentDate)
                 if currentValue > 0 {
-                    habit.setCounterValue(currentValue - 1, for: Date())
+                    habit.setCounterValue(currentValue - 1, for: currentDate)
                     if currentValue - 1 == 0 {
                         // If we're going to 0, remove the date from completedDates
-                        habit.removeCompletedDate(Date())
+                        habit.removeCompletedDate(currentDate)
                     }
                     try? viewContext.save()
                 }
@@ -101,14 +114,14 @@ struct HabitRowView: View {
             .accessibilityLabel("Decrement counter")
             .buttonStyle(.plain)
             
-            Text("\(habit.counterValue(for: Date()))")
+            Text("\(habit.counterValue(for: currentDate))")
                 .font(.title2.bold())
                 .foregroundColor(Color(.gray))
                 .frame(minWidth: 30)
                 .accessibilityLabel("Current counter value")
             
             Button(action: {
-                habit.incrementCounter(for: Date())
+                habit.incrementCounter(for: currentDate)
                 try? viewContext.save()
             }) {
                 Image(systemName: "plus.circle.fill")
@@ -192,7 +205,7 @@ struct HabitRowView: View {
     
     private func getDateForWeekday(_ index: Int) -> Date {
         let calendar = Calendar.current
-        let today = Date()
+        let today = currentDate
         
         // Get the weekday of today (1 = Sunday, 2 = Monday, ..., 7 = Saturday) 
         let weekday = calendar.component(.weekday, from: today)

@@ -302,10 +302,13 @@ struct ContentView: View {
     @State private var showingAddHabit = false
     @State private var showingCategories = false
     @State private var isPresentingSettingsView = false
+    @Environment(\.scenePhase) var scenePhase
 
     @State private var exportURL: URL?
     @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
-    @AppStorage("isSortingOrderDescending") private var isSortingOrderAscending = false
+    @AppStorage("isSortingOrderAscending") private var isSortingOrderAscending = false
+    @State private var currentDate = Date()
+    @State private var timer: Timer?
     
     var body: some View {
         NavigationView {
@@ -368,8 +371,42 @@ struct ContentView: View {
             .sheet(isPresented: $isPresentingSettingsView) {
                 SettingsView()
             }
-
+            .onAppear {
+                startDateRefreshTimer()
+            }
+            .onDisappear {
+                stopDateRefreshTimer()
+            }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .active {
+                    // Refresh the current date when app becomes active
+                    currentDate = Date()
+                }
+            }
         }
+    }
+    
+    private func startDateRefreshTimer() {
+        // Stop any existing timer
+        stopDateRefreshTimer()
+        
+        // Create a timer that fires every minute to check for day changes
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            let newDate = Date()
+            let calendar = Calendar.current
+            
+            // Check if the day has changed
+            if !calendar.isDate(currentDate, inSameDayAs: newDate) {
+                currentDate = newDate
+                // Force UI refresh by updating the environment
+                dataController.objectWillChange.send()
+            }
+        }
+    }
+    
+    private func stopDateRefreshTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }
 
