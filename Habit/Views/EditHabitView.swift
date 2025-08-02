@@ -62,6 +62,10 @@ struct EditHabitView: View {
                 duration: $duration,
                 durationEffectiveDate: $durationEffectiveDate
             )
+            
+            if selectedType == .counter {
+                PastHabitSection(habit: habit)
+            }
         }
         .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
         .navigationBarTitleDisplayMode(.inline)
@@ -189,6 +193,39 @@ private struct DurationSection: View {
         Section(header: Text("Duration")) {
             Stepper("Duration: \(duration) minutes", value: $duration, in: 0...1440, step: 5)
             DatePicker("Effective Date", selection: $durationEffectiveDate, displayedComponents: .date)
+        }
+    }
+}
+
+private struct PastHabitSection: View {
+    let habit: Habit?
+    @State private var showingPastHabitEditor = false
+    @State private var selectedPastDate = Date()
+    
+    var body: some View {
+        Section(header: Text("Past Habits")) {
+            if let habit = habit {
+                Button(action: {
+                    selectedPastDate = Date()
+                    showingPastHabitEditor = true
+                }) {
+                    HStack {
+                        Image(systemName: "calendar.badge.plus")
+                            .foregroundColor(.blue)
+                        Text("Edit Past Counter Values")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .sheet(isPresented: $showingPastHabitEditor) {
+                    PastHabitEditorView(habit: habit, selectedDate: selectedPastDate)
+                }
+            } else {
+                Text("Save the habit first to edit past values")
+                    .foregroundColor(.secondary)
+                    .italic()
+            }
         }
     }
 }

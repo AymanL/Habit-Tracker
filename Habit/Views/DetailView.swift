@@ -18,6 +18,8 @@ struct DetailView: View {
     @State private var selectedDuration: HabitDuration? = nil
     @State private var exportData: Data?
     @State private var isShowingShareSheet = false
+    @State private var showingPastHabitEditor = false
+    @State private var selectedPastDate = Date()
     
     private var habitInstance: Habit {
         habit
@@ -49,6 +51,31 @@ struct DetailView: View {
                 )
                     .frame(height: 200)
                     .padding()
+                
+                // Past Habit Editor Section (for counter habits)
+                if habit.type == .counter {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("PAST HABIT EDITOR")
+                                .font(.caption.bold())
+                            Spacer()
+                            Button(action: {
+                                selectedPastDate = Date()
+                                showingPastHabitEditor = true
+                            }) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .foregroundColor(Color(habit.color))
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        Text("Edit counter values for past dates")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                    }
+                    .padding(.vertical)
+                }
                 
                 // Duration History Section
                 VStack(alignment: .leading, spacing: 10) {
@@ -149,6 +176,9 @@ struct DetailView: View {
                 if let data = exportData {
                     ShareSheet(items: [data])
                 }
+            }
+            .sheet(isPresented: $showingPastHabitEditor) {
+                PastHabitEditorView(habit: habit, selectedDate: selectedPastDate)
             }
         }
     }
@@ -482,6 +512,154 @@ struct EditDurationView: View {
         }
         
         dismiss()
+    }
+}
+
+struct PastHabitEditorView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    
+    @ObservedObject var habit: Habit
+    @State var selectedDate: Date
+    @State private var showingDatePicker = false
+    
+    private var currentValue: Int {
+        habit.counterValue(for: selectedDate)
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Date Display and Picker
+                VStack(spacing: 10) {
+                    Text("Selected Date")
+                        .font(.headline)
+                    
+                    Button(action: {
+                        showingDatePicker = true
+                    }) {
+                        HStack {
+                            Text(selectedDate.formatted(date: .complete, time: .omitted))
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                            Image(systemName: "calendar")
+                                .foregroundColor(.blue)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
+                }
+                
+                // Current Value Display
+                VStack(spacing: 10) {
+                    Text("Current Value")
+                        .font(.headline)
+                    
+                    Text("\(currentValue)")
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(Color(habit.color))
+                }
+                
+                // Counter Controls
+                VStack(spacing: 15) {
+                    HStack(spacing: 20) {
+                        Button(action: {
+                            if currentValue > 0 {
+                                habit.setCounterValue(currentValue - 1, for: selectedDate)
+                                if currentValue - 1 == 0 {
+                                    habit.removeCompletedDate(selectedDate)
+                                }
+                                try? viewContext.save()
+                            }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.system(size: 44))
+                                .foregroundColor(.red)
+                        }
+                        .disabled(currentValue <= 0)
+                        
+                        Button(action: {
+                            habit.incrementCounter(for: selectedDate)
+                            try? viewContext.save()
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 44))
+                                .foregroundColor(.green)
+                        }
+                    }
+                    
+                    // Quick increment buttons
+                    HStack(spacing: 10) {
+                        ForEach([5, 10, 15], id: \.self) { increment in
+                            Button(action: {
+                                habit.setCounterValue(currentValue + increment, for: selectedDate)
+                                try? viewContext.save()
+                            }) {
+                                Text("+\(increment)")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color(habit.color))
+                                    .cornerRadius(8)
+                            }
+                        }
+                    }
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Edit Past Habit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .sheet(isPresented: $showingDatePicker) {
+                DatePickerView(selectedDate: $selectedDate)
+            }
+        }
+    }
+}
+
+struct DatePickerView: View {
+    @Binding var selectedDate: Date
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                DatePicker(
+                    "Select Date",
+                    selection: $selectedDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.wheel)
+                .padding()
+                
+                Spacer()
+            }
+            .navigationTitle("Select Date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
