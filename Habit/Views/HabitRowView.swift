@@ -59,6 +59,14 @@ struct HabitRowView: View {
         .sheet(isPresented: $isPresentingEditHabitView) {
             DetailView(habit: habit)
         }
+        .contextMenu {
+            Button(action: {
+                habit.isHidden_.toggle()
+                try? viewContext.save()
+            }) {
+                Label(habit.isHidden_ ? "Unhide" : "Hide", systemImage: habit.isHidden_ ? "eye" : "eye.slash")
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(habit.title), \(habit.strengthPercentage)% strength, \(habit.isCompleted(for: currentDate) ? "completed" : "not completed") for today.")
         .accessibilityAction(named: "Toggle completion for today") {

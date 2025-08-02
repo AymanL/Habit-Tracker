@@ -48,6 +48,8 @@ struct SettingsView: View {
                         Text("Export your habits to back them up or transfer them to another device. Import previously exported habits to restore your data.")
                     }
                     
+                    HiddenHabitsSection()
+                    
 
                 }
                 
@@ -294,6 +296,53 @@ struct SettingsView: View {
         }
         
         try dataController.container.viewContext.save()
+    }
+}
+
+struct HiddenHabitsSection: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Habit.order_, ascending: true)],
+        predicate: NSPredicate(format: "isHidden_ == YES"),
+        animation: .default)
+    private var hiddenHabits: FetchedResults<Habit>
+    
+    var body: some View {
+        Section {
+            if hiddenHabits.isEmpty {
+                HStack {
+                    Image(systemName: "eye.slash")
+                        .foregroundColor(.secondary)
+                    Text("No Hidden Habits")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            } else {
+                ForEach(hiddenHabits) { habit in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(habit.title)
+                                .font(.headline)
+                            Text(habit.motivation)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Button(action: {
+                            habit.isHidden_ = false
+                            try? viewContext.save()
+                        }) {
+                            Image(systemName: "eye")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("Hidden Habits")
+        } footer: {
+            Text("Hidden habits are not shown in the main list but retain all their data and progress.")
+        }
     }
 }
 

@@ -66,6 +66,10 @@ struct EditHabitView: View {
             if selectedType == .counter {
                 PastHabitSection(habit: habit)
             }
+            
+            if habit != nil {
+                HiddenSection(habit: habit!)
+            }
         }
         .navigationTitle(habit == nil ? "New Habit" : "Edit Habit")
         .navigationBarTitleDisplayMode(.inline)
@@ -193,6 +197,23 @@ private struct DurationSection: View {
         Section(header: Text("Duration")) {
             Stepper("Duration: \(duration) minutes", value: $duration, in: 0...1440, step: 5)
             DatePicker("Effective Date", selection: $durationEffectiveDate, displayedComponents: .date)
+        }
+    }
+}
+
+private struct HiddenSection: View {
+    @ObservedObject var habit: Habit
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    var body: some View {
+        Section(header: Text("Visibility")) {
+            Toggle("Hide Habit", isOn: Binding(
+                get: { habit.isHidden_ },
+                set: { newValue in
+                    habit.isHidden_ = newValue
+                    try? viewContext.save()
+                }
+            ))
         }
     }
 }

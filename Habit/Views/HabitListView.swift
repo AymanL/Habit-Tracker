@@ -34,16 +34,17 @@ struct HabitListView: View {
     }
     
     var body: some View {
+        let visibleHabits = habits.filter { !$0.isHidden_ }
         List {
-            UncategorizedHabitsSection(habits: habits, dataController: dataController)
-            CategorizedHabitsSection(habits: habits, categories: categories, dataController: dataController)
+            UncategorizedHabitsSection(habits: visibleHabits, dataController: dataController)
+            CategorizedHabitsSection(habits: visibleHabits, categories: categories, dataController: dataController)
         }
         .listStyle(.plain)
     }
 }
 
 private struct UncategorizedHabitsSection: View {
-    let habits: FetchedResults<Habit>
+    let habits: [Habit]
     let dataController: DataController
     
     var body: some View {
@@ -85,12 +86,12 @@ private struct UncategorizedHabitsSection: View {
 }
 
 private struct CategorizedHabitsSection: View {
-    let habits: FetchedResults<Habit>
+    let habits: [Habit]
     let categories: FetchedResults<Category>
     let dataController: DataController
     @State private var expandedCategories: Set<ObjectIdentifier>
     
-    init(habits: FetchedResults<Habit>, categories: FetchedResults<Category>, dataController: DataController) {
+    init(habits: [Habit], categories: FetchedResults<Category>, dataController: DataController) {
         self.habits = habits
         self.categories = categories
         self.dataController = dataController
