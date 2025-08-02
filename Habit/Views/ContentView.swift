@@ -214,6 +214,7 @@ struct SettingsView: View {
                 DispatchQueue.main.async {
                     self.exportURL = tempFile
                     self.isExporting = false
+                    self.isShowingShareSheet = true
                     print("Export completed, calling completion handler")
                     completion?(true)
                 }
