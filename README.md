@@ -2,6 +2,13 @@
 
 # Habit
 
+# Version 1.2 features:
+- Holiday mode
+- Weekend mode
+- Daily reminder notifications
+- Past habit edit for counters
+- Date refreshes automatically on open
+
 # Features I want to add:
 - Choose for each habit the time it takes
   - Have for each habit the cumulative time that was spent on it
