@@ -19,6 +19,7 @@ struct EditHabitView: View {
     @State private var startDate: Date
     @State private var isWeekly: Bool
     @State private var weekendMode: Bool
+    @State private var holidayMode: Bool
     @State private var duration: Int
     @State private var durationEffectiveDate: Date
     @State private var selectedCategory: Category?
@@ -39,6 +40,7 @@ struct EditHabitView: View {
         _startDate = State(initialValue: habit?.creationDate ?? Date())
         _isWeekly = State(initialValue: habit?.isWeekly ?? false)
         _weekendMode = State(initialValue: habit?.weekendMode_ ?? false)
+        _holidayMode = State(initialValue: habit?.holidayMode_ ?? false)
         _duration = State(initialValue: habit?.currentDuration ?? 0)
         _durationEffectiveDate = State(initialValue: Date())
         _selectedCategory = State(initialValue: habit?.category)
@@ -58,7 +60,8 @@ struct EditHabitView: View {
                 selectedType: $selectedType,
                 isWeekly: $isWeekly,
                 startDate: $startDate,
-                weekendMode: $weekendMode
+                weekendMode: $weekendMode,
+                holidayMode: $holidayMode
             )
             
             DurationSection(
@@ -103,6 +106,7 @@ struct EditHabitView: View {
             habit.type = selectedType
             habit.isWeekly = isWeekly
             habit.weekendMode_ = weekendMode
+            habit.holidayMode_ = holidayMode
             habit.creationDate = startDate
             habit.category = selectedCategory
             
@@ -128,6 +132,7 @@ struct EditHabitView: View {
             // Create new habit
             let newHabit = Habit(context: viewContext, title: title, motivation: motivation, color: selectedColor, type: selectedType, isWeekly: isWeekly, category: selectedCategory)
             newHabit.weekendMode_ = weekendMode
+            newHabit.holidayMode_ = holidayMode
             newHabit.creationDate = startDate
             
             // Set initial duration
@@ -179,6 +184,7 @@ private struct SettingsSection: View {
     @Binding var isWeekly: Bool
     @Binding var startDate: Date
     @Binding var weekendMode: Bool
+    @Binding var holidayMode: Bool
     
     var body: some View {
         Section(header: Text("Settings")) {
@@ -197,6 +203,8 @@ private struct SettingsSection: View {
                         isWeekly = false
                     }
                 }
+            
+            Toggle("Holiday Mode", isOn: $holidayMode)
             
             DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
         }

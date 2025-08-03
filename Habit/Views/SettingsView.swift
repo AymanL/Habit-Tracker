@@ -47,6 +47,8 @@ struct SettingsView: View {
                     HiddenHabitsSection()
                     
                     NotificationSettingsSection()
+                    
+                    HolidaySettingsSection()
                 }
                 
                 if isExporting || isImporting {
@@ -314,5 +316,145 @@ struct NotificationSettingsSection: View {
                 // Permission status available for debugging if needed
             }
         }
+    }
+}
+
+struct HolidaySettingsSection: View {
+    @AppStorage("holidayRanges") private var holidayRangesData: Data = Data()
+    @State private var showingDatePicker = false
+    @State private var selectedStartDate = Date()
+    @State private var selectedEndDate = Date()
+    @State private var holidayName = ""
+    @State private var holidayRanges: [HolidayRange] = []
+    
+    private func loadHolidayRanges() {
+        guard let ranges = try? JSONDecoder().decode([HolidayRange].self, from: holidayRangesData) else {
+            holidayRanges = []
+            return
+        }
+        holidayRanges = ranges.sorted { $0.startDate > $1.startDate }
+    }
+    
+    private func saveHolidayRanges() {
+        if let data = try? JSONEncoder().encode(holidayRanges) {
+            holidayRangesData = data
+        }
+    }
+    
+    var body: some View {
+        Section {
+            HStack {
+                Text("Holiday Periods")
+                Spacer()
+                Button(action: {
+                    showingDatePicker = true
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.blue)
+                }
+            }
+            
+            if holidayRanges.isEmpty {
+                Text("No holidays set")
+                    .foregroundColor(.secondary)
+                    .italic()
+            } else {
+                ForEach(holidayRanges) { range in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                if !range.name.isEmpty {
+                                    Text(range.name)
+                                        .font(.headline)
+                                }
+                                Text("\(range.startDate.formatted(date: .abbreviated, time: .omitted)) - \(range.endDate.formatted(date: .abbreviated, time: .omitted))")
+                                    .font(.subheadline)
+                            }
+                            Spacer()
+                            Button(action: {
+                                removeHoliday(range)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("Holidays")
+        } footer: {
+            Text("Holiday periods allow habits with holiday mode enabled to continue their streak even if not completed during these periods.")
+        }
+        .onAppear {
+            loadHolidayRanges()
+        }
+        .sheet(isPresented: $showingDatePicker) {
+            NavigationView {
+                VStack(spacing: 20) {
+                    TextField("Holiday Name (Optional)", text: $holidayName)
+                        .textFieldStyle(.roundedBorder)
+                        .padding(.horizontal)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Start Date")
+                            .font(.headline)
+                        DatePicker(
+                            "Start Date",
+                            selection: $selectedStartDate,
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.wheel)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("End Date")
+                            .font(.headline)
+                        DatePicker(
+                            "End Date",
+                            selection: $selectedEndDate,
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.wheel)
+                    }
+                    
+                    Spacer()
+                }
+                .padding()
+                .navigationTitle("Add Holiday Period")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showingDatePicker = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Add") {
+                            addHolidayRange()
+                            showingDatePicker = false
+                        }
+                        .disabled(selectedEndDate < selectedStartDate)
+                    }
+                }
+            }
+            .onAppear {
+                // Reset state when sheet appears
+                selectedStartDate = Date()
+                selectedEndDate = Date()
+                holidayName = ""
+            }
+        }
+    }
+    
+    private func addHolidayRange() {
+        let newRange = HolidayRange(startDate: selectedStartDate, endDate: selectedEndDate, name: holidayName)
+        holidayRanges.append(newRange)
+        saveHolidayRanges()
+    }
+    
+    private func removeHoliday(_ range: HolidayRange) {
+        holidayRanges.removeAll { $0.id == range.id }
+        saveHolidayRanges()
     }
 }

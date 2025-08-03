@@ -17,7 +17,7 @@ extension Habit {
     }
     
     var streak: Int {
-        let dates = weekendMode_ ? processDatesForWeekendModeStreakCalculation(completedDates) : processDatesForStreakCalculation(completedDates)
+        let dates = (weekendMode_ || holidayMode_) ? processDatesForWeekendModeStreakCalculation(completedDates) : processDatesForStreakCalculation(completedDates)
         
         // Check if there are any completed dates
         guard let firstDate = dates.first else { return 0 }
@@ -58,9 +58,9 @@ extension Habit {
                 let daysBetweenDates = previousDate.days(from: date)
                 if daysBetweenDates <= 1 {
                     currentStreak += 1
-                } else if weekendMode_ && daysBetweenDates >= 2 {
-                    // Check if the missing days are weekend days
-                    var allWeekendDays = true
+                } else if (weekendMode_ || holidayMode_) && daysBetweenDates >= 2 {
+                    // Check if the missing days are weekend days or holidays
+                    var allAllowedDays = true
                     var gapDays: [String] = []
                     
                     for dayOffset in 1..<daysBetweenDates {
@@ -68,15 +68,24 @@ extension Habit {
                             let weekday = Calendar.current.component(.weekday, from: missingDate)
                             gapDays.append(Calendar.current.weekdaySymbols[weekday - 1])
                             
-                            // If it's not a weekend day (Saturday = 7, Sunday = 1), break the streak
-                            if weekday != 1 && weekday != 7 {
-                                allWeekendDays = false
+                            // Check if it's a weekend day (Saturday = 7, Sunday = 1)
+                            let isWeekendDay = weekday == 1 || weekday == 7
+                            
+                            // Check if it's a holiday
+                            let isHolidayDay = holidayMode_ && isHolidayDate(missingDate)
+                            
+                            // Check if this day is allowed to be missing
+                            let isAllowedToBeMissing = (weekendMode_ && isWeekendDay) || (holidayMode_ && isHolidayDay)
+                            
+                            // If this day is not allowed to be missing, break the streak
+                            if !isAllowedToBeMissing {
+                                allAllowedDays = false
                                 break
                             }
                         }
                     }
                     
-                    if allWeekendDays {
+                    if allAllowedDays {
                         currentStreak += 1
                     } else {
                         break
@@ -92,7 +101,7 @@ extension Habit {
     }
     
     var longestStreak: Int {
-        let dates = weekendMode_ ? processDatesForWeekendModeStreakCalculation(completedDates) : processDatesForStreakCalculation(completedDates)
+        let dates = (weekendMode_ || holidayMode_) ? processDatesForWeekendModeStreakCalculation(completedDates) : processDatesForStreakCalculation(completedDates)
         // Check if there are any completed dates
         guard let firstDate = dates.first else { return 0 }
         
@@ -174,37 +183,9 @@ extension Habit {
         // Sort from newest to oldest
         let sortedDates = uniqueDatesWithinPeriod.sorted { $0 > $1 }
         
-        // For weekend mode, we need to fill in missing weekdays between completed dates
-        var processedDates: [Date] = []
-        let calendar = Calendar.current
-        
-        for index in 0..<sortedDates.count {
-            let currentDate = sortedDates[index]
-            processedDates.append(currentDate)
-            
-            // If there's a next date, check if we need to fill in weekdays
-            if index + 1 < sortedDates.count {
-                let nextDate = sortedDates[index + 1]
-                let daysBetween = calendar.dateComponents([.day], from: nextDate, to: currentDate).day ?? 0
-                
-                // If there are gaps, fill in the weekdays (Monday-Friday)
-                if daysBetween > 1 {
-                    for dayOffset in 1..<daysBetween {
-                        if let intermediateDate = calendar.date(byAdding: .day, value: -dayOffset, to: currentDate) {
-                            let weekday = calendar.component(.weekday, from: intermediateDate)
-                            
-                            // Only fill in weekdays (Monday = 2, Tuesday = 3, ..., Friday = 6)
-                            if weekday >= 2 && weekday <= 6 {
-                                processedDates.append(intermediateDate)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Sort again to maintain chronological order
-        return processedDates.sorted { $0 > $1 }
+        // For weekend/holiday mode, we DON'T add missing days - we just return the original dates
+        // The streak calculation logic will handle weekend/holiday gaps separately
+        return sortedDates
     }
 
     func isCompleted(for date: Date) -> Bool {
@@ -339,5 +320,27 @@ extension Habit {
     
     func completionsWithinLastDays(daysAgo: Int) -> Int {
         completedDates.filter { $0.isWithinLastCustomDays(daysAgo: daysAgo) }.count
+    }
+    
+    /// Checks if a given date is a holiday date
+    ///
+    /// - Parameter date: The date to check
+    /// - Returns: True if the date is a holiday, false otherwise
+    private func isHolidayDate(_ date: Date) -> Bool {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        
+        // Check new holiday ranges format
+        if let holidayRangesData = UserDefaults.standard.data(forKey: "holidayRanges"),
+           let holidayRanges = try? JSONDecoder().decode([HolidayRange].self, from: holidayRangesData) {
+            return holidayRanges.contains { $0.contains(normalizedDate) }
+        }
+        
+        // Fallback to old individual dates format for backward compatibility
+        if let holidayDatesData = UserDefaults.standard.data(forKey: "holidayDates"),
+           let holidayDates = try? JSONDecoder().decode([Date].self, from: holidayDatesData) {
+            return holidayDates.contains { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }
+        }
+        
+        return false
     }
 }

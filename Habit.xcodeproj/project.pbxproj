@@ -53,6 +53,7 @@
 		E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */; };
 		E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */; };
 		E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */; };
+		E3E9A6EA2E3FDF9700B15958 /* HolidayRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,6 +148,7 @@
 		E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
 		E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 		E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastHabitEditorView.swift; sourceTree = "<group>"; };
+		E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRange.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +179,7 @@
 		0224D8D42A13A3390067B559 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */,
 				02C3A89A2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift */,
 				02C39F952A73BF9500550CA1 /* Habit+Utils.swift */,
 				02C3A8A72A1260220044D090 /* Constants.swift */,
@@ -513,6 +516,7 @@
 				02C39F9E2A765EDF00550CA1 /* HabitListView.swift in Sources */,
 				E326B14F2DCE5B1E007D351A /* CategoryListView.swift in Sources */,
 				E326B1512DCE5B88007D351A /* EditCategoryView.swift in Sources */,
+				E3E9A6EA2E3FDF9700B15958 /* HolidayRange.swift in Sources */,
 				02C3A89D2A1218A50044D090 /* HabitRowView.swift in Sources */,
 				0224D8DB2A17D6FF0067B559 /* HeaderView.swift in Sources */,
 				02C3A89B2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift in Sources */,
