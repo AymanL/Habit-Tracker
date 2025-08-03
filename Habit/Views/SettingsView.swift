@@ -141,7 +141,7 @@ struct SettingsView: View {
             }
             
             let exportData: [String: Any] = [
-                "version": "1.0",
+                "version": "1.2.1",
                 "exportDate": Date().timeIntervalSince1970,
                 "habits": habitsData
             ]

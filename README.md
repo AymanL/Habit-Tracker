@@ -2,7 +2,7 @@
 
 # Habit
 
-# Version 1.2 features:
+# Version 1.2.1 features:
 - Holiday mode
 - Weekend mode
 - Daily reminder notifications
