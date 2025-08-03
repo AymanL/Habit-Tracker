@@ -75,7 +75,9 @@ struct ContentView: View {
                 CategoryListView()
             }
             .sheet(isPresented: $isPresentingSettingsView) {
-                SettingsView()
+                NavigationView {
+                    SettingsView()
+                }
             }
             .onAppear {
                 startDateRefreshTimer()

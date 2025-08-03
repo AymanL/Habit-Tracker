@@ -48,6 +48,8 @@ struct SettingsView: View {
                     
                     NotificationSettingsSection()
                     
+                    CustomDayResetSection()
+                    
                     HolidaySettingsSection()
                 }
                 
@@ -75,6 +77,13 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
             .fullScreenCover(isPresented: $isShowingShareSheet) {
                 if let url = exportURL {
                     ShareSheet(items: [url])
@@ -190,6 +199,45 @@ struct SettingsView: View {
     }
 }
 
+struct CustomDayResetSection: View {
+    @AppStorage("dayResetHour") private var dayResetHour: Int = 0
+    
+    var body: some View {
+        Section {
+            Picker("Day Reset Hour", selection: $dayResetHour) {
+                Text("Midnight (12 AM)").tag(0)
+                Text("1 AM").tag(1)
+                Text("2 AM").tag(2)
+                Text("3 AM").tag(3)
+                Text("4 AM").tag(4)
+                Text("5 AM").tag(5)
+                Text("6 AM").tag(6)
+                Text("7 AM").tag(7)
+                Text("8 AM").tag(8)
+                Text("9 AM").tag(9)
+                Text("10 AM").tag(10)
+                Text("11 AM").tag(11)
+                Text("Noon (12 PM)").tag(12)
+                Text("1 PM").tag(13)
+                Text("2 PM").tag(14)
+                Text("3 PM").tag(15)
+                Text("4 PM").tag(16)
+                Text("5 PM").tag(17)
+                Text("6 PM").tag(18)
+                Text("7 PM").tag(19)
+                Text("8 PM").tag(20)
+                Text("9 PM").tag(21)
+                Text("10 PM").tag(22)
+                Text("11 PM").tag(23)
+            }
+        } header: {
+            Text("Day Reset")
+        } footer: {
+            Text("Choose when your day resets for habit tracking. For example, if set to 4 AM, habits completed at 3 AM on Saturday will count towards Friday.")
+        }
+    }
+}
+
 struct HiddenHabitsSection: View {
     @EnvironmentObject var dataController: DataController
     @FetchRequest(
@@ -225,6 +273,8 @@ struct NotificationSettingsSection: View {
     @State private var reminderTime: Date
     @AppStorage("reminderEnabled") private var reminderEnabled = false
     @State private var showingPermissionAlert = false
+    @State private var showingPermissionStatus = false
+    @State private var permissionStatus = ""
     
     init() {
         let defaultTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
@@ -245,7 +295,10 @@ struct NotificationSettingsSection: View {
             
             if reminderEnabled {
                 DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                    .onChange(of: reminderTime) { _ in
+                    .onChange(of: reminderTime) { newValue in
+                        // Save the reminder time to UserDefaults
+                        UserDefaults.standard.set(newValue, forKey: "reminderTime")
+                        
                         if reminderEnabled {
                             scheduleDailyReminder()
                         }
@@ -270,6 +323,11 @@ struct NotificationSettingsSection: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Please enable notifications in Settings to receive daily reminders.")
+        }
+        .alert("Notification Permissions", isPresented: $showingPermissionStatus) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(permissionStatus)
         }
     }
     
@@ -312,8 +370,24 @@ struct NotificationSettingsSection: View {
     private func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
-                _ = settings.authorizationStatus
-                // Permission status available for debugging if needed
+                let status: String
+                switch settings.authorizationStatus {
+                case .notDetermined:
+                    status = "Notifications: Not Determined\n\nYou haven't been asked for permission yet. Enable notifications to receive daily reminders."
+                case .denied:
+                    status = "Notifications: Denied\n\nNotifications are disabled. Go to Settings > Habit > Notifications to enable them."
+                case .authorized:
+                    status = "Notifications: Authorized\n\n✅ Notifications are enabled and working properly."
+                case .provisional:
+                    status = "Notifications: Provisional\n\n⚠️ Notifications are provisionally authorized. They may be limited."
+                case .ephemeral:
+                    status = "Notifications: Ephemeral\n\n⚠️ Notifications are temporarily authorized."
+                @unknown default:
+                    status = "Notifications: Unknown Status\n\nUnable to determine notification permission status."
+                }
+                
+                self.permissionStatus = status
+                self.showingPermissionStatus = true
             }
         }
     }
