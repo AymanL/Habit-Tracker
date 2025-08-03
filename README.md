@@ -8,6 +8,7 @@
 - Daily reminder notifications
 - Past habit edit for counters
 - Date refreshes automatically on open
+- Choose at what time day resets
 
 # Features I want to add:
 - Choose for each habit the time it takes
