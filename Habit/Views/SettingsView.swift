@@ -22,11 +22,8 @@ struct SettingsView: View {
                 List {
                     Section {
                         Button {
-                            print("DEBUG: Export Habits button tapped")
                             exportAllHabits { success in
-                                print("DEBUG: Export completion handler called with success: \(success)")
                                 if success {
-                                    print("DEBUG: Setting isShowingShareSheet to true")
                                     isShowingShareSheet = true
                                 }
                             }
@@ -89,13 +86,11 @@ struct SettingsView: View {
         }
 
     private func exportAllHabits(completion: ((Bool) -> Void)? = nil) {
-        print("DEBUG: Starting exportAllHabits")
         let startTime = Date()
         isExporting = true
         
         // Show initial message
         exportProgress = "Preparing export..."
-        print("DEBUG: \(exportProgress)")
         
         // Use async to not block the UI
         DispatchQueue.global(qos: .userInitiated).async {
@@ -103,11 +98,9 @@ struct SettingsView: View {
             Thread.sleep(forTimeInterval: 0.5)
             
             let habits = dataController.getAllHabits()
-            print("DEBUG: Found \(habits.count) habits to export")
             
             DispatchQueue.main.async {
                 exportProgress = "Processing \(habits.count) habits..."
-                print("DEBUG: \(exportProgress)")
             }
             
             // Add a small delay to ensure the second message is visible
@@ -130,7 +123,7 @@ struct SettingsView: View {
                         [
                             "minutes": duration.minutes,
                             "effectiveDate": duration.effectiveDate.timeIntervalSince1970,
-                            "expirationDate": duration.expirationDate?.timeIntervalSince1970
+                            "expirationDate": duration.expirationDate?.timeIntervalSince1970 as Any
                         ]
                     }
                 ]
@@ -154,34 +147,26 @@ struct SettingsView: View {
                 
                 DispatchQueue.main.async {
                     exportProgress = "Writing file..."
-                    print("DEBUG: \(exportProgress)")
                 }
                 
                 // Add a small delay to ensure the third message is visible
                 Thread.sleep(forTimeInterval: 0.5)
                 
                 try jsonData.write(to: tempFile)
-                print("DEBUG: Successfully wrote export file to: \(tempFile.path)")
                 
                 // Calculate remaining time to meet minimum display duration
                 let elapsedTime = Date().timeIntervalSince(startTime)
                 let remainingTime = max(0, minimumLoadingTime - elapsedTime)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + remainingTime) {
-                    print("DEBUG: Setting exportURL to: \(tempFile.path)")
                     self.exportURL = tempFile
                     self.isExporting = false
-                    print("DEBUG: Calling completion handler with success")
                     completion?(true)
                     
                     // Present share sheet using UIKit
                     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                        let rootViewController = windowScene.windows.first?.rootViewController {
-                        print("DEBUG: Found root view controller, presenting share sheet")
                         let activityVC = UIActivityViewController(activityItems: [tempFile], applicationActivities: nil)
-                        activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
-                            print("DEBUG: Share sheet completed - Activity: \(String(describing: activityType)), Completed: \(completed), Error: \(String(describing: error))")
-                        }
                         
                         // Present on iPad
                         if let popoverController = activityVC.popoverPresentationController {
@@ -190,15 +175,10 @@ struct SettingsView: View {
                             popoverController.permittedArrowDirections = []
                         }
                         
-                        rootViewController.present(activityVC, animated: true) {
-                            print("DEBUG: Share sheet presentation completed")
-                        }
-                    } else {
-                        print("DEBUG: Could not find root view controller")
+                        rootViewController.present(activityVC, animated: true)
                     }
                 }
             } catch {
-                print("DEBUG: Error in export: \(error)")
                 DispatchQueue.main.async {
                     self.isExporting = false
                     completion?(false)
@@ -317,8 +297,8 @@ struct NotificationSettingsSection: View {
         let request = UNNotificationRequest(identifier: "dailyReminder", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error)")
+            if error != nil {
+                // Handle notification scheduling error if needed
             }
         }
     }
@@ -330,11 +310,9 @@ struct NotificationSettingsSection: View {
     private func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
-                let status = settings.authorizationStatus
-                print("Notification permission status: \(status.rawValue)")
+                _ = settings.authorizationStatus
+                // Permission status available for debugging if needed
             }
         }
     }
 }
-
- 

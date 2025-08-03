@@ -49,6 +49,10 @@
 		E326B1512DCE5B88007D351A /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E326B1502DCE5B88007D351A /* EditCategoryView.swift */; };
 		E3E9A6DF2E3FB3A200B15958 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */; };
 		E3E9A6E02E3FB3A200B15958 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */; };
+		E3E9A6E52E3FBB5200B15958 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */; };
+		E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */; };
+		E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */; };
+		E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,6 +143,10 @@
 		E334A4682DC56ECB00AA1092 /* Habit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habit.entitlements; sourceTree = "<group>"; };
 		E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerView.swift; sourceTree = "<group>"; };
+		E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
+		E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastHabitEditorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,6 +188,10 @@
 		0224D8D52A13A3510067B559 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */,
+				E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */,
+				E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */,
+				E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */,
 				E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */,
 				E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */,
 				E326B1502DCE5B88007D351A /* EditCategoryView.swift */,
@@ -484,6 +496,10 @@
 				02DAD6C02A4C42FC00F2DA14 /* Date+Ext.swift in Sources */,
 				02FD36682A4F32A70023AB38 /* ShortcutsHabitEntity.swift in Sources */,
 				02C3A8912A0FBA7A0044D090 /* DataController.swift in Sources */,
+				E3E9A6E52E3FBB5200B15958 /* OverviewView.swift in Sources */,
+				E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */,
+				E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */,
+				E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */,
 				0224D8D92A17964A0067B559 /* EditHabitView.swift in Sources */,
 				02C39FA22A768B1F00550CA1 /* View+Ext.swift in Sources */,
 				02089EBD2A626390003DB055 /* CustomErrors.swift in Sources */,

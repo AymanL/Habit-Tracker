@@ -7,10 +7,6 @@
 
 import SwiftUI
 import CoreData
-import UserNotifications
-
-
-
 
 struct ContentView: View {
     @EnvironmentObject var dataController: DataController
@@ -83,7 +79,6 @@ struct ContentView: View {
             }
             .onAppear {
                 startDateRefreshTimer()
-                checkNotificationSettings()
             }
             .onDisappear {
                 stopDateRefreshTimer()
@@ -118,15 +113,7 @@ struct ContentView: View {
     private func stopDateRefreshTimer() {
         timer?.invalidate()
         timer = nil
-    }
-    
-    private func checkNotificationSettings() {
-        // Note: Notification scheduling is now handled within NotificationSettingsSection
-        // This function is kept for potential future use
-    }
-    
-
-    
+    }    
 }
 
 struct ContentView_Previews: PreviewProvider {
