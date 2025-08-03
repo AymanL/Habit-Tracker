@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import UserNotifications
 
 @main
 struct HabitApp: App {
@@ -17,6 +18,13 @@ struct HabitApp: App {
             ContentView()
                 .environment(\.managedObjectContext, dataController.container.viewContext)
                 .environmentObject(dataController)
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                    // Clear all notifications when app becomes active
+                    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+                    
+                    // Clear the app badge
+                    UIApplication.shared.applicationIconBadgeNumber = 0
+                }
         }
     }
 }
