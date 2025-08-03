@@ -54,6 +54,10 @@
 		E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */; };
 		E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */; };
 		E3E9A6EA2E3FDF9700B15958 /* HolidayRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */; };
+		E3E9A6EC2E3FFF0800B15958 /* SkillTreeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */; };
+		E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */; };
+		E3E9A6F02E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */; };
+		E3E9A6F22E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +153,10 @@
 		E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 		E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastHabitEditorView.swift; sourceTree = "<group>"; };
 		E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRange.swift; sourceTree = "<group>"; };
+		E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeTests.swift; sourceTree = "<group>"; };
+		E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
+		E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillNode+CoreDataHelpers.swift"; sourceTree = "<group>"; };
+		E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillTree+CoreDataHelpers.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +187,8 @@
 		0224D8D42A13A3390067B559 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */,
+				E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */,
 				E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */,
 				02C3A89A2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift */,
 				02C39F952A73BF9500550CA1 /* Habit+Utils.swift */,
@@ -191,6 +201,7 @@
 		0224D8D52A13A3510067B559 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */,
 				E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */,
 				E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */,
 				E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */,
@@ -316,6 +327,7 @@
 		02EC2FB02A1CECF00004DA4B /* HabitTests */ = {
 			isa = PBXGroup;
 			children = (
+				E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */,
 				02EC2FAA2A1CEA410004DA4B /* Habit.xctestplan */,
 				02EC2FB12A1CECF00004DA4B /* BaseTestCase.swift */,
 				02EC2FBA2A20BA4E0004DA4B /* HabitTests.swift */,
@@ -502,7 +514,9 @@
 				E3E9A6E52E3FBB5200B15958 /* OverviewView.swift in Sources */,
 				E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */,
 				E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */,
+				E3E9A6F02E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift in Sources */,
 				E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */,
+				E3E9A6F22E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift in Sources */,
 				0224D8D92A17964A0067B559 /* EditHabitView.swift in Sources */,
 				02C39FA22A768B1F00550CA1 /* View+Ext.swift in Sources */,
 				02089EBD2A626390003DB055 /* CustomErrors.swift in Sources */,
@@ -522,6 +536,7 @@
 				02C3A89B2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift in Sources */,
 				02C3A8942A0FBA7A0044D090 /* Habit.xcdatamodeld in Sources */,
 				02C3A8882A0FBA780044D090 /* HabitApp.swift in Sources */,
+				E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */,
 				02C3A8A82A1260220044D090 /* Constants.swift in Sources */,
 				020A5DB02A4887100062C283 /* ChartView.swift in Sources */,
 			);
@@ -536,6 +551,7 @@
 				0261399F2A8CB4EF003D6711 /* HabitUtilsTests.swift in Sources */,
 				02EC2FBB2A20BA4E0004DA4B /* HabitTests.swift in Sources */,
 				0261399D2A8BCF76003D6711 /* DateExtensionTests.swift in Sources */,
+				E3E9A6EC2E3FFF0800B15958 /* SkillTreeTests.swift in Sources */,
 				02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -114,8 +114,40 @@ class DataController: ObservableObject {
     func createSampleData() throws {
         let viewContext = container.viewContext
         
+        // Create sample habits
         for index in 0..<10 {
             let _ = Habit(context: viewContext, title: "Habit \(index)", motivation: "", color: HabitColor.randomColor)
+        }
+        
+        // Create sample skill trees
+        let programmingTree = SkillTree(context: viewContext, name: "Programming Skills", description: "Learn programming fundamentals")
+        let fitnessTree = SkillTree(context: viewContext, name: "Fitness Journey", description: "Build healthy habits")
+        
+        // Add nodes to programming tree
+        let swiftNode = SkillNode(context: viewContext, name: "Learn Swift", type: .standalone, description: "Master Swift programming language")
+        let iosNode = SkillNode(context: viewContext, name: "Build iOS App", type: .oneShot, description: "Create your first iOS application")
+        let dailyCodeNode = SkillNode(context: viewContext, name: "Daily Coding", type: .habitLinked, description: "Practice coding daily")
+        
+        swiftNode.tree = programmingTree
+        iosNode.tree = programmingTree
+        dailyCodeNode.tree = programmingTree
+        
+        // Add nodes to fitness tree
+        let workoutNode = SkillNode(context: viewContext, name: "Start Working Out", type: .standalone, description: "Begin your fitness journey")
+        let runNode = SkillNode(context: viewContext, name: "Run 5K", type: .oneShot, description: "Complete a 5K run")
+        let dailyExerciseNode = SkillNode(context: viewContext, name: "Daily Exercise", type: .habitLinked, description: "Exercise every day")
+        
+        workoutNode.tree = fitnessTree
+        runNode.tree = fitnessTree
+        dailyExerciseNode.tree = fitnessTree
+        
+        // Link habit-linked nodes to existing habits
+        let habits = try viewContext.fetch(Habit.fetchRequest())
+        if let firstHabit = habits.first {
+            dailyCodeNode.linkToHabit(firstHabit)
+        }
+        if habits.count > 1 {
+            dailyExerciseNode.linkToHabit(habits[1])
         }
         
         try viewContext.save()
@@ -149,6 +181,146 @@ extension DataController {
         } catch {
             throw Error.notFound
         }
+    }
+    
+    func getAllCategories() -> [Category] {
+        let request: NSFetchRequest<Category> = Category.fetchRequest()
+        do {
+            return try container.viewContext.fetch(request).sorted(by: { $0.creationDate_ ?? Date() < $1.creationDate_ ?? Date() })
+        } catch {
+            print("Couldn't fetch all categories: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    // MARK: - Skill Tree Methods
+    
+    func createSkillTree(name: String, description: String = "") -> SkillTree {
+        let tree = SkillTree(context: container.viewContext, name: name, description: description)
+        save()
+        print("✅ Created skill tree: \(name)")
+        return tree
+    }
+    
+    func getAllSkillTrees() -> [SkillTree] {
+        let request: NSFetchRequest<SkillTree> = SkillTree.fetchRequest()
+        do {
+            let trees = try container.viewContext.fetch(request)
+            print("📊 Fetched \(trees.count) skill trees")
+            return trees.sorted(by: { $0.creationDate < $1.creationDate })
+        } catch {
+            print("❌ Error fetching skill trees: \(error)")
+            return []
+        }
+    }
+    
+    func findSkillTree(withId id: UUID) throws -> SkillTree {
+        let request: NSFetchRequest<SkillTree> = SkillTree.fetchRequest()
+        request.fetchLimit = 1
+        request.predicate = NSPredicate(format: "id_ = %@", id as CVarArg)
+        
+        do {
+            guard let foundTree = try container.viewContext.fetch(request).first else {
+                throw Error.notFound
+            }
+            return foundTree
+        } catch {
+            throw Error.notFound
+        }
+    }
+    
+    func deleteSkillTree(_ tree: SkillTree) {
+        container.viewContext.delete(tree)
+        save()
+        print("🗑️ Deleted skill tree: \(tree.name)")
+    }
+    
+    // MARK: - Skill Node Methods
+    
+    func createSkillNode(name: String, type: SkillNodeType, description: String = "", in tree: SkillTree) -> SkillNode {
+        let node = SkillNode(context: container.viewContext, name: name, type: type, description: description)
+        node.tree = tree
+        save()
+        print("✅ Created skill node: \(name) in tree: \(tree.name)")
+        return node
+    }
+    
+    func getAllSkillNodes() -> [SkillNode] {
+        let request: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
+        do {
+            let nodes = try container.viewContext.fetch(request)
+            print("📋 Fetched \(nodes.count) skill nodes")
+            return nodes.sorted(by: { $0.creationDate < $1.creationDate })
+        } catch {
+            print("❌ Error fetching skill nodes: \(error)")
+            return []
+        }
+    }
+    
+    func findSkillNode(withId id: UUID) throws -> SkillNode {
+        let request: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
+        request.fetchLimit = 1
+        request.predicate = NSPredicate(format: "id_ = %@", id as CVarArg)
+        
+        do {
+            guard let foundNode = try container.viewContext.fetch(request).first else {
+                throw Error.notFound
+            }
+            return foundNode
+        } catch {
+            throw Error.notFound
+        }
+    }
+    
+    func deleteSkillNode(_ node: SkillNode) {
+        container.viewContext.delete(node)
+        save()
+        print("🗑️ Deleted skill node: \(node.name)")
+    }
+    
+    // MARK: - Debug Methods
+    
+    func debugAllEntities() {
+        print("=== DEBUG: All Entities ===")
+        print("Habits: \(getAllHabits().count)")
+        print("Categories: \(getAllCategories().count)")
+        print("Skill Trees: \(getAllSkillTrees().count)")
+        print("Skill Nodes: \(getAllSkillNodes().count)")
+    }
+    
+    func debugSkillTrees() {
+        let trees = getAllSkillTrees()
+        print("🌳 Skill Trees (\(trees.count)):")
+        for tree in trees {
+            print("  - \(tree.name) (\(tree.nodes.count) nodes, \(Int(tree.completionPercentage * 100))% complete)")
+        }
+    }
+    
+    func debugSkillNodes() {
+        let nodes = getAllSkillNodes()
+        print("📋 Skill Nodes (\(nodes.count)):")
+        for node in nodes {
+            let status = node.isCompleted ? "✅" : "⭕"
+            let habitInfo = node.isHabitLinked ? " (linked to: \(node.habit?.title ?? "unknown"))" : ""
+            print("  \(status) \(node.name) (\(node.nodeType.displayName))\(habitInfo)")
+        }
+    }
+    
+    func createTestSkillTree() {
+        let tree = createSkillTree(name: "Debug Skill Tree", description: "A test skill tree for debugging")
+        
+        _ = createSkillNode(name: "Learn Swift Basics", type: .standalone, description: "Complete Swift fundamentals", in: tree)
+        _ = createSkillNode(name: "Build First App", type: .oneShot, description: "Create your first iOS app", in: tree)
+        let node3 = createSkillNode(name: "Daily Coding Practice", type: .habitLinked, description: "Practice coding daily", in: tree)
+        
+        // Link the habit-linked node to an existing habit if available
+        let habits = getAllHabits()
+        if let firstHabit = habits.first {
+            node3.linkToHabit(firstHabit)
+        }
+        
+        save()
+        print("✅ Created test skill tree with 3 nodes")
     }
     
 }
