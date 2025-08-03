@@ -76,27 +76,13 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button("Done") {
-//                        dismiss()
-//                    }
-//                }
-//            }
             .fullScreenCover(isPresented: $isShowingShareSheet) {
                 if let url = exportURL {
-//                    print("DEBUG: Presenting ShareSheet with URL: \(url.path)")
                     ShareSheet(items: [url])
                         .ignoresSafeArea()
-                        .onAppear {
-                            print("DEBUG: ShareSheet appeared")
-                        }
                         .onDisappear {
-                            print("DEBUG: ShareSheet disappeared")
                             isShowingShareSheet = false
                         }
-                } else {
-//                    print("DEBUG: ShareSheet triggered but exportURL is nil")
                 }
             }
 
@@ -225,7 +211,7 @@ struct SettingsView: View {
 struct HiddenHabitsSection: View {
     @EnvironmentObject var dataController: DataController
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(key: "order", ascending: true)],
+        sortDescriptors: [NSSortDescriptor(key: "order_", ascending: true)],
         predicate: NSPredicate(format: "isHidden_ == %@", NSNumber(value: true))
     ) var hiddenHabits: FetchedResults<Habit>
     
