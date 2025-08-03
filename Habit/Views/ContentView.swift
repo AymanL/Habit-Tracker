@@ -304,6 +304,7 @@ struct SettingsView: View {
 
 struct NotificationSettingsSection: View {
     @AppStorage("dailyReminderEnabled") private var dailyReminderEnabled = false
+    @AppStorage("dayResetHour") private var dayResetHour: Int = 0 // 0 = midnight (default)
     @State private var dailyReminderTime: Date
     @State private var showingPermissionAlert = false
     
@@ -328,17 +329,35 @@ struct NotificationSettingsSection: View {
                 DatePicker("Reminder Time", selection: $dailyReminderTime, displayedComponents: .hourAndMinute)
                     .onChange(of: dailyReminderTime) { newTime in
                         UserDefaults.standard.set(newTime, forKey: "dailyReminderTime")
-                                                        if dailyReminderEnabled {
-                                    self.scheduleDailyReminder(at: newTime)
-                                }
+                        if dailyReminderEnabled {
+                            self.scheduleDailyReminder(at: newTime)
+                        }
                     }
-                
-
+            }
+            
+            HStack {
+                Text("Day Reset Time")
+                Spacer()
+                Picker("Day Reset Time", selection: $dayResetHour) {
+                    Text("Midnight (12 AM)").tag(0)
+                    Text("1 AM").tag(1)
+                    Text("2 AM").tag(2)
+                    Text("3 AM").tag(3)
+                    Text("4 AM").tag(4)
+                    Text("5 AM").tag(5)
+                    Text("6 AM").tag(6)
+                }
+                .pickerStyle(.menu)
             }
         } header: {
             Text("Notifications")
         } footer: {
-            Text("Receive a daily reminder to check and complete your habits.")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Receive a daily reminder to check and complete your habits.")
+                Text("Choose when your day resets - for example, if you set it to 4 AM, then habits completed at 3 AM on Saturday will count towards Friday.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .alert("Notification Permission Required", isPresented: $showingPermissionAlert) {
             Button("Open Settings") {

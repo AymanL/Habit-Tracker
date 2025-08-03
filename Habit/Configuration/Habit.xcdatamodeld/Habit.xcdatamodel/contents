@@ -22,6 +22,7 @@
         <attribute name="title_" optional="YES" attributeType="String"/>
         <attribute name="type_" optional="YES" attributeType="String"/>
         <attribute name="isHidden_" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="weekendMode_" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <relationship name="category_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="habits_" inverseEntity="Category"/>
     </entity>
 </model>

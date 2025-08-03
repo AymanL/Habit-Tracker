@@ -133,7 +133,7 @@ struct ChartView: View {
 
     func isDateCompleted(_ habitDate: Date) -> Bool {
         return dates.contains { date in
-            date.isInSameDay(as: habitDate)
+            Calendar.current.isDate(date, inSameDayAs: habitDate)
         }
     }
     

@@ -57,16 +57,20 @@ struct CalendarView: UIViewRepresentable {
         }
         
         func multiDateSelection(_ selection: UICalendarSelectionMultiDate, didSelectDate dateComponents: DateComponents) {
-            // Convert DateComponents to Date
+            // Convert DateComponents to Date using regular calendar (not custom day reset)
             if let date = Calendar.current.date(from: dateComponents) {
-                habit.addCompletedDate(date)
+                // Use regular calendar day normalization for calendar interactions
+                let normalizedDate = Calendar.current.startOfDay(for: date)
+                habit.addCompletedDateForCalendar(normalizedDate)
             }
         }
         
         func multiDateSelection(_ selection: UICalendarSelectionMultiDate, didDeselectDate dateComponents: DateComponents) {
-            // Convert DateComponents to Date
+            // Convert DateComponents to Date using regular calendar (not custom day reset)
             if let date = Calendar.current.date(from: dateComponents) {
-                habit.removeCompletedDate(date)
+                // Use regular calendar day normalization for calendar interactions
+                let normalizedDate = Calendar.current.startOfDay(for: date)
+                habit.removeCompletedDateForCalendar(normalizedDate)
             }
         }
         

@@ -14,6 +14,7 @@ extension Habit {
     @NSManaged public var durationHistory_: String?
     @NSManaged public var id_: UUID?
     @NSManaged public var isHidden_: Bool
+    @NSManaged public var weekendMode_: Bool
     @NSManaged public var isWeekly_: Bool
     @NSManaged public var motivation_: String?
     @NSManaged public var order_: Int64
@@ -101,6 +102,11 @@ extension Habit {
     var isHidden: Bool {
         get { isHidden_ }
         set { isHidden_ = newValue }
+    }
+    
+    var weekendMode: Bool {
+        get { weekendMode_ }
+        set { weekendMode_ = newValue }
     }
     
     var isWeekly: Bool {

@@ -171,6 +171,13 @@ extension Habit {
     
     /// Get the counter value for a specific date
     func counterValue(for date: Date) -> Int {
+        let normalizedDate = CustomDayResetCalendar.shared.startOfCustomDay(for: date)
+        let value = dailyCounters[normalizedDate] ?? 0
+        return value
+    }
+    
+    /// Get the counter value for a specific date using regular calendar days (for past editing)
+    func counterValueForPastDate(for date: Date) -> Int {
         let normalizedDate = Calendar.current.startOfDay(for: date)
         let value = dailyCounters[normalizedDate] ?? 0
         return value
@@ -178,7 +185,7 @@ extension Habit {
     
     /// Set the counter value for a specific date
     func setCounterValue(_ value: Int, for date: Date) {
-        let normalizedDate = Calendar.current.startOfDay(for: date)
+        let normalizedDate = CustomDayResetCalendar.shared.startOfCustomDay(for: date)
         var counters = dailyCounters
         counters[normalizedDate] = value
         dailyCounters = counters
@@ -195,9 +202,28 @@ extension Habit {
         }
     }
     
+    /// Set the counter value for a specific date using regular calendar days (for past editing)
+    func setCounterValueForPastDate(_ value: Int, for date: Date) {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        var counters = dailyCounters
+        counters[normalizedDate] = value
+        dailyCounters = counters
+        
+        // Sync with completedDates using regular calendar days
+        if value > 0 {
+            // Add to completedDates if not already there
+            if !completedDates.contains(where: { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }) {
+                completedDates.append(normalizedDate)
+            }
+        } else {
+            // Remove from completedDates if counter is 0
+            completedDates.removeAll { Calendar.current.isDate($0, inSameDayAs: normalizedDate) }
+        }
+    }
+    
     /// Increment the counter for a specific date
     func incrementCounter(for date: Date) {
-        let normalizedDate = Calendar.current.startOfDay(for: date)
+        let normalizedDate = CustomDayResetCalendar.shared.startOfCustomDay(for: date)
         let currentValue = counterValue(for: normalizedDate)
         setCounterValue(currentValue + 1, for: normalizedDate)
         

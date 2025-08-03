@@ -49,8 +49,9 @@ struct DetailView: View {
                     color: habit.color,
                     counterValues: habit.dailyCounters
                 )
-                    .frame(height: 200)
-                    .padding()
+                .frame(height: 200)
+                .padding()
+
                 
                 // Past Habit Editor Section (for counter habits)
                 if habit.type == .counter {
@@ -524,7 +525,7 @@ struct PastHabitEditorView: View {
     @State private var showingDatePicker = false
     
     private var currentValue: Int {
-        habit.counterValue(for: selectedDate)
+        habit.counterValueForPastDate(for: selectedDate)
     }
     
     var body: some View {
@@ -566,9 +567,9 @@ struct PastHabitEditorView: View {
                     HStack(spacing: 20) {
                         Button(action: {
                             if currentValue > 0 {
-                                habit.setCounterValue(currentValue - 1, for: selectedDate)
+                                habit.setCounterValueForPastDate(currentValue - 1, for: selectedDate)
                                 if currentValue - 1 == 0 {
-                                    habit.removeCompletedDate(selectedDate)
+                                    habit.removeCompletedDateForPastDate(selectedDate)
                                 }
                                 try? viewContext.save()
                             }
@@ -580,7 +581,7 @@ struct PastHabitEditorView: View {
                         .disabled(currentValue <= 0)
                         
                         Button(action: {
-                            habit.incrementCounter(for: selectedDate)
+                            habit.setCounterValueForPastDate(currentValue + 1, for: selectedDate)
                             try? viewContext.save()
                         }) {
                             Image(systemName: "plus.circle.fill")
@@ -593,7 +594,7 @@ struct PastHabitEditorView: View {
                     HStack(spacing: 10) {
                         ForEach([5, 10, 15], id: \.self) { increment in
                             Button(action: {
-                                habit.setCounterValue(currentValue + increment, for: selectedDate)
+                                habit.setCounterValueForPastDate(currentValue + increment, for: selectedDate)
                                 try? viewContext.save()
                             }) {
                                 Text("+\(increment)")

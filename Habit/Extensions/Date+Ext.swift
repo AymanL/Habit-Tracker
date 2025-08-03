@@ -7,10 +7,67 @@
 
 import Foundation
 
+// MARK: - Custom Day Reset Calendar
+struct CustomDayResetCalendar {
+    static let shared = CustomDayResetCalendar()
+    
+    private var dayResetHour: Int {
+        UserDefaults.standard.integer(forKey: "dayResetHour")
+    }
+    
+    private init() {}
+    
+    /// Returns the start of the custom day for a given date
+    /// If dayResetHour is 4, then 3am on Saturday counts as Friday
+    func startOfCustomDay(for date: Date) -> Date {
+        let calendar = Calendar.current
+        let dayResetHour = self.dayResetHour
+        
+        // Get the date components for the given date
+        var components = calendar.dateComponents([.year, .month, .day], from: date)
+        
+        // If the current hour is before the reset hour, we're still in the previous day
+        let currentHour = calendar.component(.hour, from: date)
+        if currentHour < dayResetHour {
+            // We're in the previous day, so subtract one day
+            components.day = (components.day ?? 1) - 1
+        }
+        
+        // Set the time to the reset hour
+        components.hour = dayResetHour
+        components.minute = 0
+        components.second = 0
+        components.nanosecond = 0
+        
+        return calendar.date(from: components) ?? date
+    }
+    
+    /// Checks if two dates are in the same custom day
+    func isDate(_ date1: Date, inSameCustomDayAs date2: Date) -> Bool {
+        let start1 = startOfCustomDay(for: date1)
+        let start2 = startOfCustomDay(for: date2)
+        return Calendar.current.isDate(start1, inSameDayAs: start2)
+    }
+    
+    /// Returns the current custom day (adjusted for reset hour)
+    func currentCustomDay() -> Date {
+        return startOfCustomDay(for: Date())
+    }
+    
+    /// Returns a date that is N days ago from the current custom day
+    func customDayMinusDaysAgo(daysAgo: Int) -> Date {
+        let currentCustomDay = self.currentCustomDay()
+        return Calendar.current.date(byAdding: .day, value: -daysAgo, to: currentCustomDay) ?? Date()
+    }
+}
 
 extension Date {
     func isInSameDay(as date: Date) -> Bool {
         Calendar.current.isDate(self, inSameDayAs: date)
+    }
+    
+    func isInSameCustomDay(as date: Date) -> Bool {
+        CustomDayResetCalendar.shared.isDate(self, inSameCustomDayAs: date)
     }
     
     static func todayMinusDaysAgo(daysAgo: Int) -> Date {
@@ -19,9 +76,19 @@ extension Date {
         return todayMinusDaysAgo
     }
     
+    static func customDayMinusDaysAgo(daysAgo: Int) -> Date {
+        return CustomDayResetCalendar.shared.customDayMinusDaysAgo(daysAgo: daysAgo)
+    }
+    
     func isWithinLastDays(daysAgo: Int) -> Bool {
         let daysAgoDate = Date.todayMinusDaysAgo(daysAgo: daysAgo)
         if self.isInSameDay(as: daysAgoDate) { return true }
+        return self >= daysAgoDate && self <= Date.now
+    }
+    
+    func isWithinLastCustomDays(daysAgo: Int) -> Bool {
+        let daysAgoDate = Date.customDayMinusDaysAgo(daysAgo: daysAgo)
+        if self.isInSameCustomDay(as: daysAgoDate) { return true }
         return self >= daysAgoDate && self <= Date.now
     }
     

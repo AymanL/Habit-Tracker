@@ -25,7 +25,7 @@ struct HeaderView: View {
                     }
                     .frame(width: Constants.dayOfTheWeekFrameSize, height: Constants.dayOfTheWeekFrameSize)
                     .font(.system(size: 11, weight: .bold))
-                    .opacity(Calendar.current.isDateInToday(date) ? 1 : 0.5)
+                    .opacity(date.isInSameCustomDay(as: Date()) ? 1 : 0.5)
                 }
             }
             .padding(.trailing, 10)

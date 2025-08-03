@@ -18,6 +18,7 @@ struct EditHabitView: View {
     @State private var selectedType: Habit.HabitType
     @State private var startDate: Date
     @State private var isWeekly: Bool
+    @State private var weekendMode: Bool
     @State private var duration: Int
     @State private var durationEffectiveDate: Date
     @State private var selectedCategory: Category?
@@ -37,6 +38,7 @@ struct EditHabitView: View {
         _selectedType = State(initialValue: habit?.type ?? .counter)
         _startDate = State(initialValue: habit?.creationDate ?? Date())
         _isWeekly = State(initialValue: habit?.isWeekly ?? false)
+        _weekendMode = State(initialValue: habit?.weekendMode_ ?? false)
         _duration = State(initialValue: habit?.currentDuration ?? 0)
         _durationEffectiveDate = State(initialValue: Date())
         _selectedCategory = State(initialValue: habit?.category)
@@ -55,7 +57,8 @@ struct EditHabitView: View {
             SettingsSection(
                 selectedType: $selectedType,
                 isWeekly: $isWeekly,
-                startDate: $startDate
+                startDate: $startDate,
+                weekendMode: $weekendMode
             )
             
             DurationSection(
@@ -99,6 +102,7 @@ struct EditHabitView: View {
             habit.color = selectedColor
             habit.type = selectedType
             habit.isWeekly = isWeekly
+            habit.weekendMode_ = weekendMode
             habit.creationDate = startDate
             habit.category = selectedCategory
             
@@ -123,6 +127,7 @@ struct EditHabitView: View {
         } else {
             // Create new habit
             let newHabit = Habit(context: viewContext, title: title, motivation: motivation, color: selectedColor, type: selectedType, isWeekly: isWeekly, category: selectedCategory)
+            newHabit.weekendMode_ = weekendMode
             newHabit.creationDate = startDate
             
             // Set initial duration
@@ -173,6 +178,7 @@ private struct SettingsSection: View {
     @Binding var selectedType: Habit.HabitType
     @Binding var isWeekly: Bool
     @Binding var startDate: Date
+    @Binding var weekendMode: Bool
     
     var body: some View {
         Section(header: Text("Settings")) {
@@ -183,6 +189,14 @@ private struct SettingsSection: View {
             .pickerStyle(.segmented)
             
             Toggle("Weekly Habit", isOn: $isWeekly)
+            
+            Toggle("Weekend Mode", isOn: $weekendMode)
+                .onChange(of: weekendMode) { newValue in
+                    if newValue {
+                        // If enabling weekend mode, disable weekly habit (they're mutually exclusive)
+                        isWeekly = false
+                    }
+                }
             
             DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
         }
