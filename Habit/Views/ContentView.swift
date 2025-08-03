@@ -499,7 +499,6 @@ struct ContentView: View {
                 HeaderView()
                 HabitListView(sortingOption: sortingOption, isSortingOrderAscending: isSortingOrderAscending)
             }
-            .navigationTitle("Habits")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
