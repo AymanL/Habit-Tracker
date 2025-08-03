@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreData
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +18,6 @@ struct SettingsView: View {
     @State private var minimumLoadingTime: TimeInterval = 1.5 // Minimum time to show loader
     
     var body: some View {
-        NavigationView {
             ZStack {
                 List {
                     Section {
@@ -43,11 +43,13 @@ struct SettingsView: View {
                         .disabled(isExporting || isImporting)
                     } header: {
                         Text("Data Management")
-                    } footer: {
+                    }                     footer: {
                         Text("Export your habits to back them up or transfer them to another device. Import previously exported habits to restore your data.")
                     }
                     
-
+                    HiddenHabitsSection()
+                    
+                    NotificationSettingsSection()
                 }
                 
                 if isExporting || isImporting {
@@ -74,16 +76,16 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button("Done") {
+//                        dismiss()
+//                    }
+//                }
+//            }
             .fullScreenCover(isPresented: $isShowingShareSheet) {
                 if let url = exportURL {
-                    print("DEBUG: Presenting ShareSheet with URL: \(url.path)")
+//                    print("DEBUG: Presenting ShareSheet with URL: \(url.path)")
                     ShareSheet(items: [url])
                         .ignoresSafeArea()
                         .onAppear {
@@ -94,12 +96,11 @@ struct SettingsView: View {
                             isShowingShareSheet = false
                         }
                 } else {
-                    print("DEBUG: ShareSheet triggered but exportURL is nil")
+//                    print("DEBUG: ShareSheet triggered but exportURL is nil")
                 }
             }
 
         }
-    }
 
     private func exportAllHabits(completion: ((Bool) -> Void)? = nil) {
         print("DEBUG: Starting exportAllHabits")
@@ -219,25 +220,135 @@ struct SettingsView: View {
             }
         }
     }
-
-
 }
 
-
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
+struct HiddenHabitsSection: View {
+    @EnvironmentObject var dataController: DataController
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(key: "order", ascending: true)],
+        predicate: NSPredicate(format: "isHidden_ == %@", NSNumber(value: true))
+    ) var hiddenHabits: FetchedResults<Habit>
     
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        print("DEBUG: Creating UIActivityViewController with items: \(items)")
-        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        controller.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
-            print("DEBUG: Share sheet completed - Activity: \(String(describing: activityType)), Completed: \(completed), Error: \(String(describing: error))")
+    var body: some View {
+        Section {
+            ForEach(hiddenHabits) { habit in
+                HStack {
+                    Circle()
+                        .fill(Color(habit.color))
+                        .frame(width: 12, height: 12)
+                    Text(habit.title)
+                    Spacer()
+                    Button("Unhide") {
+                        habit.setValue(false, forKey: "isHidden_")
+                        try? dataController.container.viewContext.save()
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        } header: {
+            Text("Hidden Habits")
+        } footer: {
+            Text("Hidden habits are not shown in the main list but can be restored here.")
         }
-        return controller
+    }
+}
+
+struct NotificationSettingsSection: View {
+    @State private var reminderTime: Date
+    @AppStorage("reminderEnabled") private var reminderEnabled = false
+    @State private var showingPermissionAlert = false
+    
+    init() {
+        let defaultTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
+        let savedTime = UserDefaults.standard.object(forKey: "reminderTime") as? Date ?? defaultTime
+        _reminderTime = State(initialValue: savedTime)
     }
     
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
-        print("DEBUG: Updating UIActivityViewController")
+    var body: some View {
+        Section {
+            Toggle("Daily Reminder", isOn: $reminderEnabled)
+                .onChange(of: reminderEnabled) { newValue in
+                    if newValue {
+                        requestNotificationPermission()
+                    } else {
+                        cancelDailyReminder()
+                    }
+                }
+            
+            if reminderEnabled {
+                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                    .onChange(of: reminderTime) { _ in
+                        if reminderEnabled {
+                            scheduleDailyReminder()
+                        }
+                    }
+                
+                Button("Check Permissions") {
+                    checkNotificationPermission()
+                }
+                .buttonStyle(.bordered)
+            }
+        } header: {
+            Text("Notifications")
+        } footer: {
+            Text("Set a daily reminder to help you stay on track with your habits.")
+        }
+        .alert("Notification Permission Required", isPresented: $showingPermissionAlert) {
+            Button("Open Settings", role: .none) {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Please enable notifications in Settings to receive daily reminders.")
+        }
     }
-} 
+    
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            DispatchQueue.main.async {
+                if granted {
+                    scheduleDailyReminder()
+                } else {
+                    reminderEnabled = false
+                    showingPermissionAlert = true
+                }
+            }
+        }
+    }
+    
+    private func scheduleDailyReminder() {
+        let content = UNMutableNotificationContent()
+        content.title = "Habit Reminder"
+        content.body = "Time to check in on your habits!"
+        content.sound = .default
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: reminderTime)
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: "dailyReminder", content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error)")
+            }
+        }
+    }
+    
+    private func cancelDailyReminder() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["dailyReminder"])
+    }
+    
+    private func checkNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                let status = settings.authorizationStatus
+                print("Notification permission status: \(status.rawValue)")
+            }
+        }
+    }
+}
+
+ 
