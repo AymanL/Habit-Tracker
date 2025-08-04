@@ -124,8 +124,8 @@ class DataController: ObservableObject {
         let fitnessTree = SkillTree(context: viewContext, name: "Fitness Journey", description: "Build healthy habits")
         
         // Add nodes to programming tree
-        let swiftNode = SkillNode(context: viewContext, name: "Learn Swift", type: .standalone, description: "Master Swift programming language")
-        let iosNode = SkillNode(context: viewContext, name: "Build iOS App", type: .oneShot, description: "Create your first iOS application")
+        let swiftNode = SkillNode(context: viewContext, name: "Learn Swift", type: .goal, description: "Master Swift programming language")
+        let iosNode = SkillNode(context: viewContext, name: "Build iOS App", type: .activity, description: "Create your first iOS application")
         let dailyCodeNode = SkillNode(context: viewContext, name: "Daily Coding", type: .habitLinked, description: "Practice coding daily")
         
         swiftNode.tree = programmingTree
@@ -133,8 +133,8 @@ class DataController: ObservableObject {
         dailyCodeNode.tree = programmingTree
         
         // Add nodes to fitness tree
-        let workoutNode = SkillNode(context: viewContext, name: "Start Working Out", type: .standalone, description: "Begin your fitness journey")
-        let runNode = SkillNode(context: viewContext, name: "Run 5K", type: .oneShot, description: "Complete a 5K run")
+        let workoutNode = SkillNode(context: viewContext, name: "Start Working Out", type: .goal, description: "Begin your fitness journey")
+        let runNode = SkillNode(context: viewContext, name: "Run 5K", type: .activity, description: "Complete a 5K run")
         let dailyExerciseNode = SkillNode(context: viewContext, name: "Daily Exercise", type: .habitLinked, description: "Exercise every day")
         
         workoutNode.tree = fitnessTree
@@ -195,8 +195,38 @@ extension DataController {
     
     // MARK: - Skill Tree Methods
     
-    func createSkillTree(name: String, description: String = "") -> SkillTree {
+    func createSkillTree(name: String, description: String = "", withSampleNodes: Bool = false) -> SkillTree {
         let tree = SkillTree(context: container.viewContext, name: name, description: description)
+        
+        if withSampleNodes {
+            // Ensure we have some habits to link to
+            let existingHabits = getAllHabits()
+            var habitsToUse = existingHabits
+            
+            // If no habits exist, create some sample habits
+            if existingHabits.isEmpty {
+                print("📝 No habits found, creating sample habits for linking...")
+                for i in 0..<3 {
+                    let habit = Habit(context: container.viewContext, title: "Sample Habit \(i + 1)", motivation: "A sample habit for testing", color: HabitColor.randomColor)
+                    habitsToUse.append(habit)
+                }
+                save()
+            }
+            
+            // Add some sample nodes for testing
+            _ = createSkillNode(name: "Learn Basics", type: .goal, description: "Start with the fundamentals", in: tree)
+            _ = createSkillNode(name: "First Milestone", type: .activity, description: "Complete your first major goal", in: tree)
+            let habitNode = createSkillNode(name: "Daily Practice", type: .habitLinked, description: "Link to an existing habit", in: tree)
+            
+            // Link the habit-linked node to a sample habit
+            if let firstHabit = habitsToUse.first {
+                habitNode.linkToHabit(firstHabit)
+                print("🔗 Linked 'Daily Practice' node to habit: \(firstHabit.title)")
+            }
+            
+            print("📝 Added \(tree.nodes.count) sample nodes to skill tree: \(name)")
+        }
+        
         save()
         print("✅ Created skill tree: \(name)")
         return tree
@@ -273,9 +303,22 @@ extension DataController {
     }
     
     func deleteSkillNode(_ node: SkillNode) {
+        // Log the node and tree info before deletion
+        let nodeName = node.name
+        let treeName = node.tree?.name ?? "Unknown"
+        let treeId = node.tree?.id ?? UUID()
+        
+        print("🗑️ About to delete skill node: \(nodeName) from tree: \(treeName)")
+        print("🗑️ Tree ID: \(treeId)")
+        
+        // Delete the node (Core Data will handle the relationship automatically)
         container.viewContext.delete(node)
+        
+        // Save the context
         save()
-        print("🗑️ Deleted skill node: \(node.name)")
+        
+        print("🗑️ Successfully deleted skill node: \(nodeName)")
+        print("🗑️ Tree '\(treeName)' should still exist")
     }
     
     // MARK: - Debug Methods
@@ -306,11 +349,64 @@ extension DataController {
         }
     }
     
+    func debugCoreDataState() {
+        print("=== DEBUG: Core Data State ===")
+        print("Context has changes: \(container.viewContext.hasChanges)")
+        
+        // Check for any deleted objects
+        let deletedObjects = container.viewContext.deletedObjects
+        if !deletedObjects.isEmpty {
+            print("⚠️ Deleted objects in context:")
+            for obj in deletedObjects {
+                print("   - \(obj)")
+            }
+        }
+        
+        // Check for any inserted objects
+        let insertedObjects = container.viewContext.insertedObjects
+        if !insertedObjects.isEmpty {
+            print("➕ Inserted objects in context:")
+            for obj in insertedObjects {
+                print("   - \(obj)")
+            }
+        }
+        
+        // Check for any updated objects
+        let updatedObjects = container.viewContext.updatedObjects
+        if !updatedObjects.isEmpty {
+            print("🔄 Updated objects in context:")
+            for obj in updatedObjects {
+                print("   - \(obj)")
+            }
+        }
+    }
+    
+    func debugSkillNode(_ node: SkillNode) {
+        print("=== DEBUG: Skill Node ===")
+        print("Name: \(node.name)")
+        print("Deleted: \(node.isDeleted)")
+        print("Has Changes: \(node.hasChanges)")
+        print("Object ID: \(node.objectID.uriRepresentation().absoluteString)")
+        print("Context: \(node.managedObjectContext != nil)")
+        
+        if let tree = node.tree {
+            print("Tree: \(tree.name)")
+        } else {
+            print("Tree: nil")
+        }
+        
+        if let habit = node.habit {
+            print("Habit: \(habit.title)")
+        } else {
+            print("Habit: nil")
+        }
+    }
+    
     func createTestSkillTree() {
         let tree = createSkillTree(name: "Debug Skill Tree", description: "A test skill tree for debugging")
         
-        _ = createSkillNode(name: "Learn Swift Basics", type: .standalone, description: "Complete Swift fundamentals", in: tree)
-        _ = createSkillNode(name: "Build First App", type: .oneShot, description: "Create your first iOS app", in: tree)
+        _ = createSkillNode(name: "Learn Swift Basics", type: .goal, description: "Complete Swift fundamentals", in: tree)
+        _ = createSkillNode(name: "Build First App", type: .activity, description: "Create your first iOS app", in: tree)
         let node3 = createSkillNode(name: "Daily Coding Practice", type: .habitLinked, description: "Practice coding daily", in: tree)
         
         // Link the habit-linked node to an existing habit if available

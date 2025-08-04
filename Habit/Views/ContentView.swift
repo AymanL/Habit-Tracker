@@ -22,6 +22,73 @@ struct ContentView: View {
     @State private var timer: Timer?
     
     var body: some View {
+        TabView {
+            // Habits Tab
+            HabitsView(
+                showingAddHabit: $showingAddHabit,
+                showingCategories: $showingCategories,
+                isPresentingSettingsView: $isPresentingSettingsView,
+                currentDate: $currentDate
+            )
+            .tabItem {
+                Label("Habits", systemImage: "list.bullet")
+            }
+            
+            // Skill Trees Tab
+            SkillTreesView()
+                .tabItem {
+                    Label("Skill Trees", systemImage: "tree")
+                }
+        }
+        .onAppear {
+            startDateRefreshTimer()
+        }
+        .onDisappear {
+            stopDateRefreshTimer()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                // Refresh the current date when app becomes active
+                currentDate = Date()
+            }
+        }
+    }
+    
+    private func startDateRefreshTimer() {
+        // Stop any existing timer
+        stopDateRefreshTimer()
+        
+        // Create a timer that fires every minute to check for day changes
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            let newDate = Date()
+            let calendar = Calendar.current
+            
+            // Check if the day has changed
+            if !calendar.isDate(currentDate, inSameDayAs: newDate) {
+                currentDate = newDate
+                // Force UI refresh by updating the environment
+                dataController.objectWillChange.send()
+            }
+        }
+    }
+    
+    private func stopDateRefreshTimer() {
+        timer?.invalidate()
+        timer = nil
+    }    
+}
+
+// MARK: - Habits View (Current Functionality)
+struct HabitsView: View {
+    @EnvironmentObject var dataController: DataController
+    @Binding var showingAddHabit: Bool
+    @Binding var showingCategories: Bool
+    @Binding var isPresentingSettingsView: Bool
+    @AppStorage("sortingOption") private var sortingOption: SortingOption = .byOrder
+    @AppStorage("isSortingOrderAscending") private var isSortingOrderAscending = false
+    @Binding var currentDate: Date
+    
+    var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 Divider()
@@ -79,43 +146,15 @@ struct ContentView: View {
                     SettingsView()
                 }
             }
-            .onAppear {
-                startDateRefreshTimer()
-            }
-            .onDisappear {
-                stopDateRefreshTimer()
-            }
-            .onChange(of: scenePhase) { newPhase in
-                if newPhase == .active {
-                    // Refresh the current date when app becomes active
-                    currentDate = Date()
-                }
-            }
         }
     }
-    
-    private func startDateRefreshTimer() {
-        // Stop any existing timer
-        stopDateRefreshTimer()
-        
-        // Create a timer that fires every minute to check for day changes
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
-            let newDate = Date()
-            let calendar = Calendar.current
-            
-            // Check if the day has changed
-            if !calendar.isDate(currentDate, inSameDayAs: newDate) {
-                currentDate = newDate
-                // Force UI refresh by updating the environment
-                dataController.objectWillChange.send()
-            }
-        }
+}
+
+// MARK: - Skill Trees View
+struct SkillTreesView: View {
+    var body: some View {
+        SkillTreeListView()
     }
-    
-    private func stopDateRefreshTimer() {
-        timer?.invalidate()
-        timer = nil
-    }    
 }
 
 struct ContentView_Previews: PreviewProvider {

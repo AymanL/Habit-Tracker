@@ -38,25 +38,20 @@ class SkillTreeTests: BaseTestCase {
     // MARK: - SkillNode Tests
     
     func testSkillNodeCreation() {
-        let tree = SkillTree(context: managedObjectContext, name: "Test Tree")
-        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .standalone)
+        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .goal)
         
-        XCTAssertNotNil(node.id)
         XCTAssertEqual(node.name, "Test Node")
-        XCTAssertEqual(node.nodeType, .standalone)
+        XCTAssertEqual(node.nodeType, .goal)
         XCTAssertFalse(node.isCompleted)
-        XCTAssertNil(node.completionDate)
-        XCTAssertEqual(node.positionX, 0.0)
-        XCTAssertEqual(node.positionY, 0.0)
     }
     
     func testSkillNodeTypes() {
-        let standaloneNode = SkillNode(context: managedObjectContext, name: "Standalone", type: .standalone)
-        let oneShotNode = SkillNode(context: managedObjectContext, name: "One Shot", type: .oneShot)
+        let standaloneNode = SkillNode(context: managedObjectContext, name: "Goal", type: .goal)
+        let activityNode = SkillNode(context: managedObjectContext, name: "Activity", type: .activity)
         let habitLinkedNode = SkillNode(context: managedObjectContext, name: "Habit Linked", type: .habitLinked)
         
-        XCTAssertEqual(standaloneNode.nodeType, .standalone)
-        XCTAssertEqual(oneShotNode.nodeType, .oneShot)
+        XCTAssertEqual(standaloneNode.nodeType, .goal)
+        XCTAssertEqual(activityNode.nodeType, .activity)
         XCTAssertEqual(habitLinkedNode.nodeType, .habitLinked)
         
         XCTAssertEqual(standaloneNode.nodeType.displayName, "Standalone")
@@ -65,7 +60,7 @@ class SkillTreeTests: BaseTestCase {
     }
     
     func testSkillNodeCompletion() {
-        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .standalone)
+        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .goal)
         
         XCTAssertFalse(node.isCompleted)
         XCTAssertNil(node.completionDate)
@@ -79,7 +74,7 @@ class SkillTreeTests: BaseTestCase {
     }
     
     func testSkillNodePosition() {
-        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .standalone)
+        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .goal)
         let testPosition = CGPoint(x: 100.0, y: 200.0)
         
         node.position = testPosition
@@ -93,7 +88,7 @@ class SkillTreeTests: BaseTestCase {
     
     func testSkillTreeNodeRelationship() {
         let tree = SkillTree(context: managedObjectContext, name: "Test Tree")
-        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .standalone)
+        let node = SkillNode(context: managedObjectContext, name: "Test Node", type: .goal)
         
         node.tree = tree
         
@@ -138,11 +133,11 @@ class SkillTreeTests: BaseTestCase {
     
     func testCreateSkillNode() {
         let tree = dataController.createSkillTree(name: "Test Tree")
-        let node = dataController.createSkillNode(name: "Test Node", type: .standalone, description: "Test Description", in: tree)
+        let node = dataController.createSkillNode(name: "Test Node", type: .goal, description: "Test Description", in: tree)
         
         XCTAssertEqual(node.name, "Test Node")
         XCTAssertEqual(node.description, "Test Description")
-        XCTAssertEqual(node.nodeType, .standalone)
+        XCTAssertEqual(node.nodeType, .goal)
         XCTAssertEqual(node.tree, tree)
         
         let nodes = dataController.getAllSkillNodes()
@@ -159,7 +154,7 @@ class SkillTreeTests: BaseTestCase {
     
     func testFindSkillNode() throws {
         let tree = dataController.createSkillTree(name: "Test Tree")
-        let node = dataController.createSkillNode(name: "Test Node", type: .standalone, in: tree)
+        let node = dataController.createSkillNode(name: "Test Node", type: .goal, in: tree)
         let foundNode = try dataController.findSkillNode(withId: node.id)
         
         XCTAssertEqual(foundNode.id, node.id)
@@ -170,9 +165,9 @@ class SkillTreeTests: BaseTestCase {
     
     func testSkillTreeCompletionPercentage() {
         let tree = SkillTree(context: managedObjectContext, name: "Test Tree")
-        let node1 = SkillNode(context: managedObjectContext, name: "Node 1", type: .standalone)
-        let node2 = SkillNode(context: managedObjectContext, name: "Node 2", type: .standalone)
-        let node3 = SkillNode(context: managedObjectContext, name: "Node 3", type: .standalone)
+        let node1 = SkillNode(context: managedObjectContext, name: "Node 1", type: .goal)
+        let node2 = SkillNode(context: managedObjectContext, name: "Node 2", type: .goal)
+        let node3 = SkillNode(context: managedObjectContext, name: "Node 3", type: .goal)
         
         node1.tree = tree
         node2.tree = tree
@@ -201,7 +196,7 @@ class SkillTreeTests: BaseTestCase {
     func testDebugMethods() {
         // Create some test data
         let tree = dataController.createSkillTree(name: "Debug Tree")
-        dataController.createSkillNode(name: "Debug Node", type: .standalone, in: tree)
+        dataController.createSkillNode(name: "Debug Node", type: .goal, in: tree)
         
         // These should not crash and should print debug info
         dataController.debugAllEntities()

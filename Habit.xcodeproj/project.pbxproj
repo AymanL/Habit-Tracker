@@ -58,6 +58,11 @@
 		E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */; };
 		E3E9A6F02E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */; };
 		E3E9A6F22E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */; };
+		E3E9A6F42E3FFF4A00B15958 /* SkillTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */; };
+		E3E9A6F62E3FFF5A00B15958 /* SkillTreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */; };
+		E3E9A6F82E3FFF6A00B15958 /* EditSkillTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */; };
+		E3E9A6FA2E3FFF7A00B15958 /* EditSkillNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */; };
+		E3E9A6FC2E3FFF8A00B15958 /* SkillNodeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,6 +162,11 @@
 		E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
 		E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillNode+CoreDataHelpers.swift"; sourceTree = "<group>"; };
 		E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillTree+CoreDataHelpers.swift"; sourceTree = "<group>"; };
+		E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
+		E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDetailView.swift; sourceTree = "<group>"; };
+		E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillTreeView.swift; sourceTree = "<group>"; };
+		E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillNodeView.swift; sourceTree = "<group>"; };
+		E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +212,11 @@
 			isa = PBXGroup;
 			children = (
 				E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */,
+				E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */,
+				E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */,
+				E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */,
+				E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */,
+				E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */,
 				E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */,
 				E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */,
 				E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */,
@@ -537,6 +552,11 @@
 				02C3A8942A0FBA7A0044D090 /* Habit.xcdatamodeld in Sources */,
 				02C3A8882A0FBA780044D090 /* HabitApp.swift in Sources */,
 				E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */,
+				E3E9A6F42E3FFF4A00B15958 /* SkillTreeListView.swift in Sources */,
+				E3E9A6F62E3FFF5A00B15958 /* SkillTreeDetailView.swift in Sources */,
+				E3E9A6F82E3FFF6A00B15958 /* EditSkillTreeView.swift in Sources */,
+				E3E9A6FA2E3FFF7A00B15958 /* EditSkillNodeView.swift in Sources */,
+				E3E9A6FC2E3FFF8A00B15958 /* SkillNodeDetailView.swift in Sources */,
 				02C3A8A82A1260220044D090 /* Constants.swift in Sources */,
 				020A5DB02A4887100062C283 /* ChartView.swift in Sources */,
 			);

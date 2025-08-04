@@ -39,7 +39,7 @@
         <attribute name="positionX_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="positionY_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="habit_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Habit" inverseName="skillNodes_" inverseEntity="Habit"/>
-        <relationship name="tree_" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="SkillTree" inverseName="nodes_" inverseEntity="SkillTree"/>
+        <relationship name="tree_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillTree" inverseName="nodes_" inverseEntity="SkillTree"/>
     </entity>
     <entity name="SkillTree" representedClassName="SkillTree" syncable="YES" codeGenerationType="class">
         <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>

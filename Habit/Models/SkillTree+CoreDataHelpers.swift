@@ -80,8 +80,8 @@ extension SkillTree {
         let tree = SkillTree(context: context, name: "Example Skill Tree", description: "A sample skill tree for testing")
         
         // Add some example nodes
-        let node1 = SkillNode(context: context, name: "Learn Swift", type: .standalone)
-        let node2 = SkillNode(context: context, name: "Build iOS App", type: .oneShot)
+        let node1 = SkillNode(context: context, name: "Learn Swift", type: .goal)
+        let node2 = SkillNode(context: context, name: "Build iOS App", type: .activity)
         let node3 = SkillNode(context: context, name: "Daily Practice", type: .habitLinked)
         
         node1.tree = tree

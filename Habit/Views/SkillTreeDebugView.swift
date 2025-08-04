@@ -7,74 +7,85 @@ struct SkillTreeDebugView: View {
     @State private var newTreeDescription = ""
     
     var body: some View {
-        List {
-            Section("Debug Tools") {
-                Button("Print All Entities") {
-                    dataController.debugAllEntities()
-                }
-                
-                Button("Print Skill Trees") {
-                    dataController.debugSkillTrees()
-                }
-                
-                Button("Print Skill Nodes") {
-                    dataController.debugSkillNodes()
-                }
-                
-                Button("Create Test Skill Tree") {
-                    dataController.createTestSkillTree()
-                }
-                
-                Button("Create Custom Tree") {
-                    showingCreateTree = true
-                }
-            }
+        VStack(spacing: 20) {
+            Text("Skill Tree Debug")
+                .font(.title)
+                .fontWeight(.bold)
             
-            Section("Sample Data") {
-                let trees = dataController.getAllSkillTrees()
-                ForEach(trees, id: \.id) { tree in
-                    VStack(alignment: .leading) {
-                        Text(tree.name)
+            ScrollView {
+                VStack(spacing: 16) {
+                    // Debug buttons
+                    VStack(spacing: 12) {
+                        Button("Debug All Entities") {
+                            dataController.debugAllEntities()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                        Button("Debug Skill Trees") {
+                            dataController.debugSkillTrees()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                        Button("Debug Skill Nodes") {
+                            dataController.debugSkillNodes()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                        Button("Debug Core Data State") {
+                            dataController.debugCoreDataState()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    
+                    // Test skill tree creation
+                    VStack(spacing: 12) {
+                        Text("Test Functions")
                             .font(.headline)
-                        Text(tree.description)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        HStack {
-                            Text("\(tree.nodes.count) nodes")
-                            Spacer()
-                            Text("\(Int(tree.completionPercentage * 100))% complete")
-                                .foregroundColor(.green)
+                        
+                        Button("Create Test Skill Tree") {
+                            dataController.createTestSkillTree()
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Create Sample Data") {
+                            do {
+                                try dataController.createSampleData()
+                            } catch {
+                                print("❌ Error creating sample data: \(error)")
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    
+                    // Current state display
+                    VStack(spacing: 12) {
+                        Text("Current State")
+                            .font(.headline)
+                        
+                        let trees = dataController.getAllSkillTrees()
+                        let nodes = dataController.getAllSkillNodes()
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Skill Trees: \(trees.count)")
+                            Text("Skill Nodes: \(nodes.count)")
+                            
+                            if !trees.isEmpty {
+                                Text("Sample Tree: \(trees.first?.name ?? "Unknown")")
+                            }
+                            
+                            if !nodes.isEmpty {
+                                Text("Sample Node: \(nodes.first?.name ?? "Unknown")")
+                            }
                         }
                         .font(.caption)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
                     }
                 }
+                .padding()
             }
         }
-        .navigationTitle("Skill Tree Debug")
-        .sheet(isPresented: $showingCreateTree) {
-            NavigationView {
-                Form {
-                    Section("Tree Details") {
-                        TextField("Tree Name", text: $newTreeName)
-                        TextField("Description", text: $newTreeDescription)
-                    }
-                }
-                .navigationTitle("Create Skill Tree")
-                .navigationBarItems(
-                    leading: Button("Cancel") {
-                        showingCreateTree = false
-                    },
-                    trailing: Button("Create") {
-                        if !newTreeName.isEmpty {
-                            dataController.createSkillTree(name: newTreeName, description: newTreeDescription)
-                            newTreeName = ""
-                            newTreeDescription = ""
-                            showingCreateTree = false
-                        }
-                    }
-                    .disabled(newTreeName.isEmpty)
-                )
-            }
-        }
+        .padding()
     }
 } 

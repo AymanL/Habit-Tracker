@@ -539,24 +539,15 @@ struct HolidaySettingsSection: View {
 
 #if DEBUG
 struct SkillTreeDebugSection: View {
-    @State private var showingDebugView = false
-    
     var body: some View {
         Section {
-            Button {
-                showingDebugView = true
-            } label: {
+            NavigationLink(destination: SkillTreeDebugView()) {
                 Label("Skill Tree Debug", systemImage: "ladybug")
             }
         } header: {
             Text("Development")
         } footer: {
             Text("Debug tools for skill tree development")
-        }
-        .sheet(isPresented: $showingDebugView) {
-            NavigationView {
-                SkillTreeDebugView()
-            }
         }
     }
 }

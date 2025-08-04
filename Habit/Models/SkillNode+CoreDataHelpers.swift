@@ -1,19 +1,59 @@
 import Foundation
 import CoreData
+import SwiftUI
+
+// MARK: - Daily Completion Status
+
+enum DailyCompletionStatus {
+    case completed
+    case completedViaHabit
+    case notCompleted
+    
+    var displayName: String {
+        switch self {
+        case .completed:
+            return "Completed"
+        case .completedViaHabit:
+            return "Completed via Habit"
+        case .notCompleted:
+            return "Not Completed"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .completed, .completedViaHabit:
+            return .green
+        case .notCompleted:
+            return .secondary
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .completed:
+            return "checkmark.circle.fill"
+        case .completedViaHabit:
+            return "checkmark.circle.fill"
+        case .notCompleted:
+            return "circle"
+        }
+    }
+}
 
 // MARK: - Node Type Enum
 
 enum SkillNodeType: String, CaseIterable {
-    case standalone = "standalone"
-    case oneShot = "oneShot"
+    case goal = "goal"
+    case activity = "activity"
     case habitLinked = "habitLinked"
     
     var displayName: String {
         switch self {
-        case .standalone:
-            return "Standalone"
-        case .oneShot:
-            return "One Shot"
+        case .goal:
+            return "Goal"
+        case .activity:
+            return "Activity"
         case .habitLinked:
             return "Habit Linked"
         }
@@ -21,10 +61,10 @@ enum SkillNodeType: String, CaseIterable {
     
     var description: String {
         switch self {
-        case .standalone:
-            return "A simple task that can be completed once"
-        case .oneShot:
-            return "A one-time event that can only be completed once"
+        case .goal:
+            return "A goal that can be achieved once"
+        case .activity:
+            return "An activity that can be completed multiple times"
         case .habitLinked:
             return "Linked to an existing habit for daily tracking"
         }
@@ -77,7 +117,7 @@ extension SkillNode {
     }
     
     var nodeType: SkillNodeType {
-        get { SkillNodeType(rawValue: nodeType_ ?? "standalone") ?? .standalone }
+        get { SkillNodeType(rawValue: nodeType_ ?? "goal") ?? .goal }
         set { nodeType_ = newValue.rawValue }
     }
     
@@ -113,7 +153,7 @@ extension SkillNode {
     
     var canBeCompleted: Bool {
         switch nodeType {
-        case .standalone, .oneShot:
+        case .goal, .activity:
             return !isCompleted
         case .habitLinked:
             return habit != nil && !isCompleted
@@ -161,6 +201,70 @@ extension SkillNode {
         print("✅ Completed SkillNode: \(name)")
     }
     
+    /// Check if the node is completed for today
+    func isCompletedForToday() -> Bool {
+        if isCompleted {
+            return true
+        }
+        
+        // For habit-linked nodes, check if the linked habit is completed for today
+        if nodeType == .habitLinked, let linkedHabit = habit {
+            return linkedHabit.isCompleted(for: Date())
+        }
+        
+        return false
+    }
+    
+    /// Get the daily completion status for habit-linked nodes
+    func getDailyCompletionStatus() -> DailyCompletionStatus {
+        switch nodeType {
+        case .goal, .activity:
+            return isCompleted ? .completed : .notCompleted
+        case .habitLinked:
+            if let linkedHabit = habit {
+                if linkedHabit.isCompleted(for: Date()) {
+                    return .completedViaHabit
+                } else {
+                    return .notCompleted
+                }
+            } else {
+                return .notCompleted
+            }
+        }
+    }
+    
+    /// Mark the node as completed for today (for habit-linked nodes, this syncs with the habit)
+    func completeForToday() {
+        switch nodeType {
+        case .goal, .activity:
+            if !isCompleted {
+                complete()
+            }
+        case .habitLinked:
+            if let linkedHabit = habit {
+                // Complete the linked habit for today
+                linkedHabit.addCompletedDate(Date())
+                print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            }
+        }
+    }
+    
+    /// Uncomplete the node for today (for habit-linked nodes, this syncs with the habit)
+    func uncompleteForToday() {
+        switch nodeType {
+        case .goal, .activity:
+            if isCompleted {
+                isCompleted = false
+            }
+        case .habitLinked:
+            if let linkedHabit = habit {
+                // Uncomplete the linked habit for today
+                linkedHabit.removeCompletedDate(Date())
+                print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            }
+        }
+    }
+    
     func linkToHabit(_ habit: Habit) {
         guard nodeType == .habitLinked else {
             print("⚠️ Cannot link habit to non-habit-linked node: \(name)")
@@ -185,6 +289,6 @@ extension SkillNode {
     
     static var example: SkillNode {
         let context = DataController.preview.container.viewContext
-        return SkillNode(context: context, name: "Example Node", type: .standalone, description: "A sample node for testing")
+        return SkillNode(context: context, name: "Example Node", type: .goal, description: "A sample node for testing")
     }
 } 
