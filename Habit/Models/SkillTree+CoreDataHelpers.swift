@@ -50,6 +50,33 @@ extension SkillTree {
         nodes.count
     }
     
+    // MARK: - Tree Structure
+    
+    var rootNodes: [SkillNode] {
+        return nodes.filter { $0.name == name }.sorted { $0.order < $1.order }
+    }
+    
+    func getNodesAtLevel(_ level: Int) -> [SkillNode] {
+        return nodes.filter { $0.depth == level }.sorted { $0.order < $1.order }
+    }
+    
+    func buildHierarchicalStructure() -> [SkillNode] {
+        var result: [SkillNode] = []
+        
+        func addNodeAndChildren(_ node: SkillNode) {
+            result.append(node)
+            for child in node.childNodes.sorted(by: { $0.order < $1.order }) {
+                addNodeAndChildren(child)
+            }
+        }
+        
+        for rootNode in rootNodes {
+            addNodeAndChildren(rootNode)
+        }
+        
+        return result
+    }
+    
     // MARK: - Initialization
     
     convenience init(context: NSManagedObjectContext, name: String, description: String = "") {

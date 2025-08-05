@@ -18,12 +18,6 @@ struct SkillTreeDetailView: View {
                     selectedNode = node
                     showingNodeDetail = true
                 }
-                
-                // Node list
-                SkillTreeNodesListView(skillTree: skillTree) { node in
-                    selectedNode = node
-                    showingNodeDetail = true
-                }
             }
             .padding()
         }
@@ -114,17 +108,141 @@ struct SkillTreeVisualizationView: View {
     @ObservedObject var skillTree: SkillTree
     let onNodeTap: (SkillNode) -> Void
     
+    var rootNode: SkillNode? {
+        skillTree.nodes.filter { $0.isRootNode }.sorted { $0.order < $1.order }.first
+    }
+    
     var body: some View {
         VStack(spacing: 16) {
             Text("Tree Structure")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            // Simple tree visualization
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                ForEach(skillTree.nodes) { node in
-                    SkillNodeVisualView(node: node) {
-                        onNodeTap(node)
+            // Single root node tree visualization
+            if let root = rootNode {
+                NestedNodeView(node: root, onNodeTap: onNodeTap)
+            } else {
+                Text("No root node found")
+                    .foregroundColor(.secondary)
+                    .padding()
+            }
+        }
+        .padding(.vertical)
+    }
+}
+
+struct NestedNodeView: View {
+    @ObservedObject var node: SkillNode
+    let onNodeTap: (SkillNode) -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Current node
+            SkillNodeVisualView(node: node) {
+                onNodeTap(node)
+            }
+            
+            // Children (if any) - evenly spaced horizontally
+            if node.hasChildren {
+                let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
+                
+                ZStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 20) {
+                            ForEach(sortedChildren, id: \.id) { childNode in
+                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                    .frame(maxHeight: .infinity, alignment: .top)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    
+                    // Scroll indicators - more robust calculation
+                    HStack {
+                        // Left arrow (when can scroll left)
+                        if shouldShowScrollIndicators(for: sortedChildren) {
+                            Image(systemName: "chevron.left")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(8)
+                                .background(Color(.systemBackground).opacity(0.8))
+                                .clipShape(Circle())
+                                .shadow(radius: 2)
+                        }
+                        
+                        Spacer()
+                        
+                        // Right arrow (when can scroll right)
+                        if shouldShowScrollIndicators(for: sortedChildren) {
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(8)
+                                .background(Color(.systemBackground).opacity(0.8))
+                                .clipShape(Circle())
+                                .shadow(radius: 2)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .border(Color.red, width: 2)
+    }
+    
+    // Helper function to determine if scroll indicators should be shown
+    private func shouldShowScrollIndicators(for children: [SkillNode]) -> Bool {
+        // Calculate total visual width needed
+        let estimatedNodeWidth: CGFloat = 120 // Base width for a node
+        let spacing: CGFloat = 20
+        let totalWidthNeeded = CGFloat(children.count) * estimatedNodeWidth + CGFloat(children.count - 1) * spacing
+        
+        // Account for nodes with many descendants (they take more space)
+        let totalDescendants = children.reduce(0) { count, child in
+            count + child.getAllDescendants().count
+        }
+        
+        // If there are many descendants, we likely need scrolling
+        let hasManyDescendants = totalDescendants > children.count * 2
+        
+        // Show indicators if we have many children OR many descendants
+        return children.count > 4 || hasManyDescendants || totalWidthNeeded > 400
+    }
+}
+
+
+
+struct HierarchicalNodeView: View {
+    @ObservedObject var node: SkillNode
+    let onTap: (SkillNode) -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Node with indentation based on depth
+            HStack(spacing: 0) {
+                // Indentation
+                ForEach(0..<node.depth, id: \.self) { _ in
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 20, height: 1)
+                        .padding(.leading, 8)
+                }
+                
+                // Node content
+                SkillNodeVisualView(node: node) {
+                    onTap(node)
+                }
+                .padding(.leading, node.depth > 0 ? 8 : 0)
+                
+                Spacer()
+            }
+            
+            // Children (if any)
+            if node.hasChildren {
+                VStack(spacing: 0) {
+                    ForEach(Array(node.childNodes.sorted(by: { $0.order < $1.order })), id: \.id) { childNode in
+                        HierarchicalNodeView(node: childNode, onTap: onTap)
                     }
                 }
             }
@@ -139,35 +257,30 @@ struct SkillNodeVisualView: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 8) {
+                // Node icon
                 ZStack {
                     let dailyStatus = node.getDailyCompletionStatus()
                     Circle()
                         .fill(dailyStatus == .notCompleted ? Color.blue : Color.green)
-                        .frame(width: 50, height: 50)
+                        .frame(width: 40, height: 40)
                     
                     Image(systemName: nodeTypeIcon)
-                        .font(.title2)
+                        .font(.title3)
                         .foregroundColor(.white)
                 }
                 
+                // Node title
                 Text(node.name)
                     .font(.caption)
                     .fontWeight(.medium)
+                    .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
-                
-                if node.nodeType == .habitLinked {
-                    let dailyStatus = node.getDailyCompletionStatus()
-                    HStack(spacing: 2) {
-                        Image(systemName: dailyStatus.icon)
-                            .font(.caption2)
-                            .foregroundColor(dailyStatus.color)
-                        Text("Today")
-                            .font(.caption2)
-                            .foregroundColor(dailyStatus.color)
-                    }
-                }
             }
+            .frame(width: 80)
+            .padding(.vertical, 8)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
         }
         .buttonStyle(PlainButtonStyle())
     }

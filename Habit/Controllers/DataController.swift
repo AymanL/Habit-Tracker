@@ -123,23 +123,49 @@ class DataController: ObservableObject {
         let programmingTree = SkillTree(context: viewContext, name: "Programming Skills", description: "Learn programming fundamentals")
         let fitnessTree = SkillTree(context: viewContext, name: "Fitness Journey", description: "Build healthy habits")
         
-        // Add nodes to programming tree
+        // Create root nodes for each tree
+        let programmingRoot = SkillNode(context: viewContext, name: "Programming Skills", type: .goal, description: "Root node for Programming Skills")
+        programmingRoot.tree = programmingTree
+        
+        let fitnessRoot = SkillNode(context: viewContext, name: "Fitness Journey", type: .goal, description: "Root node for Fitness Journey")
+        fitnessRoot.tree = fitnessTree
+        
+        // Add nodes to programming tree under root
         let swiftNode = SkillNode(context: viewContext, name: "Learn Swift", type: .goal, description: "Master Swift programming language")
         let iosNode = SkillNode(context: viewContext, name: "Build iOS App", type: .activity, description: "Create your first iOS application")
         let dailyCodeNode = SkillNode(context: viewContext, name: "Daily Coding", type: .habitLinked, description: "Practice coding daily")
+        let advancedSwiftNode = SkillNode(context: viewContext, name: "Advanced Swift", type: .goal, description: "Learn advanced Swift concepts")
+        let uiKitNode = SkillNode(context: viewContext, name: "Learn UIKit", type: .activity, description: "Master iOS UI development")
         
         swiftNode.tree = programmingTree
         iosNode.tree = programmingTree
         dailyCodeNode.tree = programmingTree
+        advancedSwiftNode.tree = programmingTree
+        uiKitNode.tree = programmingTree
         
-        // Add nodes to fitness tree
+        // Set up parent-child relationships under root
+        programmingRoot.addChild(swiftNode) // Swift is child of Programming Skills root
+        swiftNode.addChild(iosNode) // iOS is child of Swift
+        swiftNode.addChild(dailyCodeNode) // Daily Coding is child of Swift
+        swiftNode.addChild(advancedSwiftNode) // Advanced Swift is child of Swift
+        iosNode.addChild(uiKitNode) // UIKit is child of iOS App
+        
+        // Add nodes to fitness tree under root
         let workoutNode = SkillNode(context: viewContext, name: "Start Working Out", type: .goal, description: "Begin your fitness journey")
         let runNode = SkillNode(context: viewContext, name: "Run 5K", type: .activity, description: "Complete a 5K run")
         let dailyExerciseNode = SkillNode(context: viewContext, name: "Daily Exercise", type: .habitLinked, description: "Exercise every day")
+        let strengthNode = SkillNode(context: viewContext, name: "Strength Training", type: .activity, description: "Build muscle and strength")
         
         workoutNode.tree = fitnessTree
         runNode.tree = fitnessTree
         dailyExerciseNode.tree = fitnessTree
+        strengthNode.tree = fitnessTree
+        
+        // Set up parent-child relationships under root
+        fitnessRoot.addChild(workoutNode) // Workout is child of Fitness Journey root
+        workoutNode.addChild(runNode) // Run 5K is child of Workout
+        workoutNode.addChild(dailyExerciseNode) // Daily Exercise is child of Workout
+        workoutNode.addChild(strengthNode) // Strength Training is child of Workout
         
         // Link habit-linked nodes to existing habits
         let habits = try viewContext.fetch(Habit.fetchRequest())
@@ -198,6 +224,10 @@ extension DataController {
     func createSkillTree(name: String, description: String = "", withSampleNodes: Bool = false) -> SkillTree {
         let tree = SkillTree(context: container.viewContext, name: name, description: description)
         
+        // Create the root node with the same name as the tree
+        let rootNode = SkillNode(context: container.viewContext, name: name, type: .goal, description: "Root node for \(name)")
+        rootNode.tree = tree
+        
         if withSampleNodes {
             // Ensure we have some habits to link to
             let existingHabits = getAllHabits()
@@ -213,22 +243,23 @@ extension DataController {
                 save()
             }
             
-            // Add some sample nodes for testing
-            _ = createSkillNode(name: "Learn Basics", type: .goal, description: "Start with the fundamentals", in: tree)
-            _ = createSkillNode(name: "First Milestone", type: .activity, description: "Complete your first major goal", in: tree)
-            let habitNode = createSkillNode(name: "Daily Practice", type: .habitLinked, description: "Link to an existing habit", in: tree)
+            // Add some sample nodes under the root node
+            let basicNode = createSkillNode(name: "Learn Basics", type: .goal, description: "Start with the fundamentals", in: tree)
+            rootNode.addChild(basicNode)
             
-            // Link the habit-linked node to a sample habit
+            let milestoneNode = createSkillNode(name: "First Milestone", type: .activity, description: "Complete your first major goal", in: tree)
+            rootNode.addChild(milestoneNode)
+            
+            let habitNode = createSkillNode(name: "Daily Practice", type: .habitLinked, description: "Link to an existing habit", in: tree)
+            rootNode.addChild(habitNode)
+            
+            // Link habit node to first available habit
             if let firstHabit = habitsToUse.first {
                 habitNode.linkToHabit(firstHabit)
-                print("🔗 Linked 'Daily Practice' node to habit: \(firstHabit.title)")
             }
-            
-            print("📝 Added \(tree.nodes.count) sample nodes to skill tree: \(name)")
         }
         
         save()
-        print("✅ Created skill tree: \(name)")
         return tree
     }
     
@@ -319,6 +350,38 @@ extension DataController {
         
         print("🗑️ Successfully deleted skill node: \(nodeName)")
         print("🗑️ Tree '\(treeName)' should still exist")
+    }
+    
+    // MARK: - Parent-Child Node Management
+    
+    func addChildToParent(child: SkillNode, parent: SkillNode) {
+        parent.addChild(child)
+        save()
+    }
+    
+    func removeChildFromParent(child: SkillNode) {
+        child.parentNode?.removeChild(child)
+        save()
+    }
+    
+    func moveNodeToNewParent(node: SkillNode, newParent: SkillNode?) {
+        // Remove from current parent
+        node.parentNode?.removeChild(node)
+        
+        // Add to new parent (or make root if nil)
+        if let newParent = newParent {
+            newParent.addChild(node)
+        }
+        
+        save()
+    }
+    
+    func createChildNode(name: String, type: SkillNodeType, parent: SkillNode, description: String = "") -> SkillNode {
+        let child = SkillNode(context: container.viewContext, name: name, type: type, description: description)
+        child.tree = parent.tree
+        parent.addChild(child)
+        save()
+        return child
     }
     
     // MARK: - Debug Methods

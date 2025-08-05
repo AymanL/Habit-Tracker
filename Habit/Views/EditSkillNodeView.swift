@@ -8,6 +8,7 @@ struct EditSkillNodeView: View {
     @State private var description = ""
     @State private var nodeType: SkillNodeType = .goal
     @State private var selectedHabit: Habit?
+    @State private var selectedParent: SkillNode?
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
@@ -22,6 +23,7 @@ struct EditSkillNodeView: View {
             _description = State(initialValue: node.nodeDescription)
             _nodeType = State(initialValue: node.nodeType)
             _selectedHabit = State(initialValue: node.habit)
+            _selectedParent = State(initialValue: node.parentNode)
         }
     }
     
@@ -31,6 +33,22 @@ struct EditSkillNodeView: View {
     
     var availableHabits: [Habit] {
         dataController.getAllHabits()
+    }
+    
+    var availableParentNodes: [SkillNode] {
+        let allNodes = skillTree.nodes
+        guard let currentNode = skillNode else {
+            // For new nodes, all nodes are available as parents (including root)
+            return allNodes.sorted { $0.name < $1.name }
+        }
+        
+        // For existing nodes, exclude the current node and all its descendants
+        let descendants = currentNode.getAllDescendants()
+        let excludedNodes = Set([currentNode] + descendants)
+        
+        return allNodes
+            .filter { !excludedNodes.contains($0) } // Don't exclude root nodes
+            .sorted { $0.name < $1.name }
     }
     
     var body: some View {
@@ -66,6 +84,24 @@ struct EditSkillNodeView: View {
                 Text("Node Type")
             } footer: {
                 Text("Choose the type of node based on how it should be completed.")
+            }
+            
+            Section {
+                Picker("Parent Node", selection: $selectedParent) {
+                    ForEach(availableParentNodes) { parentNode in
+                        HStack {
+                            Image(systemName: parentNode.nodeType.icon)
+                                .foregroundColor(.blue)
+                            Text(parentNode.name)
+                        }
+                        .tag(parentNode as SkillNode?)
+                    }
+                }
+                .pickerStyle(.navigationLink)
+            } header: {
+                Text("Parent Node")
+            } footer: {
+                Text("Select a parent node. All nodes must have a parent except the root node.")
             }
             
             if nodeType == .habitLinked {
@@ -166,12 +202,22 @@ struct EditSkillNodeView: View {
             return
         }
         
+        // For new nodes, require a parent
+        if skillNode == nil && selectedParent == nil {
+            alertMessage = "Please select a parent node. All nodes must have a parent."
+            showingAlert = true
+            return
+        }
+        
         do {
             if let existingNode = skillNode {
                 // Update existing node
                 existingNode.name = trimmedName
                 existingNode.nodeDescription = trimmedDescription
                 existingNode.nodeType = nodeType
+                
+                // Handle parent relationship (can change parent, including to root)
+                dataController.moveNodeToNewParent(node: existingNode, newParent: selectedParent)
                 
                 // Handle habit linking
                 if nodeType == .habitLinked {
@@ -186,8 +232,13 @@ struct EditSkillNodeView: View {
                 
                 dataController.save()
             } else {
-                // Create new node
+                // Create new node (parent is required)
                 let newNode = dataController.createSkillNode(name: trimmedName, type: nodeType, description: trimmedDescription, in: skillTree)
+                
+                // Add to selected parent (required)
+                if let selectedParent = selectedParent {
+                    dataController.addChildToParent(child: newNode, parent: selectedParent)
+                }
                 
                 // Handle habit linking for new node
                 if nodeType == .habitLinked, let selectedHabit = selectedHabit {

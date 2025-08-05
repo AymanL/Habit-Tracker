@@ -69,6 +69,17 @@ enum SkillNodeType: String, CaseIterable {
             return "Linked to an existing habit for daily tracking"
         }
     }
+    
+    var icon: String {
+        switch self {
+        case .goal:
+            return "target"
+        case .activity:
+            return "repeat"
+        case .habitLinked:
+            return "link"
+        }
+    }
 }
 
 extension SkillNode {
@@ -119,6 +130,67 @@ extension SkillNode {
     var nodeType: SkillNodeType {
         get { SkillNodeType(rawValue: nodeType_ ?? "goal") ?? .goal }
         set { nodeType_ = newValue.rawValue }
+    }
+    
+    // MARK: - Parent-Child Relationships
+    
+    var parentNode: SkillNode? {
+        get { parentNode_ }
+        set { parentNode_ = newValue }
+    }
+    
+    var childNodes: Set<SkillNode> {
+        get { childNodes_ as? Set<SkillNode> ?? [] }
+        set { childNodes_ = newValue as NSSet }
+    }
+    
+    var isRootNode: Bool {
+        return parentNode == nil
+    }
+    
+    var hasChildren: Bool {
+        return !childNodes.isEmpty
+    }
+    
+    var depth: Int {
+        var current = self
+        var depth = 0
+        while let parent = current.parentNode {
+            depth += 1
+            current = parent
+        }
+        return depth
+    }
+    
+    // MARK: - Tree Structure Methods
+    
+    func addChild(_ child: SkillNode) {
+        child.parentNode = self
+        childNodes.insert(child)
+    }
+    
+    func removeChild(_ child: SkillNode) {
+        childNodes.remove(child)
+        child.parentNode = nil
+    }
+    
+    func getAllDescendants() -> [SkillNode] {
+        var descendants: [SkillNode] = []
+        for child in childNodes {
+            descendants.append(child)
+            descendants.append(contentsOf: child.getAllDescendants())
+        }
+        return descendants
+    }
+    
+    func getAllAncestors() -> [SkillNode] {
+        var ancestors: [SkillNode] = []
+        var current = self
+        while let parent = current.parentNode {
+            ancestors.append(parent)
+            current = parent
+        }
+        return ancestors
     }
     
     var positionX: Double {
