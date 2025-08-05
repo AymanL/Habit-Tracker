@@ -1,95 +1,55 @@
 import SwiftUI
 
 struct EditSkillTreeView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var dataController: DataController
-    @Environment(\.dismiss) private var dismiss
+    
+    let forest: Forest?
     
     @State private var name = ""
     @State private var description = ""
-    @State private var withSampleNodes = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
-    let skillTree: SkillTree?
-    
-    init(skillTree: SkillTree? = nil) {
-        self.skillTree = skillTree
-        if let tree = skillTree {
-            _name = State(initialValue: tree.name)
-            _description = State(initialValue: tree.treeDescription)
-        }
-    }
-    
-    var isEditing: Bool {
-        skillTree != nil
-    }
-    
     var body: some View {
-        Form {
-            Section {
-                TextField("Skill Tree Name", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+        NavigationView {
+            Form {
+                Section(header: Text("Tree Information")) {
+                    TextField("Tree Name", text: $name)
+                    
+                    TextField("Description (Optional)", text: $description, axis: .vertical)
+                        .lineLimit(3...6)
+                }
                 
-                TextField("Description (Optional)", text: $description, axis: .vertical)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .lineLimit(3...6)
-            } header: {
-                Text("Tree Information")
-            } footer: {
-                Text("Give your skill tree a descriptive name and optional description to help you remember its purpose.")
-            }
-            
-            if !isEditing {
-                Section {
-                    Toggle("Add Sample Nodes", isOn: $withSampleNodes)
-                } header: {
-                    Text("Quick Start")
-                } footer: {
-                    Text("Add some example nodes to get started quickly. You can edit or delete them later.")
-                }
-            }
-            
-            if isEditing {
-                Section {
-                    HStack {
-                        Label("Created", systemImage: "calendar")
-                        Spacer()
-                        Text(skillTree?.creationDate.formatted(date: .abbreviated, time: .omitted) ?? "")
+                Section(header: Text("Forest")) {
+                    if let forest = forest {
+                        HStack {
+                            Text("Forest")
+                            Spacer()
+                            Text(forest.name_ ?? "Unnamed Forest")
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        Text("No forest selected")
                             .foregroundColor(.secondary)
                     }
-                    
-                    HStack {
-                        Label("Nodes", systemImage: "circle.grid.2x2")
-                        Spacer()
-                        Text("\(skillTree?.nodes.count ?? 0)")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    HStack {
-                        Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
-                        Spacer()
-                        Text("\(Int((skillTree?.completionPercentage ?? 0) * 100))%")
-                            .foregroundColor(.secondary)
-                    }
-                } header: {
-                    Text("Tree Statistics")
                 }
             }
-        }
-        .navigationTitle(isEditing ? "Edit Skill Tree" : "New Skill Tree")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel") {
-                    dismiss()
+            .navigationTitle("New Skill Tree")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(isEditing ? "Save" : "Create") {
-                    saveSkillTree()
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveTree()
+                    }
+                    .disabled(name.isEmpty)
                 }
-                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .alert("Error", isPresented: $showingAlert) {
@@ -99,35 +59,37 @@ struct EditSkillTreeView: View {
         }
     }
     
-    private func saveSkillTree() {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard !trimmedName.isEmpty else {
-            alertMessage = "Please enter a name for the skill tree."
+    private func saveTree() {
+        guard !name.isEmpty else {
+            alertMessage = "Please enter a tree name"
             showingAlert = true
             return
         }
         
+        let context = dataController.container.viewContext
+        
         do {
-            if let existingTree = skillTree {
-                // Update existing tree
-                existingTree.name = trimmedName
-                existingTree.treeDescription = trimmedDescription
-                dataController.save()
-            } else {
-                // Create new tree
-                _ = dataController.createSkillTree(name: trimmedName, description: trimmedDescription, withSampleNodes: withSampleNodes)
+            let tree = SkillTree(context: context, name: name, description: description)
+            
+            // Associate with forest if provided
+            if let forest = forest {
+                tree.forest = forest
             }
             
+            try context.save()
+            
+            print("✅ Created SkillTree: \(name)")
             dismiss()
+            
+        } catch {
+            alertMessage = "Failed to create tree: \(error.localizedDescription)"
+            showingAlert = true
+            print("❌ Error creating SkillTree: \(error)")
         }
     }
 }
 
 #Preview {
-    NavigationView {
-        EditSkillTreeView()
-    }
-    .environmentObject(DataController.preview)
+    EditSkillTreeView(forest: nil)
+        .environmentObject(DataController.preview)
 } 

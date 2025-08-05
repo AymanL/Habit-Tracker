@@ -34,6 +34,11 @@ extension SkillTree {
         set { nodes_ = NSSet(array: newValue) }
     }
     
+    var forest: Forest? {
+        get { forest_ }
+        set { forest_ = newValue }
+    }
+    
     // MARK: - Computed Properties
     
     var completionPercentage: Double {

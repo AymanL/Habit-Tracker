@@ -40,7 +40,7 @@ struct SkillTreeListView: View {
             })
             .sheet(isPresented: $showingAddSkillTree) {
                 NavigationView {
-                    EditSkillTreeView()
+                    EditSkillTreeView(forest: nil)
                 }
             }
             .overlay {

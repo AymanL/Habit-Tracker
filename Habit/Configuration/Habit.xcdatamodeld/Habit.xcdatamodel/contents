@@ -43,12 +43,21 @@
         <relationship name="parentNode_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillNode" inverseName="childNodes_" inverseEntity="SkillNode"/>
         <relationship name="tree_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillTree" inverseName="nodes_" inverseEntity="SkillTree"/>
     </entity>
+    <entity name="Forest" representedClassName="Forest" syncable="YES" codeGenerationType="class">
+        <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="description_" optional="YES" attributeType="String"/>
+        <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name_" optional="YES" attributeType="String"/>
+        <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="trees_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillTree" inverseName="forest_" inverseEntity="SkillTree"/>
+    </entity>
     <entity name="SkillTree" representedClassName="SkillTree" syncable="YES" codeGenerationType="class">
         <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="description_" optional="YES" attributeType="String"/>
         <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name_" optional="YES" attributeType="String"/>
         <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="forest_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Forest" inverseName="trees_" inverseEntity="Forest"/>
         <relationship name="nodes_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillNode" inverseName="tree_" inverseEntity="SkillNode"/>
     </entity>
 </model>

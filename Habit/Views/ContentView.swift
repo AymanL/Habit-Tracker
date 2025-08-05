@@ -136,7 +136,9 @@ struct HabitsView: View {
                 }
             }
             .sheet(isPresented: $showingAddHabit) {
-                EditHabitView()
+                NavigationView {
+                    EditHabitView()
+                }
             }
             .sheet(isPresented: $showingCategories) {
                 CategoryListView()
