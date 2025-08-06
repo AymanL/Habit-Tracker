@@ -8,11 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		02089EBD2A626390003DB055 /* CustomErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02089EBC2A626390003DB055 /* CustomErrors.swift */; };
-		02089EC92A66D4A1003DB055 /* TipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02089EC82A66D4A1003DB055 /* TipView.swift */; };
-		020A5DB02A4887100062C283 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020A5DAF2A4887100062C283 /* ChartView.swift */; };
-		0224D8D72A1614B90067B559 /* ColorsPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0224D8D62A1614B90067B559 /* ColorsPickerView.swift */; };
-		0224D8D92A17964A0067B559 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0224D8D82A1796490067B559 /* EditHabitView.swift */; };
-		0224D8DB2A17D6FF0067B559 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0224D8DA2A17D6FF0067B559 /* HeaderView.swift */; };
 		0257EED32A7EBB8100A787D6 /* HapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0257EED22A7EBB8100A787D6 /* HapticController.swift */; };
 		0261399D2A8BCF76003D6711 /* DateExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0261399C2A8BCF76003D6711 /* DateExtensionTests.swift */; };
 		0261399F2A8CB4EF003D6711 /* HabitUtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0261399E2A8CB4EF003D6711 /* HabitUtilsTests.swift */; };
@@ -20,11 +15,7 @@
 		0269BE7E2A8A860500059457 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 0269BE802A8A860500059457 /* Localizable.stringsdict */; };
 		026E1CAB2A24B58900B882C1 /* HabitUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 026E1CAA2A24B58900B882C1 /* HabitUITests.swift */; };
 		026E1CAD2A24B58900B882C1 /* HabitUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 026E1CAC2A24B58900B882C1 /* HabitUITestsLaunchTests.swift */; };
-		0282C6B72A6825EC00356786 /* SortMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0282C6B62A6825EC00356786 /* SortMenuView.swift */; };
-		0282C6B92A6AE52E00356786 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0282C6B82A6AE52E00356786 /* CalendarView.swift */; };
-		0282C6BB2A6AE7B300356786 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0282C6BA2A6AE7B300356786 /* DetailView.swift */; };
 		02C39F962A73BF9500550CA1 /* Habit+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C39F952A73BF9500550CA1 /* Habit+Utils.swift */; };
-		02C39F9E2A765EDF00550CA1 /* HabitListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C39F9D2A765EDF00550CA1 /* HabitListView.swift */; };
 		02C39FA22A768B1F00550CA1 /* View+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C39FA12A768B1F00550CA1 /* View+Ext.swift */; };
 		02C3A8882A0FBA780044D090 /* HabitApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8872A0FBA780044D090 /* HabitApp.swift */; };
 		02C3A88A2A0FBA780044D090 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8892A0FBA780044D090 /* ContentView.swift */; };
@@ -33,7 +24,6 @@
 		02C3A8912A0FBA7A0044D090 /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8902A0FBA7A0044D090 /* DataController.swift */; };
 		02C3A8942A0FBA7A0044D090 /* Habit.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8922A0FBA7A0044D090 /* Habit.xcdatamodeld */; };
 		02C3A89B2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A89A2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift */; };
-		02C3A89D2A1218A50044D090 /* HabitRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A89C2A1218A50044D090 /* HabitRowView.swift */; };
 		02C3A8A62A125CA10044D090 /* HabitColors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02C3A8A52A125CA10044D090 /* HabitColors.xcassets */; };
 		02C3A8A82A1260220044D090 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C3A8A72A1260220044D090 /* Constants.swift */; };
 		02C6B7CA2A1B8B67003FAC61 /* HabitColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C6B7C92A1B8B67003FAC61 /* HabitColor.swift */; };
@@ -45,24 +35,36 @@
 		02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EC2FBE2A20E5730004DA4B /* DevelopmentTests.swift */; };
 		02FD36682A4F32A70023AB38 /* ShortcutsHabitEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36672A4F32A70023AB38 /* ShortcutsHabitEntity.swift */; };
 		02FD366A2A4F33080023AB38 /* CompleteHabitIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FD36692A4F33080023AB38 /* CompleteHabitIntent.swift */; };
-		E326B14F2DCE5B1E007D351A /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E326B14E2DCE5B1E007D351A /* CategoryListView.swift */; };
-		E326B1512DCE5B88007D351A /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E326B1502DCE5B88007D351A /* EditCategoryView.swift */; };
-		E3E9A6DF2E3FB3A200B15958 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */; };
-		E3E9A6E02E3FB3A200B15958 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */; };
-		E3E9A6E52E3FBB5200B15958 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */; };
-		E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */; };
-		E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */; };
-		E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */; };
 		E3E9A6EA2E3FDF9700B15958 /* HolidayRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */; };
 		E3E9A6EC2E3FFF0800B15958 /* SkillTreeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */; };
-		E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */; };
 		E3E9A6F02E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */; };
 		E3E9A6F22E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */; };
-		E3E9A6F42E3FFF4A00B15958 /* SkillTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */; };
-		E3E9A6F62E3FFF5A00B15958 /* SkillTreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */; };
-		E3E9A6F82E3FFF6A00B15958 /* EditSkillTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */; };
-		E3E9A6FA2E3FFF7A00B15958 /* EditSkillNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */; };
-		E3E9A6FC2E3FFF8A00B15958 /* SkillNodeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */; };
+		E3E9A7142E42D35E00B15958 /* TipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FE2E42D35E00B15958 /* TipView.swift */; };
+		E3E9A7152E42D35E00B15958 /* SkillTreeDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */; };
+		E3E9A7162E42D35E00B15958 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7092E42D35E00B15958 /* SettingsView.swift */; };
+		E3E9A7172E42D35E00B15958 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FB2E42D35E00B15958 /* OverviewView.swift */; };
+		E3E9A7182E42D35E00B15958 /* EditDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7032E42D35E00B15958 /* EditDurationView.swift */; };
+		E3E9A7192E42D35E00B15958 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7042E42D35E00B15958 /* EditHabitView.swift */; };
+		E3E9A71A2E42D35E00B15958 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FC2E42D35E00B15958 /* ShareSheet.swift */; };
+		E3E9A71B2E42D35E00B15958 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F42E42D35E00B15958 /* EditCategoryView.swift */; };
+		E3E9A71C2E42D35E00B15958 /* HabitListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7052E42D35E00B15958 /* HabitListView.swift */; };
+		E3E9A71D2E42D35E00B15958 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FA2E42D35E00B15958 /* HeaderView.swift */; };
+		E3E9A71E2E42D35E00B15958 /* EditSkillTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70E2E42D35E00B15958 /* EditSkillTreeView.swift */; };
+		E3E9A71F2E42D35E00B15958 /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F92E42D35E00B15958 /* DatePickerView.swift */; };
+		E3E9A7202E42D35E00B15958 /* SkillNodeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70C2E42D35E00B15958 /* SkillNodeDetailView.swift */; };
+		E3E9A7212E42D35E00B15958 /* ColorsPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F82E42D35E00B15958 /* ColorsPickerView.swift */; };
+		E3E9A7222E42D35E00B15958 /* HabitRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7062E42D35E00B15958 /* HabitRowView.swift */; };
+		E3E9A7232E42D35E00B15958 /* SkillTreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */; };
+		E3E9A7242E42D35E00B15958 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7022E42D35E00B15958 /* DetailView.swift */; };
+		E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F32E42D35E00B15958 /* CategoryListView.swift */; };
+		E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F72E42D35E00B15958 /* ChartView.swift */; };
+		E3E9A7272E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */; };
+		E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */; };
+		E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */; };
+		E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */; };
+		E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */; };
+		E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F62E42D35E00B15958 /* CalendarView.swift */; };
+		E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,13 +99,8 @@
 
 /* Begin PBXFileReference section */
 		02089EBC2A626390003DB055 /* CustomErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomErrors.swift; sourceTree = "<group>"; };
-		02089EC82A66D4A1003DB055 /* TipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipView.swift; sourceTree = "<group>"; };
-		020A5DAF2A4887100062C283 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		0220B20B2A97900200C29248 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		0220B20D2A97A7B000C29248 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		0224D8D62A1614B90067B559 /* ColorsPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorsPickerView.swift; sourceTree = "<group>"; };
-		0224D8D82A1796490067B559 /* EditHabitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
-		0224D8DA2A17D6FF0067B559 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		0257EED22A7EBB8100A787D6 /* HapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticController.swift; sourceTree = "<group>"; };
 		0261399C2A8BCF76003D6711 /* DateExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensionTests.swift; sourceTree = "<group>"; };
 		0261399E2A8CB4EF003D6711 /* HabitUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitUtilsTests.swift; sourceTree = "<group>"; };
@@ -114,11 +111,7 @@
 		026E1CA82A24B58900B882C1 /* HabitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HabitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		026E1CAA2A24B58900B882C1 /* HabitUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitUITests.swift; sourceTree = "<group>"; };
 		026E1CAC2A24B58900B882C1 /* HabitUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		0282C6B62A6825EC00356786 /* SortMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortMenuView.swift; sourceTree = "<group>"; };
-		0282C6B82A6AE52E00356786 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		0282C6BA2A6AE7B300356786 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		02C39F952A73BF9500550CA1 /* Habit+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Habit+Utils.swift"; sourceTree = "<group>"; };
-		02C39F9D2A765EDF00550CA1 /* HabitListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitListView.swift; sourceTree = "<group>"; };
 		02C39FA12A768B1F00550CA1 /* View+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Ext.swift"; sourceTree = "<group>"; };
 		02C3A8842A0FBA780044D090 /* Habit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Habit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02C3A8872A0FBA780044D090 /* HabitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitApp.swift; sourceTree = "<group>"; };
@@ -128,7 +121,6 @@
 		02C3A8902A0FBA7A0044D090 /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
 		02C3A8932A0FBA7A0044D090 /* Habit.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Habit.xcdatamodel; sourceTree = "<group>"; };
 		02C3A89A2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Habit+CoreDataHelpers.swift"; sourceTree = "<group>"; };
-		02C3A89C2A1218A50044D090 /* HabitRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowView.swift; sourceTree = "<group>"; };
 		02C3A8A52A125CA10044D090 /* HabitColors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = HabitColors.xcassets; sourceTree = "<group>"; };
 		02C3A8A72A1260220044D090 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		02C6B7C92A1B8B67003FAC61 /* HabitColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitColor.swift; sourceTree = "<group>"; };
@@ -148,25 +140,37 @@
 		CD606A262CA1CCEE00544BAE /* HabitDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitDebug.entitlements; sourceTree = "<group>"; };
 		CD606A272CA1CD1900544BAE /* HabitWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		E326B14C2DCCA9B0007D351A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E326B14E2DCE5B1E007D351A /* CategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListView.swift; sourceTree = "<group>"; };
-		E326B1502DCE5B88007D351A /* EditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCategoryView.swift; sourceTree = "<group>"; };
 		E334A4682DC56ECB00AA1092 /* Habit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habit.entitlements; sourceTree = "<group>"; };
-		E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
-		E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerView.swift; sourceTree = "<group>"; };
-		E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
-		E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
-		E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastHabitEditorView.swift; sourceTree = "<group>"; };
 		E3E9A6E92E3FDF9700B15958 /* HolidayRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRange.swift; sourceTree = "<group>"; };
 		E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeTests.swift; sourceTree = "<group>"; };
-		E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
 		E3E9A6EF2E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillNode+CoreDataHelpers.swift"; sourceTree = "<group>"; };
 		E3E9A6F12E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkillTree+CoreDataHelpers.swift"; sourceTree = "<group>"; };
-		E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
-		E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDetailView.swift; sourceTree = "<group>"; };
-		E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillTreeView.swift; sourceTree = "<group>"; };
-		E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillNodeView.swift; sourceTree = "<group>"; };
-		E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeDetailView.swift; sourceTree = "<group>"; };
+		E3E9A6F32E42D35E00B15958 /* CategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListView.swift; sourceTree = "<group>"; };
+		E3E9A6F42E42D35E00B15958 /* EditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCategoryView.swift; sourceTree = "<group>"; };
+		E3E9A6F62E42D35E00B15958 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		E3E9A6F72E42D35E00B15958 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
+		E3E9A6F82E42D35E00B15958 /* ColorsPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorsPickerView.swift; sourceTree = "<group>"; };
+		E3E9A6F92E42D35E00B15958 /* DatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerView.swift; sourceTree = "<group>"; };
+		E3E9A6FA2E42D35E00B15958 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
+		E3E9A6FB2E42D35E00B15958 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		E3E9A6FC2E42D35E00B15958 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortMenuView.swift; sourceTree = "<group>"; };
+		E3E9A6FE2E42D35E00B15958 /* TipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipView.swift; sourceTree = "<group>"; };
+		E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestDetailView.swift; sourceTree = "<group>"; };
+		E3E9A7022E42D35E00B15958 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		E3E9A7032E42D35E00B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
+		E3E9A7042E42D35E00B15958 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
+		E3E9A7052E42D35E00B15958 /* HabitListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitListView.swift; sourceTree = "<group>"; };
+		E3E9A7062E42D35E00B15958 /* HabitRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowView.swift; sourceTree = "<group>"; };
+		E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastHabitEditorView.swift; sourceTree = "<group>"; };
+		E3E9A7092E42D35E00B15958 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillNodeView.swift; sourceTree = "<group>"; };
+		E3E9A70C2E42D35E00B15958 /* SkillNodeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeDetailView.swift; sourceTree = "<group>"; };
+		E3E9A70E2E42D35E00B15958 /* EditSkillTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillTreeView.swift; sourceTree = "<group>"; };
+		E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeCoreGraphicsView.swift; sourceTree = "<group>"; };
+		E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
+		E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDetailView.swift; sourceTree = "<group>"; };
+		E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,31 +215,14 @@
 		0224D8D52A13A3510067B559 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				E3E9A6ED2E3FFF1400B15958 /* SkillTreeDebugView.swift */,
-				E3E9A6F32E3FFF4A00B15958 /* SkillTreeListView.swift */,
-				E3E9A6F52E3FFF5A00B15958 /* SkillTreeDetailView.swift */,
-				E3E9A6F72E3FFF6A00B15958 /* EditSkillTreeView.swift */,
-				E3E9A6F92E3FFF7A00B15958 /* EditSkillNodeView.swift */,
-				E3E9A6FB2E3FFF8A00B15958 /* SkillNodeDetailView.swift */,
-				E3E9A6E12E3FBB5200B15958 /* DatePickerView.swift */,
-				E3E9A6E22E3FBB5200B15958 /* EditDurationView.swift */,
-				E3E9A6E32E3FBB5200B15958 /* OverviewView.swift */,
-				E3E9A6E42E3FBB5200B15958 /* PastHabitEditorView.swift */,
-				E3E9A6DD2E3FB3A200B15958 /* SettingsView.swift */,
-				E3E9A6DE2E3FB3A200B15958 /* ShareSheet.swift */,
-				E326B1502DCE5B88007D351A /* EditCategoryView.swift */,
-				E326B14E2DCE5B1E007D351A /* CategoryListView.swift */,
+				E3E9A6F52E42D35E00B15958 /* Categories */,
+				E3E9A6FF2E42D35E00B15958 /* Common */,
+				E3E9A7012E42D35E00B15958 /* Forests */,
+				E3E9A7082E42D35E00B15958 /* Habits */,
+				E3E9A70A2E42D35E00B15958 /* Settings */,
+				E3E9A70D2E42D35E00B15958 /* SkillNodes */,
+				E3E9A7132E42D35E00B15958 /* SkillTrees */,
 				02C3A8892A0FBA780044D090 /* ContentView.swift */,
-				02C39F9D2A765EDF00550CA1 /* HabitListView.swift */,
-				0224D8DA2A17D6FF0067B559 /* HeaderView.swift */,
-				02C3A89C2A1218A50044D090 /* HabitRowView.swift */,
-				0282C6BA2A6AE7B300356786 /* DetailView.swift */,
-				0282C6B82A6AE52E00356786 /* CalendarView.swift */,
-				020A5DAF2A4887100062C283 /* ChartView.swift */,
-				0224D8D82A1796490067B559 /* EditHabitView.swift */,
-				0224D8D62A1614B90067B559 /* ColorsPickerView.swift */,
-				02089EC82A66D4A1003DB055 /* TipView.swift */,
-				0282C6B62A6825EC00356786 /* SortMenuView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -371,6 +358,81 @@
 				CD606A0A2CA1C75200544BAE /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E3E9A6F52E42D35E00B15958 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A6F32E42D35E00B15958 /* CategoryListView.swift */,
+				E3E9A6F42E42D35E00B15958 /* EditCategoryView.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		E3E9A6FF2E42D35E00B15958 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A6F62E42D35E00B15958 /* CalendarView.swift */,
+				E3E9A6F72E42D35E00B15958 /* ChartView.swift */,
+				E3E9A6F82E42D35E00B15958 /* ColorsPickerView.swift */,
+				E3E9A6F92E42D35E00B15958 /* DatePickerView.swift */,
+				E3E9A6FA2E42D35E00B15958 /* HeaderView.swift */,
+				E3E9A6FB2E42D35E00B15958 /* OverviewView.swift */,
+				E3E9A6FC2E42D35E00B15958 /* ShareSheet.swift */,
+				E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */,
+				E3E9A6FE2E42D35E00B15958 /* TipView.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		E3E9A7012E42D35E00B15958 /* Forests */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */,
+			);
+			path = Forests;
+			sourceTree = "<group>";
+		};
+		E3E9A7082E42D35E00B15958 /* Habits */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A7022E42D35E00B15958 /* DetailView.swift */,
+				E3E9A7032E42D35E00B15958 /* EditDurationView.swift */,
+				E3E9A7042E42D35E00B15958 /* EditHabitView.swift */,
+				E3E9A7052E42D35E00B15958 /* HabitListView.swift */,
+				E3E9A7062E42D35E00B15958 /* HabitRowView.swift */,
+				E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */,
+			);
+			path = Habits;
+			sourceTree = "<group>";
+		};
+		E3E9A70A2E42D35E00B15958 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A7092E42D35E00B15958 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		E3E9A70D2E42D35E00B15958 /* SkillNodes */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */,
+				E3E9A70C2E42D35E00B15958 /* SkillNodeDetailView.swift */,
+			);
+			path = SkillNodes;
+			sourceTree = "<group>";
+		};
+		E3E9A7132E42D35E00B15958 /* SkillTrees */ = {
+			isa = PBXGroup;
+			children = (
+				E3E9A70E2E42D35E00B15958 /* EditSkillTreeView.swift */,
+				E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */,
+				E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */,
+				E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */,
+				E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */,
+			);
+			path = SkillTrees;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -518,47 +580,49 @@
 			buildActionMask = 2147483647;
 			files = (
 				02C39F962A73BF9500550CA1 /* Habit+Utils.swift in Sources */,
-				0224D8D72A1614B90067B559 /* ColorsPickerView.swift in Sources */,
 				02DAD6C22A4D772600F2DA14 /* Color+Ext.swift in Sources */,
 				02C6B7CA2A1B8B67003FAC61 /* HabitColor.swift in Sources */,
-				E3E9A6DF2E3FB3A200B15958 /* SettingsView.swift in Sources */,
-				E3E9A6E02E3FB3A200B15958 /* ShareSheet.swift in Sources */,
 				02DAD6C02A4C42FC00F2DA14 /* Date+Ext.swift in Sources */,
 				02FD36682A4F32A70023AB38 /* ShortcutsHabitEntity.swift in Sources */,
 				02C3A8912A0FBA7A0044D090 /* DataController.swift in Sources */,
-				E3E9A6E52E3FBB5200B15958 /* OverviewView.swift in Sources */,
-				E3E9A6E62E3FBB5200B15958 /* DatePickerView.swift in Sources */,
-				E3E9A6E72E3FBB5200B15958 /* EditDurationView.swift in Sources */,
+				E3E9A7142E42D35E00B15958 /* TipView.swift in Sources */,
+				E3E9A7152E42D35E00B15958 /* SkillTreeDebugView.swift in Sources */,
+				E3E9A7162E42D35E00B15958 /* SettingsView.swift in Sources */,
+				E3E9A7172E42D35E00B15958 /* OverviewView.swift in Sources */,
+				E3E9A7182E42D35E00B15958 /* EditDurationView.swift in Sources */,
+				E3E9A7192E42D35E00B15958 /* EditHabitView.swift in Sources */,
+				E3E9A71A2E42D35E00B15958 /* ShareSheet.swift in Sources */,
+				E3E9A71B2E42D35E00B15958 /* EditCategoryView.swift in Sources */,
+				E3E9A71C2E42D35E00B15958 /* HabitListView.swift in Sources */,
+				E3E9A71D2E42D35E00B15958 /* HeaderView.swift in Sources */,
+				E3E9A71E2E42D35E00B15958 /* EditSkillTreeView.swift in Sources */,
+				E3E9A71F2E42D35E00B15958 /* DatePickerView.swift in Sources */,
+				E3E9A7202E42D35E00B15958 /* SkillNodeDetailView.swift in Sources */,
+				E3E9A7212E42D35E00B15958 /* ColorsPickerView.swift in Sources */,
+				E3E9A7222E42D35E00B15958 /* HabitRowView.swift in Sources */,
+				E3E9A7232E42D35E00B15958 /* SkillTreeDetailView.swift in Sources */,
+				E3E9A7242E42D35E00B15958 /* DetailView.swift in Sources */,
+				E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */,
+				E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */,
+				E3E9A7272E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift in Sources */,
+				E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */,
+				E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */,
+				E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */,
+				E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */,
+				E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */,
+				E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */,
 				E3E9A6F02E3FFF2A00B15958 /* SkillNode+CoreDataHelpers.swift in Sources */,
-				E3E9A6E82E3FBB5200B15958 /* PastHabitEditorView.swift in Sources */,
 				E3E9A6F22E3FFF3A00B15958 /* SkillTree+CoreDataHelpers.swift in Sources */,
-				0224D8D92A17964A0067B559 /* EditHabitView.swift in Sources */,
 				02C39FA22A768B1F00550CA1 /* View+Ext.swift in Sources */,
 				02089EBD2A626390003DB055 /* CustomErrors.swift in Sources */,
-				02089EC92A66D4A1003DB055 /* TipView.swift in Sources */,
-				0282C6B72A6825EC00356786 /* SortMenuView.swift in Sources */,
-				0282C6BB2A6AE7B300356786 /* DetailView.swift in Sources */,
-				0282C6B92A6AE52E00356786 /* CalendarView.swift in Sources */,
 				0257EED32A7EBB8100A787D6 /* HapticController.swift in Sources */,
 				02FD366A2A4F33080023AB38 /* CompleteHabitIntent.swift in Sources */,
 				02C3A88A2A0FBA780044D090 /* ContentView.swift in Sources */,
-				02C39F9E2A765EDF00550CA1 /* HabitListView.swift in Sources */,
-				E326B14F2DCE5B1E007D351A /* CategoryListView.swift in Sources */,
-				E326B1512DCE5B88007D351A /* EditCategoryView.swift in Sources */,
 				E3E9A6EA2E3FDF9700B15958 /* HolidayRange.swift in Sources */,
-				02C3A89D2A1218A50044D090 /* HabitRowView.swift in Sources */,
-				0224D8DB2A17D6FF0067B559 /* HeaderView.swift in Sources */,
 				02C3A89B2A0FE57E0044D090 /* Habit+CoreDataHelpers.swift in Sources */,
 				02C3A8942A0FBA7A0044D090 /* Habit.xcdatamodeld in Sources */,
 				02C3A8882A0FBA780044D090 /* HabitApp.swift in Sources */,
-				E3E9A6EE2E3FFF1400B15958 /* SkillTreeDebugView.swift in Sources */,
-				E3E9A6F42E3FFF4A00B15958 /* SkillTreeListView.swift in Sources */,
-				E3E9A6F62E3FFF5A00B15958 /* SkillTreeDetailView.swift in Sources */,
-				E3E9A6F82E3FFF6A00B15958 /* EditSkillTreeView.swift in Sources */,
-				E3E9A6FA2E3FFF7A00B15958 /* EditSkillNodeView.swift in Sources */,
-				E3E9A6FC2E3FFF8A00B15958 /* SkillNodeDetailView.swift in Sources */,
 				02C3A8A82A1260220044D090 /* Constants.swift in Sources */,
-				020A5DB02A4887100062C283 /* ChartView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
