@@ -16,7 +16,7 @@ struct SkillNodeVisualView: View {
                     let dailyStatus = node.getDailyCompletionStatus()
                     Circle()
                         .fill(dailyStatus == .notCompleted ? Color.blue : Color.green)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 30, height: 30)
                     
                     Image(systemName: nodeTypeIcon)
                         .font(.title3)
@@ -31,12 +31,13 @@ struct SkillNodeVisualView: View {
                     .lineLimit(2)
                     .frame(maxWidth: 100)
             }
-            .padding(8)
+            .padding(2)
             .background(Color(.systemBackground))
             .cornerRadius(8)
             .shadow(radius: 2)
         }
         .buttonStyle(PlainButtonStyle())
+        .frame(maxWidth: 50)
     }
 }
 

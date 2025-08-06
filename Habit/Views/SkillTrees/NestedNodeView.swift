@@ -58,13 +58,13 @@ struct NestedNodeView: View {
                 
                 ZStack {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
+                        HStack(spacing: 5) {
                             ForEach(sortedChildren, id: \.id) { childNode in
                                 NestedNodeView(node: childNode, onNodeTap: onNodeTap)
                                     .frame(maxHeight: .infinity, alignment: .top)
                             }
                         }
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 300)
                         .frame(
                             minWidth: max(
                                 UIScreen.main.bounds.width - 40, // Account for padding
