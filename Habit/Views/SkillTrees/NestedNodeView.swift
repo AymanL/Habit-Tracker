@@ -9,7 +9,7 @@ struct NestedNodeView: View {
     @State private var nodeFrame: CGRect = .zero
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack() {
             // Current node
             SkillNodeVisualView(node: node) {
                 onNodeTap(node)
@@ -25,29 +25,29 @@ struct NestedNodeView: View {
                         }
                 }
             )
-            .overlay(
-                // Debug overlay - shows node info on long press
-                Group {
-                    if showDebugInfo {
-                        VStack(spacing: 2) {
-                            Text("Node: \(node.name)")
-                                .font(.caption)
-                                .padding(4)
-                                .background(Color.black.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(4)
-                            
-                            Text("Size: \(Int(nodeFrame.width))×\(Int(nodeFrame.height))")
-                                .font(.caption2)
-                                .padding(2)
-                                .background(Color.green.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(2)
-                        }
-                        .position(x: 80, y: 30)
-                    }
-                }
-            )
+//            .overlay(
+//                // Debug overlay - shows node info on long press
+//                Group {
+//                    if showDebugInfo {
+//                        VStack() {
+//                            Text("Node: \(node.name)")
+//                                .font(.caption)
+//                                .padding(4)
+//                                .background(Color.black.opacity(0.8))
+//                                .foregroundColor(.white)
+//                                .cornerRadius(4)
+//                            
+//                            Text("Size: \(Int(nodeFrame.width))×\(Int(nodeFrame.height))")
+//                                .font(.caption2)
+//                                .padding(2)
+//                                .background(Color.green.opacity(0.8))
+//                                .foregroundColor(.white)
+//                                .cornerRadius(2)
+//                        }
+//                        .position(x: 80, y: 30)
+//                    }
+//                }
+//            )
             .onLongPressGesture {
                 showDebugInfo.toggle()
             }
@@ -57,50 +57,19 @@ struct NestedNodeView: View {
                 let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
                 
                 ZStack {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 5) {
-                            ForEach(sortedChildren, id: \.id) { childNode in
-                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
-                                    .frame(maxHeight: .infinity, alignment: .top)
-                            }
-                        }
-                        .frame(maxWidth: 300)
-                        .frame(
-                            minWidth: max(
-                                UIScreen.main.bounds.width - 40, // Account for padding
-                                CGFloat(sortedChildren.count) * 100 + CGFloat(sortedChildren.count - 1) * 10 // Reasonable minimum space for nodes
-                            ),
-                            alignment: sortedChildren.count == 1 ? .center : .leading
-                        )
-                    }
-                    
-                    // Scroll indicators - more robust calculation
-                    HStack {
-                        // Left arrow (when can scroll left)
-                        if shouldShowScrollIndicators(for: sortedChildren) {
-                            Image(systemName: "chevron.left")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(8)
-                                .background(Color(.systemBackground).opacity(0.8))
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
-                        }
-                        
-                        Spacer()
-                        
-                        // Right arrow (when can scroll right)
-                        if shouldShowScrollIndicators(for: sortedChildren) {
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(8)
-                                .background(Color(.systemBackground).opacity(0.8))
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
+                    HStack(spacing: 0) {
+                        ForEach(sortedChildren, id: \.id) { childNode in
+                            NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                .frame(maxHeight: .infinity, alignment: .top)
                         }
                     }
-                    .padding(.horizontal, 8)
+                    .frame(
+                        // minWidth: max(
+                        //     UIScreen.main.bounds.width,
+                        //     CGFloat(sortedChildren.count) * 100 + CGFloat(sortedChildren.count - 1) * 10 // Reasonable minimum space for nodes
+                        // ),
+                        alignment: sortedChildren.count == 1 ? .center : .leading
+                    )
                 }
             }
         }
@@ -118,45 +87,45 @@ struct NestedNodeView: View {
                     }
             }
         )
-        .overlay(
-            // Debug info overlay
-            VStack {
-                HStack {
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Children: \(node.childNodes.count)")
-                            .font(.caption2)
-                            .padding(2)
-                            .background(Color.orange.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(2)
+        // .overlay(
+        //     // Debug info overlay
+        //     VStack {
+        //         HStack {
+        //             Spacer()
+        //             VStack(alignment: .trailing, spacing: 2) {
+        //                 Text("Children: \(node.childNodes.count)")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.orange.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
                         
-                        Text("Depth: \(node.depth)")
-                            .font(.caption2)
-                            .padding(2)
-                            .background(Color.purple.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(2)
-                    }
-                }
+        //                 Text("Depth: \(node.depth)")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.purple.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
+        //             }
+        //         }
                 
-                Spacer()
+        //         Spacer()
                 
-                // Bounding box dimensions
-                HStack {
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("📐 Bounding Box")
-                            .font(.caption2)
-                            .padding(2)
-                            .background(Color.red.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(2)
-                    }
-                }
-            }
-            .padding(4)
-        )
+        //         // Bounding box dimensions
+        //         HStack {
+        //             Spacer()
+        //             VStack(alignment: .trailing, spacing: 2) {
+        //                 Text("📐 Bounding Box")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.red.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
+        //             }
+        //         }
+        //     }
+        //     .padding(4)
+        // )
     }
     
     // Helper function to determine if scroll indicators should be shown

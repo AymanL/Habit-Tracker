@@ -361,6 +361,20 @@ extension SkillNode {
     
     static var example: SkillNode {
         let context = DataController.preview.container.viewContext
-        return SkillNode(context: context, name: "Example Node", type: .goal, description: "A sample node for testing")
+        
+        // Create root node
+        let rootNode = SkillNode(context: context, name: "Example Root", type: .goal, description: "A sample root node for testing")
+        
+        // Create first child
+        let child1 = SkillNode(context: context, name: "Child 1", type: .activity, description: "First child node")
+        child1.parentNode = rootNode
+        child1.order = 1
+        
+        // Create second child
+        let child2 = SkillNode(context: context, name: "Child 2", type: .activity, description: "Second child node")
+        child2.parentNode = rootNode
+        child2.order = 2
+        
+        return rootNode
     }
 } 
