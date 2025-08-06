@@ -158,6 +158,8 @@ struct SkillNodeDetailView: View {
                     Button(role: .destructive, action: { showingDeleteAlert = true }) {
                         Label("Delete Node", systemImage: "trash")
                     }
+                    .disabled(skillNode.isRootNode)
+                    .opacity(skillNode.isRootNode ? 0.5 : 1.0)
                     
                     #if DEBUG
                     Button(action: refreshDebugInfo) {
@@ -179,7 +181,11 @@ struct SkillNodeDetailView: View {
                 deleteNode()
             }
         } message: {
-            Text("Are you sure you want to delete this node? This action cannot be undone.")
+            if skillNode.isRootNode {
+                Text("Root nodes cannot be deleted as they are the foundation of the skill tree.")
+            } else {
+                Text("Are you sure you want to delete this node? This action cannot be undone.")
+            }
         }
         .onAppear {
             logViewAppearance()
@@ -220,6 +226,12 @@ struct SkillNodeDetailView: View {
     }
     
     private func deleteNode() {
+        // Check if this is a root node (should be prevented by UI, but double-check)
+        if skillNode.isRootNode {
+            print("🚫 Attempted to delete root node: \(skillNode.name) - This should not happen")
+            return
+        }
+        
         dataController.deleteSkillNode(skillNode)
         dismiss()
     }
@@ -307,6 +319,24 @@ struct SkillNodeHeaderView: View {
                     .padding(.vertical, 4)
                     .background(Color.blue.opacity(0.1))
                     .cornerRadius(8)
+                
+                // Root node indicator
+                if skillNode.isRootNode {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        
+                        Text("Root Node")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
+                }
                 
                 let dailyStatus = skillNode.getDailyCompletionStatus()
                 HStack(spacing: 4) {

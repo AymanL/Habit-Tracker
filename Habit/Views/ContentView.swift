@@ -35,9 +35,9 @@ struct ContentView: View {
             }
             
             // Skill Trees Tab
-            SkillTreesView()
+            SkillForestsView()
                 .tabItem {
-                    Label("Skill Trees", systemImage: "tree")
+                    Label("Skill Forests", systemImage: "tree")
                 }
         }
         .onAppear {
@@ -153,7 +153,7 @@ struct HabitsView: View {
 }
 
 // MARK: - Skill Trees View
-struct SkillTreesView: View {
+struct SkillForestsView: View {
     var body: some View {
         SkillTreeListView()
     }

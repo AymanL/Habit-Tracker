@@ -58,10 +58,15 @@
 		E3E9A7242E42D35E00B15958 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7022E42D35E00B15958 /* DetailView.swift */; };
 		E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F32E42D35E00B15958 /* CategoryListView.swift */; };
 		E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F72E42D35E00B15958 /* ChartView.swift */; };
-		E3E9A7272E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */; };
+
 		E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */; };
 		E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */; };
+		E3E9A72E2E42D35E00B15958 /* EditForestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A72F2E42D35E00B15958 /* EditForestView.swift */; };
 		E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */; };
+		E3E9A73C2E42D35E00B15958 /* SkillTreeVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */; };
+		E3E9A73D2E42D35E00B15958 /* NestedNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */; };
+		E3E9A73E2E42D35E00B15958 /* SkillNodeVisualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */; };
+		E3E9A73F2E42D35E00B15958 /* HierarchicalNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */; };
 		E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */; };
 		E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F62E42D35E00B15958 /* CalendarView.swift */; };
 		E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */; };
@@ -157,6 +162,7 @@
 		E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortMenuView.swift; sourceTree = "<group>"; };
 		E3E9A6FE2E42D35E00B15958 /* TipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipView.swift; sourceTree = "<group>"; };
 		E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestDetailView.swift; sourceTree = "<group>"; };
+		E3E9A72F2E42D35E00B15958 /* EditForestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditForestView.swift; sourceTree = "<group>"; };
 		E3E9A7022E42D35E00B15958 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		E3E9A7032E42D35E00B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
 		E3E9A7042E42D35E00B15958 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
@@ -167,10 +173,14 @@
 		E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillNodeView.swift; sourceTree = "<group>"; };
 		E3E9A70C2E42D35E00B15958 /* SkillNodeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeDetailView.swift; sourceTree = "<group>"; };
 		E3E9A70E2E42D35E00B15958 /* EditSkillTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditSkillTreeView.swift; sourceTree = "<group>"; };
-		E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeCoreGraphicsView.swift; sourceTree = "<group>"; };
+
 		E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
 		E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDetailView.swift; sourceTree = "<group>"; };
 		E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
+		E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeVisualizationView.swift; sourceTree = "<group>"; };
+		E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestedNodeView.swift; sourceTree = "<group>"; };
+		E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeVisualView.swift; sourceTree = "<group>"; };
+		E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchicalNodeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -389,6 +399,7 @@
 			isa = PBXGroup;
 			children = (
 				E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */,
+				E3E9A72F2E42D35E00B15958 /* EditForestView.swift */,
 			);
 			path = Forests;
 			sourceTree = "<group>";
@@ -427,10 +438,13 @@
 			isa = PBXGroup;
 			children = (
 				E3E9A70E2E42D35E00B15958 /* EditSkillTreeView.swift */,
-				E3E9A70F2E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift */,
 				E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */,
 				E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */,
 				E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */,
+				E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */,
+				E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */,
+				E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */,
+				E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */,
 			);
 			path = SkillTrees;
 			sourceTree = "<group>";
@@ -604,10 +618,15 @@
 				E3E9A7242E42D35E00B15958 /* DetailView.swift in Sources */,
 				E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */,
 				E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */,
-				E3E9A7272E42D35E00B15958 /* SkillTreeCoreGraphicsView.swift in Sources */,
+
 				E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */,
 				E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */,
+				E3E9A72E2E42D35E00B15958 /* EditForestView.swift in Sources */,
 				E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */,
+				E3E9A73C2E42D35E00B15958 /* SkillTreeVisualizationView.swift in Sources */,
+				E3E9A73D2E42D35E00B15958 /* NestedNodeView.swift in Sources */,
+				E3E9A73E2E42D35E00B15958 /* SkillNodeVisualView.swift in Sources */,
+				E3E9A73F2E42D35E00B15958 /* HierarchicalNodeView.swift in Sources */,
 				E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */,
 				E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */,
 				E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */,

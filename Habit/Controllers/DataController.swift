@@ -296,6 +296,12 @@ extension DataController {
         print("🗑️ Deleted skill tree: \(tree.name)")
     }
     
+    func deleteForest(_ forest: Forest) {
+        container.viewContext.delete(forest)
+        save()
+        print("🗑️ Deleted forest: \(forest.name_ ?? "Unknown")")
+    }
+    
     // MARK: - Skill Node Methods
     
     func createSkillNode(name: String, type: SkillNodeType, description: String = "", in tree: SkillTree) -> SkillNode {
@@ -334,6 +340,12 @@ extension DataController {
     }
     
     func deleteSkillNode(_ node: SkillNode) {
+        // Check if this is a root node (protected from deletion)
+        if node.isRootNode {
+            print("🚫 Cannot delete root node: \(node.name) - Root nodes are protected")
+            return
+        }
+        
         // Log the node and tree info before deletion
         let nodeName = node.name
         let treeName = node.tree?.name ?? "Unknown"

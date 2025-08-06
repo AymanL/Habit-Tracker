@@ -102,7 +102,12 @@ extension SkillTree {
             self.order_ = 0
         }
         
-        print("🌳 Created SkillTree: \(name)")
+        // Create the root node with the same name as the tree
+        let rootNode = SkillNode(context: context, name: name, type: .goal)
+        rootNode.tree = self
+        rootNode.order = 0
+        
+        print("🌳 Created SkillTree: \(name) with root node")
     }
     
     // MARK: - Example Data
