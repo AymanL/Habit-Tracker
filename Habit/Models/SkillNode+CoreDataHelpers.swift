@@ -145,7 +145,7 @@ extension SkillNode {
     }
     
     var isRootNode: Bool {
-        return parentNode == nil && tree?.name == name
+        return parentNode == nil
     }
     
     var hasChildren: Bool {

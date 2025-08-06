@@ -79,6 +79,14 @@ extension Forest {
         return trees.sorted { $0.order < $1.order }
     }
     
+    // MARK: - Example for Previews
+    
+    static var example: Forest {
+        let context = DataController.preview.container.viewContext
+        let forest = Forest(context: context, name: "Example Forest", description: "A sample forest for previews")
+        return forest
+    }
+    
     // MARK: - Initialization
     
     convenience init(context: NSManagedObjectContext, name: String, description: String = "") {

@@ -4,6 +4,7 @@ struct ForestDetailView: View {
     @ObservedObject var forest: Forest
     @EnvironmentObject var dataController: DataController
     @State private var showingAddTree = false
+    @State private var showingImportView = false
     @State private var selectedTree: SkillTree?
     @State private var showingTreeDetail = false
     @State private var currentTreeIndex = 0
@@ -65,8 +66,16 @@ struct ForestDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingAddTree = true }) {
-                    Label("Add Tree", systemImage: "plus")
+                Menu {
+                    Button(action: { showingAddTree = true }) {
+                        Label("Add Tree", systemImage: "plus")
+                    }
+                    
+                    Button(action: { showingImportView = true }) {
+                        Label("Import Tree", systemImage: "doc.badge.plus")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -74,6 +83,9 @@ struct ForestDetailView: View {
             NavigationView {
                 EditSkillTreeView(forest: forest)
             }
+        }
+        .sheet(isPresented: $showingImportView) {
+            ImportSingleTreeView(forest: forest)
         }
         .background(
             Group {
@@ -295,6 +307,8 @@ struct ForestTreeDisplayView: View {
                 .cornerRadius(8)
             }
             
+
+            
             // Interactive tree visualization
             if !tree.nodes.isEmpty {
                 VStack(spacing: 12) {
@@ -390,6 +404,25 @@ struct InteractiveTreeView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+        }
+        .onAppear {
+            print("🌳 Tree Display Debug for '\(tree.name)':")
+            print("  📊 Total nodes: \(tree.nodes.count)")
+            print("  🌱 Root nodes: \(tree.nodes.filter { $0.isRootNode }.count)")
+            print("  👥 Nodes with children: \(tree.nodes.filter { $0.hasChildren }.count)")
+            print("  🚫 Nodes without parent: \(tree.nodes.filter { $0.parentNode == nil }.count)")
+            print("  📋 All nodes:")
+            for (index, node) in tree.nodes.sorted(by: { $0.order < $1.order }).enumerated() {
+                print("    \(index + 1). '\(node.name)' - Parent: '\(node.parentNode?.name ?? "none")' - Children: \(node.childNodes.count)")
+            }
+            print("  🎯 Root node found: \(rootNodes.first?.name ?? "none")")
+            if let root = rootNodes.first {
+                print("  👶 Root children: \(root.childNodes.count)")
+                for child in root.childNodes.sorted(by: { $0.order < $1.order }) {
+                    print("    - '\(child.name)' has \(child.childNodes.count) children")
+                }
+            }
+            print("---")
         }
     }
 }

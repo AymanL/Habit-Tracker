@@ -58,7 +58,7 @@ extension SkillTree {
     // MARK: - Tree Structure
     
     var rootNodes: [SkillNode] {
-        return nodes.filter { $0.name == name }.sorted { $0.order < $1.order }
+        return nodes.filter { $0.parentNode == nil }.sorted { $0.order < $1.order }
     }
     
     func getNodesAtLevel(_ level: Int) -> [SkillNode] {

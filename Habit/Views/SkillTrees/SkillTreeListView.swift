@@ -3,6 +3,7 @@ import SwiftUI
 struct SkillTreeListView: View {
     @EnvironmentObject var dataController: DataController
     @State private var showingAddForest = false
+    @State private var showingImportView = false
     @State private var searchText = ""
     
     @FetchRequest(
@@ -35,13 +36,22 @@ struct SkillTreeListView: View {
             .navigationTitle("Forests")
             .navigationBarTitleDisplayMode(.large)
             .navigationBarBackButtonHidden(false)
-            .navigationBarItems(trailing: Button("Add") {
-                showingAddForest = true
+            .navigationBarItems(trailing: HStack {
+                Button(action: { showingImportView = true }) {
+                    Image(systemName: "doc.badge.plus")
+                }
+                
+                Button("Add") {
+                    showingAddForest = true
+                }
             })
             .sheet(isPresented: $showingAddForest) {
                 NavigationView {
                     EditForestView()
                 }
+            }
+            .sheet(isPresented: $showingImportView) {
+                ImportSkillTreeView()
             }
             .overlay {
                 if filteredForests.isEmpty {
