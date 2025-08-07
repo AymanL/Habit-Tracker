@@ -408,8 +408,6 @@ extension SkillNode {
         child4.parentNode = rootNode
         child4.order = 4
         
-        
-        
         return rootNode
     }
 } 
