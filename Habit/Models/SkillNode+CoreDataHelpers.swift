@@ -135,7 +135,13 @@ extension SkillNode {
     }
     
     var nodeType: SkillNodeType {
-        get { SkillNodeType(rawValue: nodeType_ ?? "goal") ?? .goal }
+        get { 
+            if let rawValue = nodeType_, let type = SkillNodeType(rawValue: rawValue) {
+                return type
+            }
+            // Default to root if no parent (root node), otherwise goal
+            return parentNode == nil ? .root : .goal
+        }
         set { nodeType_ = newValue.rawValue }
     }
     
@@ -286,10 +292,11 @@ extension SkillNode {
     /// Check if the node is completed for today
     func isCompletedForToday() -> Bool {
         // Root nodes are never considered completed for today
-        if nodeType == .root {
+        guard nodeType != .root else {
             return false
         }
         
+        // For completed nodes, return true
         if isCompleted {
             return true
         }
@@ -333,11 +340,13 @@ extension SkillNode {
                 complete()
             }
         case .habitLinked:
-            if let linkedHabit = habit {
-                // Complete the linked habit for today
-                linkedHabit.addCompletedDate(Date())
-                print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            guard let linkedHabit = habit else {
+                print("⚠️ Cannot complete habit-linked node '\(name)': no habit linked")
+                return
             }
+            // Complete the linked habit for today
+            linkedHabit.addCompletedDate(Date())
+            print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
         }
     }
     
@@ -352,11 +361,13 @@ extension SkillNode {
                 isCompleted = false
             }
         case .habitLinked:
-            if let linkedHabit = habit {
-                // Uncomplete the linked habit for today
-                linkedHabit.removeCompletedDate(Date())
-                print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            guard let linkedHabit = habit else {
+                print("⚠️ Cannot uncomplete habit-linked node '\(name)': no habit linked")
+                return
             }
+            // Uncomplete the linked habit for today
+            linkedHabit.removeCompletedDate(Date())
+            print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
         }
     }
     
