@@ -51,6 +51,10 @@ struct SettingsView: View {
                     CustomDayResetSection()
                     
                     HolidaySettingsSection()
+                    
+                    #if DEBUG
+                    SkillTreeDebugSection()
+                    #endif
                 }
                 
                 if isExporting || isImporting {
@@ -532,3 +536,19 @@ struct HolidaySettingsSection: View {
         saveHolidayRanges()
     }
 }
+
+#if DEBUG
+struct SkillTreeDebugSection: View {
+    var body: some View {
+        Section {
+            NavigationLink(destination: SkillTreeDebugView()) {
+                Label("Skill Tree Debug", systemImage: "ladybug")
+            }
+        } header: {
+            Text("Development")
+        } footer: {
+            Text("Debug tools for skill tree development")
+        }
+    }
+}
+#endif

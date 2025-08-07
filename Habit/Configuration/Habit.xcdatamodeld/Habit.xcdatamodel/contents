@@ -25,5 +25,39 @@
         <attribute name="weekendMode_" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="holidayMode_" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <relationship name="category_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="habits_" inverseEntity="Category"/>
+        <relationship name="skillNodes_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SkillNode" inverseName="habit_" inverseEntity="SkillNode"/>
+    </entity>
+    <entity name="SkillNode" representedClassName="SkillNode" syncable="YES" codeGenerationType="class">
+        <attribute name="completionDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="description_" optional="YES" attributeType="String"/>
+        <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isCompleted_" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="name_" optional="YES" attributeType="String"/>
+        <attribute name="nodeType_" optional="YES" attributeType="String"/>
+        <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="positionX_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="positionY_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="childNodes_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillNode" inverseName="parentNode_" inverseEntity="SkillNode"/>
+        <relationship name="habit_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Habit" inverseName="skillNodes_" inverseEntity="Habit"/>
+        <relationship name="parentNode_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillNode" inverseName="childNodes_" inverseEntity="SkillNode"/>
+        <relationship name="tree_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillTree" inverseName="nodes_" inverseEntity="SkillTree"/>
+    </entity>
+    <entity name="Forest" representedClassName="Forest" syncable="YES" codeGenerationType="class">
+        <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="description_" optional="YES" attributeType="String"/>
+        <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name_" optional="YES" attributeType="String"/>
+        <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="trees_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillTree" inverseName="forest_" inverseEntity="SkillTree"/>
+    </entity>
+    <entity name="SkillTree" representedClassName="SkillTree" syncable="YES" codeGenerationType="class">
+        <attribute name="creationDate_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="description_" optional="YES" attributeType="String"/>
+        <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name_" optional="YES" attributeType="String"/>
+        <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="forest_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Forest" inverseName="trees_" inverseEntity="Forest"/>
+        <relationship name="nodes_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillNode" inverseName="tree_" inverseEntity="SkillNode"/>
     </entity>
 </model>
