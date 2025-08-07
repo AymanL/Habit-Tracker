@@ -44,12 +44,15 @@ enum DailyCompletionStatus {
 // MARK: - Node Type Enum
 
 enum SkillNodeType: String, CaseIterable {
+    case root = "root"
     case goal = "goal"
     case activity = "activity"
     case habitLinked = "habitLinked"
     
     var displayName: String {
         switch self {
+        case .root:
+            return "Root"
         case .goal:
             return "Goal"
         case .activity:
@@ -61,6 +64,8 @@ enum SkillNodeType: String, CaseIterable {
     
     var description: String {
         switch self {
+        case .root:
+            return "The starting point of a skill tree"
         case .goal:
             return "A goal that can be achieved once"
         case .activity:
@@ -72,6 +77,8 @@ enum SkillNodeType: String, CaseIterable {
     
     var icon: String {
         switch self {
+        case .root:
+            return "star.fill"
         case .goal:
             return "target"
         case .activity:
@@ -226,6 +233,8 @@ extension SkillNode {
     
     var canBeCompleted: Bool {
         switch nodeType {
+        case .root:
+            return false // Root nodes cannot be completed
         case .goal, .activity:
             return !isCompleted
         case .habitLinked:
@@ -276,6 +285,11 @@ extension SkillNode {
     
     /// Check if the node is completed for today
     func isCompletedForToday() -> Bool {
+        // Root nodes are never considered completed for today
+        if nodeType == .root {
+            return false
+        }
+        
         if isCompleted {
             return true
         }
@@ -291,6 +305,8 @@ extension SkillNode {
     /// Get the daily completion status for habit-linked nodes
     func getDailyCompletionStatus() -> DailyCompletionStatus {
         switch nodeType {
+        case .root:
+            return .notCompleted // Root nodes are never considered completed for daily status
         case .goal, .activity:
             return isCompleted ? .completed : .notCompleted
         case .habitLinked:
@@ -309,6 +325,9 @@ extension SkillNode {
     /// Mark the node as completed for today (for habit-linked nodes, this syncs with the habit)
     func completeForToday() {
         switch nodeType {
+        case .root:
+            // Root nodes cannot be completed
+            print("⚠️ Cannot complete root node: \(name)")
         case .goal, .activity:
             if !isCompleted {
                 complete()
@@ -325,6 +344,9 @@ extension SkillNode {
     /// Uncomplete the node for today (for habit-linked nodes, this syncs with the habit)
     func uncompleteForToday() {
         switch nodeType {
+        case .root:
+            // Root nodes cannot be uncompleted
+            print("⚠️ Cannot uncomplete root node: \(name)")
         case .goal, .activity:
             if isCompleted {
                 isCompleted = false
@@ -364,10 +386,10 @@ extension SkillNode {
         let context = DataController.preview.container.viewContext
         
         // Create root node
-        let rootNode = SkillNode(context: context, name: "Example Root", type: .goal, description: "A sample root node for testing")
+        let rootNode = SkillNode(context: context, name: "Example Root", type: .root, description: "A sample root node for testing")
         
         // Create first child
-        let child1 = SkillNode(context: context, name: "Child 1", type: .activity, description: "First child node")
+        let child1 = SkillNode(context: context, name: "Child 1", type: .goal, description: "First child node")
         child1.parentNode = rootNode
         child1.order = 1
         

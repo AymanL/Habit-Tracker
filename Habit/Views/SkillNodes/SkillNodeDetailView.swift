@@ -323,8 +323,8 @@ struct SkillNodeHeaderView: View {
                 // Root node indicator
                 if skillNode.isRootNode {
                     HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.orange)
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
                             .font(.caption)
                         
                         Text("Root Node")
@@ -361,6 +361,8 @@ struct SkillNodeHeaderView: View {
     
     private var nodeTypeIcon: String {
         switch skillNode.nodeType {
+        case .root:
+            return "star.fill"
         case .goal:
             return "target"
         case .activity:
@@ -647,7 +649,7 @@ struct SkillNodeActionsView: View {
 #Preview {
     NavigationView {
         SkillNodeDetailView(
-            skillNode: SkillNode(context: DataController.preview.container.viewContext, name: "Sample Node", type: .goal, description: "This is a sample node")
+            skillNode: SkillNode(context: DataController.preview.container.viewContext, name: "Sample Node", type: .activity, description: "This is a sample node")
         )
     }
     .environmentObject(DataController.preview)

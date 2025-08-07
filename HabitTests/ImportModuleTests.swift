@@ -80,7 +80,7 @@ class ImportModuleTests: BaseTestCase {
         // Verify root node
         let rootNode = tree.nodes.first { $0.name == "Swift Development" }
         XCTAssertNotNil(rootNode, "Root node 'Swift Development' should exist")
-        XCTAssertEqual(rootNode?.nodeType, .goal)
+        XCTAssertEqual(rootNode?.nodeType, .root)
         
         // Verify level 1 nodes (children of root)
         
@@ -144,7 +144,7 @@ class ImportModuleTests: BaseTestCase {
         // Verify root node
         let rootNode = tree.nodes.first { $0.name == "Programming" }
         XCTAssertNotNil(rootNode, "Root node 'Programming' should exist")
-        XCTAssertEqual(rootNode?.nodeType, .goal)
+        XCTAssertEqual(rootNode?.nodeType, .root)
         
         // Verify child nodes (children of root)
         let childNodes = tree.nodes.filter { $0.name != "Programming" && $0.parentNode?.name == "Programming" }

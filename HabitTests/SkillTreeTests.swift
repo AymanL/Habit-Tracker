@@ -46,15 +46,18 @@ class SkillTreeTests: BaseTestCase {
     }
     
     func testSkillNodeTypes() {
-        let standaloneNode = SkillNode(context: managedObjectContext, name: "Goal", type: .goal)
+        let rootNode = SkillNode(context: managedObjectContext, name: "Root", type: .root)
+        let goalNode = SkillNode(context: managedObjectContext, name: "Goal", type: .goal)
         let activityNode = SkillNode(context: managedObjectContext, name: "Activity", type: .activity)
         let habitLinkedNode = SkillNode(context: managedObjectContext, name: "Habit Linked", type: .habitLinked)
         
-        XCTAssertEqual(standaloneNode.nodeType, .goal)
+        XCTAssertEqual(rootNode.nodeType, .root)
+        XCTAssertEqual(goalNode.nodeType, .goal)
         XCTAssertEqual(activityNode.nodeType, .activity)
         XCTAssertEqual(habitLinkedNode.nodeType, .habitLinked)
         
-        XCTAssertEqual(standaloneNode.nodeType.displayName, "Goal")
+        XCTAssertEqual(rootNode.nodeType.displayName, "Root")
+        XCTAssertEqual(goalNode.nodeType.displayName, "Goal")
         XCTAssertEqual(activityNode.nodeType.displayName, "Activity")
         XCTAssertEqual(habitLinkedNode.nodeType.displayName, "Habit Linked")
     }
@@ -238,7 +241,7 @@ class SkillTreeTests: BaseTestCase {
         // Verify root node
         let rootNode = tree.nodes.first { $0.name == "Swift Development" }
         XCTAssertNotNil(rootNode, "Root node 'Swift Development' should exist")
-        XCTAssertEqual(rootNode?.nodeType, .goal)
+        XCTAssertEqual(rootNode?.nodeType, .root)
         
         // Verify level 1 nodes
         let level1Nodes = tree.nodes.filter { $0.name != "Swift Development" && $0.parentNode?.name == "Swift Development" }

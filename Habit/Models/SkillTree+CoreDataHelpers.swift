@@ -103,7 +103,7 @@ extension SkillTree {
         }
         
         // Create the root node with the same name as the tree
-        let rootNode = SkillNode(context: context, name: name, type: .goal)
+        let rootNode = SkillNode(context: context, name: name, type: .root)
         rootNode.tree = self
         rootNode.order = 0
         
@@ -117,9 +117,9 @@ extension SkillTree {
         let tree = SkillTree(context: context, name: "Example Skill Tree", description: "A sample skill tree for testing")
         
         // Add some example nodes
-        let node1 = SkillNode(context: context, name: "Learn Swift", type: .goal)
-        let node2 = SkillNode(context: context, name: "Build iOS App", type: .activity)
-        let node3 = SkillNode(context: context, name: "Daily Practice", type: .habitLinked)
+        let node1 = SkillNode(context: context, name: "Learn Swift", type: .root)
+        let node2 = SkillNode(context: context, name: "Build iOS App", type: .goal)
+        let node3 = SkillNode(context: context, name: "Daily Practice", type: .activity)
         
         node1.tree = tree
         node2.tree = tree

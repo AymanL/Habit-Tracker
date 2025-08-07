@@ -124,10 +124,10 @@ class DataController: ObservableObject {
         let fitnessTree = SkillTree(context: viewContext, name: "Fitness Journey", description: "Build healthy habits")
         
         // Create root nodes for each tree
-        let programmingRoot = SkillNode(context: viewContext, name: "Programming Skills", type: .goal, description: "Root node for Programming Skills")
+        let programmingRoot = SkillNode(context: viewContext, name: "Programming Skills", type: .root, description: "Root node for Programming Skills")
         programmingRoot.tree = programmingTree
         
-        let fitnessRoot = SkillNode(context: viewContext, name: "Fitness Journey", type: .goal, description: "Root node for Fitness Journey")
+        let fitnessRoot = SkillNode(context: viewContext, name: "Fitness Journey", type: .root, description: "Root node for Fitness Journey")
         fitnessRoot.tree = fitnessTree
         
         // Add nodes to programming tree under root
@@ -225,7 +225,7 @@ extension DataController {
         let tree = SkillTree(context: container.viewContext, name: name, description: description)
         
         // Create the root node with the same name as the tree
-        let rootNode = SkillNode(context: container.viewContext, name: name, type: .goal, description: "Root node for \(name)")
+        let rootNode = SkillNode(context: container.viewContext, name: name, type: .root, description: "Root node for \(name)")
         rootNode.tree = tree
         
         if withSampleNodes {
