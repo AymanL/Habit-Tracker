@@ -50,9 +50,9 @@ struct SkillTreeDetailView: View {
                 .shadow(radius: 2)
                 
                 // Tree visualization
-                SkillTreeVisualizationView(skillTree: skillTree) { node in
-                    selectedNode = node
-                }
+                // SkillTreeVisualizationView(skillTree: skillTree) { node in
+                //     selectedNode = node
+                // }
             }
             .padding()
         }

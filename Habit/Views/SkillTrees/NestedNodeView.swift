@@ -48,9 +48,6 @@ struct NestedNodeView: View {
 //                    }
 //                }
 //            )
-            .onLongPressGesture {
-                showDebugInfo.toggle()
-            }
             
             // Children (if any) - evenly distributed around parent
             if node.hasChildren {
@@ -154,27 +151,6 @@ struct NestedNodeView: View {
         //     }
         //     .padding(4)
         // )
-    }
-    
-    // Helper function to determine if scroll indicators should be shown
-    private func shouldShowScrollIndicators(for children: [SkillNode]) -> Bool {
-        // Calculate total visual width needed based on actual descendant counts
-        let totalWidthNeeded = children.reduce(0) { totalWidth, child in
-            let descendants = child.getAllDescendants()
-            let estimatedChildWidth = max(100, CGFloat(descendants.count + 1) * 50) // Reasonable base width + space for descendants
-            return totalWidth + estimatedChildWidth
-        } + CGFloat(children.count - 1) * 10 // Further reduced spacing between children
-        
-        // Account for nodes with many descendants (they take more space)
-        let totalDescendants = children.reduce(0) { count, child in
-            count + child.getAllDescendants().count
-        }
-        
-        // If there are many descendants, we likely need scrolling
-        let hasManyDescendants = totalDescendants > children.count * 2
-        
-        // Show indicators if we have many children OR many descendants OR if width exceeds screen
-        return children.count > 4 || hasManyDescendants || totalWidthNeeded > UIScreen.main.bounds.width - 40
     }
     
     // Helper function to print the complete tree structure

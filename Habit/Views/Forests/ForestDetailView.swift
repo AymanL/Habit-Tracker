@@ -112,6 +112,7 @@ struct ForestDetailView: View {
     }
 }
 
+// MARK: - Forest Header View
 struct ForestHeaderView: View {
     @ObservedObject var forest: Forest
     
@@ -172,6 +173,7 @@ struct ForestHeaderView: View {
     }
 }
 
+// MARK: - Forest Tree Navigation View
 struct ForestTreeNavigationView: View {
     @ObservedObject var forest: Forest
     let currentTree: SkillTree?
@@ -231,6 +233,7 @@ struct ForestTreeNavigationView: View {
     }
 }
 
+// MARK: - Forest Tree Display View
 struct ForestTreeDisplayView: View {
     @ObservedObject var tree: SkillTree
     let onTreeTap: (SkillTree) -> Void
@@ -307,17 +310,14 @@ struct ForestTreeDisplayView: View {
                 .cornerRadius(8)
             }
             
-
-            
-            // Interactive tree visualization
-            if !tree.nodes.isEmpty {
-                VStack(spacing: 12) {
+            // Tree visualization
+            if let rootNode = tree.rootNodes.first {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Tree Structure")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    // Show interactive tree
-                    InteractiveTreeView(tree: tree) { node in
+                    NestedNodeView(node: rootNode) { node in
                         selectedNode = node
                         showingNodeDetail = true
                     }
@@ -343,167 +343,7 @@ struct ForestTreeDisplayView: View {
     }
 }
 
-struct InteractiveTreeView: View {
-    @ObservedObject var tree: SkillTree
-    let onNodeTap: (SkillNode) -> Void
-    
-    var rootNodes: [SkillNode] {
-        tree.nodes.filter { $0.isRootNode }.sorted { $0.order < $1.order }
-    }
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            if let rootNode = rootNodes.first {
-                // Show root node
-                HStack {
-                    Spacer()
-                    SkillNodeVisualView(node: rootNode) {
-                        onNodeTap(rootNode)
-                    }
-                    .scaleEffect(1.0)
-                    Spacer()
-                }
-                
-                // Show child nodes in a grid layout
-                if rootNode.hasChildren {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ], spacing: 12) {
-                        ForEach(Array(rootNode.childNodes.sorted(by: { $0.order < $1.order })), id: \.id) { child in
-                            SkillNodeVisualView(node: child) {
-                                onNodeTap(child)
-                            }
-                            .scaleEffect(0.9)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                
-                // Show grandchild nodes if they exist
-                let grandchildren = rootNode.childNodes.flatMap { $0.childNodes }
-                if !grandchildren.isEmpty {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible()),
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ], spacing: 8) {
-                        ForEach(Array(grandchildren.sorted(by: { $0.order < $1.order })), id: \.id) { grandchild in
-                            SkillNodeVisualView(node: grandchild) {
-                                onNodeTap(grandchild)
-                            }
-                            .scaleEffect(0.8)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            } else {
-                Text("No nodes in this tree")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .onAppear {
-            print("🌳 Tree Display Debug for '\(tree.name)':")
-            print("  📊 Total nodes: \(tree.nodes.count)")
-            print("  🌱 Root nodes: \(tree.nodes.filter { $0.isRootNode }.count)")
-            print("  👥 Nodes with children: \(tree.nodes.filter { $0.hasChildren }.count)")
-            print("  🚫 Nodes without parent: \(tree.nodes.filter { $0.parentNode == nil }.count)")
-            print("  📋 All nodes:")
-            for (index, node) in tree.nodes.sorted(by: { $0.order < $1.order }).enumerated() {
-                print("    \(index + 1). '\(node.name)' - Parent: '\(node.parentNode?.name ?? "none")' - Children: \(node.childNodes.count)")
-            }
-            print("  🎯 Root node found: \(rootNodes.first?.name ?? "none")")
-            if let root = rootNodes.first {
-                print("  👶 Root children: \(root.childNodes.count)")
-                for child in root.childNodes.sorted(by: { $0.order < $1.order }) {
-                    print("    - '\(child.name)' has \(child.childNodes.count) children")
-                }
-            }
-            print("---")
-        }
-    }
-}
-
-struct ForestTreesView: View {
-    @ObservedObject var forest: Forest
-    let onTreeTap: (SkillTree) -> Void
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Trees")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            LazyVStack(spacing: 12) {
-                ForEach(getTreesSortedByOrder(forest), id: \.id) { tree in
-                    ForestTreeRowView(tree: tree) {
-                        onTreeTap(tree)
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct ForestTreeRowView: View {
-    @ObservedObject var tree: SkillTree
-    let onTap: () -> Void
-    
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(tree.completionPercentage == 1.0 ? Color.green : Color.blue)
-                        .frame(width: 40, height: 40)
-                    
-                    Image(systemName: "tree")
-                        .font(.title3)
-                        .foregroundColor(.white)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(tree.name)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    if !tree.treeDescription.isEmpty {
-                        Text(tree.treeDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                    }
-                    
-                    HStack(spacing: 8) {
-                        Text("\(tree.completedNodesCount)/\(tree.totalNodesCount) nodes")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Text("\(Int(tree.completionPercentage * 100))%")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                            .fontWeight(.medium)
-                    }
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
+// MARK: - Preview
 #Preview {
     NavigationView {
         Text("Forest Detail View")
@@ -512,7 +352,7 @@ struct ForestTreeRowView: View {
     .environmentObject(DataController.preview)
 }
 
-// Helper functions for Forest properties (temporary until Core Data generates the class properly)
+// MARK: - Helper Functions
 private func calculateForestCompletion(_ forest: Forest) -> Double {
     let trees = forest.trees_?.allObjects as? [SkillTree] ?? []
     guard !trees.isEmpty else { return 0.0 }
