@@ -54,8 +54,8 @@ class SkillTreeTests: BaseTestCase {
         XCTAssertEqual(activityNode.nodeType, .activity)
         XCTAssertEqual(habitLinkedNode.nodeType, .habitLinked)
         
-        XCTAssertEqual(standaloneNode.nodeType.displayName, "Standalone")
-        XCTAssertEqual(oneShotNode.nodeType.displayName, "One Shot")
+        XCTAssertEqual(standaloneNode.nodeType.displayName, "Goal")
+        XCTAssertEqual(activityNode.nodeType.displayName, "Activity")
         XCTAssertEqual(habitLinkedNode.nodeType.displayName, "Habit Linked")
     }
     
@@ -196,12 +196,320 @@ class SkillTreeTests: BaseTestCase {
     func testDebugMethods() {
         // Create some test data
         let tree = dataController.createSkillTree(name: "Debug Tree")
-        dataController.createSkillNode(name: "Debug Node", type: .goal, in: tree)
+        let _ = dataController.createSkillNode(name: "Debug Node", type: .goal, in: tree)
         
         // These should not crash and should print debug info
         dataController.debugAllEntities()
         dataController.debugSkillTrees()
         dataController.debugSkillNodes()
         dataController.createTestSkillTree()
+    }
+    
+    // MARK: - Import Functionality Tests
+    
+    func testValidSingleTreeImport() throws {
+        // Given
+        let input = """
+        Swift Development
+        - Learn Swift Basics
+        - Understand Optionals
+        - Master Closures
+        - Build Simple Apps
+        - Advanced Swift Features
+        -- Protocol-Oriented Programming
+        -- Generics and Type Constraints
+        -- Memory Management
+        """
+        
+        // When
+        let result = try parseAndImport(input)
+        
+        // Then
+        XCTAssertEqual(result.treesCount, 1)
+        XCTAssertEqual(result.nodesCount, 9) // Root + 8 nodes
+        
+        // Verify tree was created
+        let trees = try managedObjectContext.fetch(SkillTree.fetchRequest())
+        XCTAssertEqual(trees.count, 1)
+        
+        let tree = trees.first!
+        XCTAssertEqual(tree.name, "Swift Development")
+        
+        // Verify root node
+        let rootNodes = tree.nodes.filter { $0.name == "Swift Development" }
+        XCTAssertEqual(rootNodes.count, 1)
+        XCTAssertEqual(rootNodes.first?.nodeType, .goal)
+        
+        // Verify level 1 nodes
+        let level1Nodes = tree.nodes.filter { $0.name != "Swift Development" && $0.parentNode?.name == "Swift Development" }
+        XCTAssertEqual(level1Nodes.count, 5)
+        XCTAssertTrue(level1Nodes.contains { $0.name == "Learn Swift Basics" })
+        XCTAssertTrue(level1Nodes.contains { $0.name == "Understand Optionals" })
+        XCTAssertTrue(level1Nodes.contains { $0.name == "Master Closures" })
+        XCTAssertTrue(level1Nodes.contains { $0.name == "Build Simple Apps" })
+        XCTAssertTrue(level1Nodes.contains { $0.name == "Advanced Swift Features" })
+        
+        // Verify level 2 nodes
+        let advancedFeaturesNode = level1Nodes.first { $0.name == "Advanced Swift Features" }
+        XCTAssertNotNil(advancedFeaturesNode)
+        
+        let level2Nodes = tree.nodes.filter { $0.parentNode?.name == "Advanced Swift Features" }
+        XCTAssertEqual(level2Nodes.count, 3)
+        XCTAssertTrue(level2Nodes.contains { $0.name == "Protocol-Oriented Programming" })
+        XCTAssertTrue(level2Nodes.contains { $0.name == "Generics and Type Constraints" })
+        XCTAssertTrue(level2Nodes.contains { $0.name == "Memory Management" })
+    }
+    
+    func testSimpleTreeImport() throws {
+        // Given
+        let input = """
+        Programming
+        - Learn Python
+        - Learn JavaScript
+        """
+        
+        // When
+        let result = try parseAndImport(input)
+        
+        // Then
+        XCTAssertEqual(result.treesCount, 1)
+        XCTAssertEqual(result.nodesCount, 3) // Root + 2 nodes
+        
+        let trees = try managedObjectContext.fetch(SkillTree.fetchRequest())
+        XCTAssertEqual(trees.count, 1)
+        
+        let tree = trees.first!
+        XCTAssertEqual(tree.name, "Programming")
+        
+        let childNodes = tree.nodes.filter { $0.name != "Programming" }
+        XCTAssertEqual(childNodes.count, 2)
+        XCTAssertTrue(childNodes.contains { $0.name == "Learn Python" })
+        XCTAssertTrue(childNodes.contains { $0.name == "Learn JavaScript" })
+    }
+    
+    func testEmptyInputThrowsError() throws {
+        // Given
+        let input = ""
+        
+        // When & Then
+        XCTAssertThrowsError(try parseAndImport(input)) { error in
+            if case ImportError.emptyFile = error as! ImportError {
+                // Success - expected error
+            } else {
+                XCTFail("Expected emptyFile error, got: \(error)")
+            }
+        }
+    }
+    
+    func testInvalidFormatThrowsError() throws {
+        // Given
+        let input = "Invalid format without proper structure"
+        
+        // When & Then
+        XCTAssertThrowsError(try parseAndImport(input)) { error in
+            if case ImportError.invalidFormat(let message) = error as! ImportError {
+                XCTAssertTrue(message.contains("At least one line"))
+            } else {
+                XCTFail("Expected invalidFormat error, got: \(error)")
+            }
+        }
+    }
+    
+    func testNodeWithoutTreeThrowsError() throws {
+        // Given
+        let input = """
+        - Node without tree definition
+        """
+        
+        // When & Then
+        XCTAssertThrowsError(try parseAndImport(input)) { error in
+            if case ImportError.noTreeDefined(let lineNumber) = error as! ImportError {
+                XCTAssertEqual(lineNumber, 1)
+            } else {
+                XCTFail("Expected noTreeDefined error, got: \(error)")
+            }
+        }
+    }
+    
+    func testInputWithEmptyLines() throws {
+        // Given
+        let input = """
+        Test Tree
+        
+        - First Node
+        
+        - Second Node
+        
+        """
+        
+        // When
+        let result = try parseAndImport(input)
+        
+        // Then
+        XCTAssertEqual(result.treesCount, 1)
+        XCTAssertEqual(result.nodesCount, 3) // Root + 2 nodes
+        
+        let trees = try managedObjectContext.fetch(SkillTree.fetchRequest())
+        let tree = trees.first!
+        XCTAssertEqual(tree.name, "Test Tree")
+        
+        let childNodes = tree.nodes.filter { $0.name != "Test Tree" }
+        XCTAssertEqual(childNodes.count, 2)
+        XCTAssertTrue(childNodes.contains { $0.name == "First Node" })
+        XCTAssertTrue(childNodes.contains { $0.name == "Second Node" })
+    }
+    
+    func testInputWithSpecialCharacters() throws {
+        // Given
+        let input = """
+        Test Tree with Special Chars: @#$%^&*()
+        - Node with spaces and dots ...
+        - Node with dashes - and underscores _
+        - Node with numbers 123 and symbols !@#
+        """
+        
+        // When
+        let result = try parseAndImport(input)
+        
+        // Then
+        XCTAssertEqual(result.treesCount, 1)
+        XCTAssertEqual(result.nodesCount, 4) // Root + 3 nodes
+        
+        let trees = try managedObjectContext.fetch(SkillTree.fetchRequest())
+        let tree = trees.first!
+        XCTAssertEqual(tree.name, "Test Tree with Special Chars: @#$%^&*()")
+        
+        let childNodes = tree.nodes.filter { $0.name != "Test Tree with Special Chars: @#$%^&*()" }
+        XCTAssertEqual(childNodes.count, 3)
+        XCTAssertTrue(childNodes.contains { $0.name == "Node with spaces and dots ..." })
+        XCTAssertTrue(childNodes.contains { $0.name == "Node with dashes - and underscores _" })
+        XCTAssertTrue(childNodes.contains { $0.name == "Node with numbers 123 and symbols !@#" })
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func parseAndImport(_ text: String) throws -> ImportResult {
+        // This is a simplified version of the parseAndImport function for testing
+        // It uses the same logic as ImportSingleTreeView but adapted for testing
+        
+        let lines = text.components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        
+        guard !lines.isEmpty else {
+            throw ImportError.emptyFile
+        }
+        
+        guard lines.count >= 1 else {
+            throw ImportError.invalidFormat("At least one line (tree name) is required")
+        }
+        
+        var trees: [SkillTree] = []
+        var currentTree: SkillTree?
+        var nodeStack: [(SkillNode, Int)] = []
+        
+        for (index, line) in lines.enumerated() {
+            let dashCount = line.prefix(while: { $0 == "-" }).count
+            let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
+            
+            guard !content.isEmpty else { continue }
+            
+            switch dashCount {
+            case 0:
+                // Tree name - create the tree (it automatically creates a root node)
+                let tree = SkillTree(context: managedObjectContext, name: content)
+                currentTree = tree
+                
+                // Find the automatically created root node
+                let rootNode = tree.nodes.first { $0.name == content }
+                if let root = rootNode {
+                    nodeStack.removeAll()
+                    nodeStack.append((root, 0)) // Root node is level 0
+                }
+                trees.append(tree)
+                
+            case 1:
+                // Level 1 node (1 dash = level 1 in tree)
+                guard let tree = currentTree else {
+                    throw ImportError.noTreeDefined(lineNumber: index + 1)
+                }
+                
+                let node = SkillNode(context: managedObjectContext, name: content, type: .goal)
+                node.tree = tree
+                node.order = nodeStack.filter { $0.1 == 1 }.count
+                
+                // Find the root node (level 0) as parent
+                if let rootIndex = nodeStack.lastIndex(where: { $0.1 == 0 }) {
+                    let root = nodeStack[rootIndex].0
+                    root.addChild(node)
+                }
+                
+                nodeStack.append((node, 1))
+                
+            case 2:
+                // Level 2 node (2 dashes = level 2 in tree)
+                guard let tree = currentTree else {
+                    throw ImportError.noTreeDefined(lineNumber: index + 1)
+                }
+                
+                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                node.tree = tree
+                node.order = nodeStack.filter { $0.1 == 2 }.count
+                
+                // Find the most recent level 1 node as parent
+                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == 1 }) {
+                    let parent = nodeStack[parentIndex].0
+                    parent.addChild(node)
+                }
+                
+                nodeStack.append((node, 2))
+                
+            case 3:
+                // Level 3 node (3 dashes = level 3 in tree)
+                guard let tree = currentTree else {
+                    throw ImportError.noTreeDefined(lineNumber: index + 1)
+                }
+                
+                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                node.tree = tree
+                node.order = nodeStack.filter { $0.1 == 3 }.count
+                
+                // Find the most recent level 2 node as parent
+                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == 2 }) {
+                    let parent = nodeStack[parentIndex].0
+                    parent.addChild(node)
+                }
+                
+                nodeStack.append((node, 3))
+                
+            default:
+                // Deeper levels (4+ dashes)
+                guard let tree = currentTree else {
+                    throw ImportError.noTreeDefined(lineNumber: index + 1)
+                }
+                
+                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                node.tree = tree
+                node.order = nodeStack.filter { $0.1 == dashCount }.count
+                
+                // Find the most recent node at the previous level as parent
+                let parentLevel = dashCount - 1
+                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == parentLevel }) {
+                    let parent = nodeStack[parentIndex].0
+                    parent.addChild(node)
+                }
+                
+                nodeStack.append((node, dashCount))
+            }
+        }
+        
+        try managedObjectContext.save()
+        
+        return ImportResult(
+            forestsCount: 0,
+            treesCount: trees.count,
+            nodesCount: trees.reduce(0) { sum, tree in sum + tree.totalNodesCount },
+            forests: []
+        )
     }
 } 
