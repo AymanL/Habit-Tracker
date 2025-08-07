@@ -236,28 +236,49 @@ class SkillTreeTests: BaseTestCase {
         XCTAssertEqual(tree.name, "Swift Development")
         
         // Verify root node
-        let rootNodes = tree.nodes.filter { $0.name == "Swift Development" }
-        XCTAssertEqual(rootNodes.count, 1)
-        XCTAssertEqual(rootNodes.first?.nodeType, .goal)
+        let rootNode = tree.nodes.first { $0.name == "Swift Development" }
+        XCTAssertNotNil(rootNode, "Root node 'Swift Development' should exist")
+        XCTAssertEqual(rootNode?.nodeType, .goal)
         
         // Verify level 1 nodes
         let level1Nodes = tree.nodes.filter { $0.name != "Swift Development" && $0.parentNode?.name == "Swift Development" }
         XCTAssertEqual(level1Nodes.count, 5)
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Learn Swift Basics" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Understand Optionals" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Master Closures" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Build Simple Apps" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Advanced Swift Features" })
+        
+        let learnSwiftBasicsNode = level1Nodes.first { $0.name == "Learn Swift Basics" }
+        let understandOptionalsNode = level1Nodes.first { $0.name == "Understand Optionals" }
+        let masterClosuresNode = level1Nodes.first { $0.name == "Master Closures" }
+        let buildSimpleAppsNode = level1Nodes.first { $0.name == "Build Simple Apps" }
+        let advancedFeaturesNode = level1Nodes.first { $0.name == "Advanced Swift Features" }
+        
+        XCTAssertNotNil(learnSwiftBasicsNode, "Learn Swift Basics node should exist")
+        XCTAssertNotNil(understandOptionalsNode, "Understand Optionals node should exist")
+        XCTAssertNotNil(masterClosuresNode, "Master Closures node should exist")
+        XCTAssertNotNil(buildSimpleAppsNode, "Build Simple Apps node should exist")
+        XCTAssertNotNil(advancedFeaturesNode, "Advanced Swift Features node should exist")
+        
+        // Verify all level 1 nodes have Swift Development as parent
+        XCTAssertEqual(learnSwiftBasicsNode?.parentNode, rootNode, "Learn Swift Basics should have Swift Development as parent")
+        XCTAssertEqual(understandOptionalsNode?.parentNode, rootNode, "Understand Optionals should have Swift Development as parent")
+        XCTAssertEqual(masterClosuresNode?.parentNode, rootNode, "Master Closures should have Swift Development as parent")
+        XCTAssertEqual(buildSimpleAppsNode?.parentNode, rootNode, "Build Simple Apps should have Swift Development as parent")
+        XCTAssertEqual(advancedFeaturesNode?.parentNode, rootNode, "Advanced Swift Features should have Swift Development as parent")
         
         // Verify level 2 nodes
-        let advancedFeaturesNode = level1Nodes.first { $0.name == "Advanced Swift Features" }
-        XCTAssertNotNil(advancedFeaturesNode)
-        
         let level2Nodes = tree.nodes.filter { $0.parentNode?.name == "Advanced Swift Features" }
         XCTAssertEqual(level2Nodes.count, 3)
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Protocol-Oriented Programming" })
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Generics and Type Constraints" })
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Memory Management" })
+        
+        let protocolOrientedNode = level2Nodes.first { $0.name == "Protocol-Oriented Programming" }
+        let genericsNode = level2Nodes.first { $0.name == "Generics and Type Constraints" }
+        let memoryManagementNode = level2Nodes.first { $0.name == "Memory Management" }
+        
+        XCTAssertNotNil(protocolOrientedNode, "Protocol-Oriented Programming node should exist")
+        XCTAssertNotNil(genericsNode, "Generics and Type Constraints node should exist")
+        XCTAssertNotNil(memoryManagementNode, "Memory Management node should exist")
+        
+        // Verify all level 2 nodes have Advanced Swift Features as parent
+        XCTAssertEqual(protocolOrientedNode?.parentNode, advancedFeaturesNode, "Protocol-Oriented Programming should have Advanced Swift Features as parent")
+        XCTAssertEqual(genericsNode?.parentNode, advancedFeaturesNode, "Generics and Type Constraints should have Advanced Swift Features as parent")
+        XCTAssertEqual(memoryManagementNode?.parentNode, advancedFeaturesNode, "Memory Management should have Advanced Swift Features as parent")
     }
     
     func testSimpleTreeImport() throws {
@@ -281,10 +302,24 @@ class SkillTreeTests: BaseTestCase {
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Programming")
         
-        let childNodes = tree.nodes.filter { $0.name != "Programming" }
-        XCTAssertEqual(childNodes.count, 2)
-        XCTAssertTrue(childNodes.contains { $0.name == "Learn Python" })
-        XCTAssertTrue(childNodes.contains { $0.name == "Learn JavaScript" })
+        // Find the root node (Programming)
+        let rootNode = tree.nodes.first { $0.name == "Programming" }
+        XCTAssertNotNil(rootNode, "Root node 'Programming' should exist")
+        
+        // Find child nodes and verify they have Programming as parent
+        let learnPythonNode = tree.nodes.first { $0.name == "Learn Python" }
+        let learnJavaScriptNode = tree.nodes.first { $0.name == "Learn JavaScript" }
+        
+        XCTAssertNotNil(learnPythonNode, "Learn Python node should exist")
+        XCTAssertNotNil(learnJavaScriptNode, "Learn JavaScript node should exist")
+        
+        // Verify parent-child relationships
+        XCTAssertEqual(learnPythonNode?.parentNode, rootNode, "Learn Python should have Programming as parent")
+        XCTAssertEqual(learnJavaScriptNode?.parentNode, rootNode, "Learn JavaScript should have Programming as parent")
+        
+        // Verify the root node has these as children
+        XCTAssertTrue(rootNode?.childNodes.contains(learnPythonNode!) ?? false, "Programming should have Learn Python as child")
+        XCTAssertTrue(rootNode?.childNodes.contains(learnJavaScriptNode!) ?? false, "Programming should have Learn JavaScript as child")
     }
     
     func testEmptyInputThrowsError() throws {
@@ -353,10 +388,20 @@ class SkillTreeTests: BaseTestCase {
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Test Tree")
         
-        let childNodes = tree.nodes.filter { $0.name != "Test Tree" }
-        XCTAssertEqual(childNodes.count, 2)
-        XCTAssertTrue(childNodes.contains { $0.name == "First Node" })
-        XCTAssertTrue(childNodes.contains { $0.name == "Second Node" })
+        // Find the root node (Test Tree)
+        let rootNode = tree.nodes.first { $0.name == "Test Tree" }
+        XCTAssertNotNil(rootNode, "Root node 'Test Tree' should exist")
+        
+        // Find child nodes and verify they have Test Tree as parent
+        let firstNode = tree.nodes.first { $0.name == "First Node" }
+        let secondNode = tree.nodes.first { $0.name == "Second Node" }
+        
+        XCTAssertNotNil(firstNode, "First Node should exist")
+        XCTAssertNotNil(secondNode, "Second Node should exist")
+        
+        // Verify parent-child relationships
+        XCTAssertEqual(firstNode?.parentNode, rootNode, "First Node should have Test Tree as parent")
+        XCTAssertEqual(secondNode?.parentNode, rootNode, "Second Node should have Test Tree as parent")
     }
     
     func testInputWithSpecialCharacters() throws {
@@ -379,11 +424,23 @@ class SkillTreeTests: BaseTestCase {
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Test Tree with Special Chars: @#$%^&*()")
         
-        let childNodes = tree.nodes.filter { $0.name != "Test Tree with Special Chars: @#$%^&*()" }
-        XCTAssertEqual(childNodes.count, 3)
-        XCTAssertTrue(childNodes.contains { $0.name == "Node with spaces and dots ..." })
-        XCTAssertTrue(childNodes.contains { $0.name == "Node with dashes - and underscores _" })
-        XCTAssertTrue(childNodes.contains { $0.name == "Node with numbers 123 and symbols !@#" })
+        // Find the root node (Test Tree with Special Chars)
+        let rootNode = tree.nodes.first { $0.name == "Test Tree with Special Chars: @#$%^&*()" }
+        XCTAssertNotNil(rootNode, "Root node should exist")
+        
+        // Find child nodes and verify they have the root as parent
+        let nodeWithSpaces = tree.nodes.first { $0.name == "Node with spaces and dots ..." }
+        let nodeWithDashes = tree.nodes.first { $0.name == "Node with dashes - and underscores _" }
+        let nodeWithNumbers = tree.nodes.first { $0.name == "Node with numbers 123 and symbols !@#" }
+        
+        XCTAssertNotNil(nodeWithSpaces, "Node with spaces should exist")
+        XCTAssertNotNil(nodeWithDashes, "Node with dashes should exist")
+        XCTAssertNotNil(nodeWithNumbers, "Node with numbers should exist")
+        
+        // Verify parent-child relationships
+        XCTAssertEqual(nodeWithSpaces?.parentNode, rootNode, "Node with spaces should have root as parent")
+        XCTAssertEqual(nodeWithDashes?.parentNode, rootNode, "Node with dashes should have root as parent")
+        XCTAssertEqual(nodeWithNumbers?.parentNode, rootNode, "Node with numbers should have root as parent")
     }
     
     // MARK: - Helper Methods
