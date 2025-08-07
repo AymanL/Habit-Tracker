@@ -66,6 +66,7 @@
 		E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */; };
 		E3E9A72E2E42D35E00B15958 /* EditForestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A72F2E42D35E00B15958 /* EditForestView.swift */; };
 		E3E9A7322E44DBBD00B15958 /* ImportModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */; };
+		E3E9A7332E44DBBD00B15958 /* ForestImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */; };
 		E3E9A73C2E42D35E00B15958 /* SkillTreeVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */; };
 		E3E9A73D2E42D35E00B15958 /* NestedNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */; };
 		E3E9A73E2E42D35E00B15958 /* SkillNodeVisualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */; };
@@ -180,6 +181,7 @@
 		E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
 		E3E9A72F2E42D35E00B15958 /* EditForestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditForestView.swift; sourceTree = "<group>"; };
 		E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportModuleTests.swift; sourceTree = "<group>"; };
+		E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestImportTests.swift; sourceTree = "<group>"; };
 		E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeVisualizationView.swift; sourceTree = "<group>"; };
 		E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestedNodeView.swift; sourceTree = "<group>"; };
 		E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeVisualView.swift; sourceTree = "<group>"; };
@@ -346,6 +348,7 @@
 			isa = PBXGroup;
 			children = (
 				E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */,
+				E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */,
 				E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */,
 				02EC2FAA2A1CEA410004DA4B /* Habit.xctestplan */,
 				02EC2FB12A1CECF00004DA4B /* BaseTestCase.swift */,
@@ -668,6 +671,7 @@
 				0261399D2A8BCF76003D6711 /* DateExtensionTests.swift in Sources */,
 				E3E9A6EC2E3FFF0800B15958 /* SkillTreeTests.swift in Sources */,
 				E3E9A7322E44DBBD00B15958 /* ImportModuleTests.swift in Sources */,
+				E3E9A7332E44DBBD00B15958 /* ForestImportTests.swift in Sources */,
 				02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

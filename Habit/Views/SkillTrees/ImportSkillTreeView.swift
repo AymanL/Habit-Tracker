@@ -267,12 +267,21 @@ struct ImportSkillTreeView: View {
                 tree.forest = forest
                 currentTree = tree
                 nodeStack.removeAll()
+                
+                // Find the automatically created root node and add it to the stack
+                let rootNode = tree.nodes.first { $0.name == content }
+                if let root = rootNode {
+                    nodeStack.append((root, 0)) // Root node is level 0
+                    print("  ✅ Found and added root node '\(root.name)' to stack at level 0")
+                } else {
+                    print("  ⚠️ Could not find automatically created root node")
+                }
+                
                 print("  ✅ Tree created and set as current")
                 print("  📊 Current state: currentTree: '\(currentTree?.name ?? "nil")', nodeStack: \(nodeStack.count) items")
-                print("  🚫 NOT adding tree to node stack (trees are not nodes)")
                 
             case 2:
-                // Level 1 node (2 dashes = level 1 in tree)
+                // Level 1 node (2 dashes = level 1 in tree) - should be child of root
                 print("  📌 Creating level 1 node: '\(content)'")
                 guard let tree = currentTree else {
                     print("  ❌ No tree defined for node: '\(content)'")
@@ -284,7 +293,18 @@ struct ImportSkillTreeView: View {
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 2 }.count
                 
-                // This is a root-level node in the tree (no parent)
+                // Find the root node (level 0) as parent
+                print("  🔍 Looking for root node (level 0)...")
+                if let rootIndex = nodeStack.lastIndex(where: { $0.1 == 0 }) {
+                    let root = nodeStack[rootIndex].0
+                    print("  👆 Found root node: '\(root.name)' at index \(rootIndex)")
+                    root.addChild(node)
+                    print("  ✅ Linked node '\(content)' to root '\(root.name)'")
+                } else {
+                    print("  ⚠️ No root node found for node '\(content)' at level 1")
+                    print("  📊 Available nodes in stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
+                }
+                
                 nodeStack.append((node, 2))
                 print("  ✅ Level 1 node created and added to stack")
                 print("  📊 Node stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")

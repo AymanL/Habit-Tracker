@@ -167,6 +167,7 @@ extension SkillNode {
     func addChild(_ child: SkillNode) {
         child.parentNode = self
         childNodes.insert(child)
+        print("👥 Linked '\(child.name)' to parent '\(name)'")
     }
     
     func removeChild(_ child: SkillNode) {
