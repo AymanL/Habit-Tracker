@@ -374,6 +374,18 @@ extension SkillNode {
         let child2 = SkillNode(context: context, name: "Child 2", type: .activity, description: "Second child node")
         child2.parentNode = rootNode
         child2.order = 2
+
+        // Create third child
+        let child3 = SkillNode(context: context, name: "Child 3", type: .activity, description: "Third child node")
+        child3.parentNode = rootNode
+        child3.order = 3
+
+        // Create fourth child
+        let child4 = SkillNode(context: context, name: "Child 4", type: .activity, description: "Fourth child node")
+        child4.parentNode = rootNode
+        child4.order = 4
+        
+        
         
         return rootNode
     }

@@ -87,6 +87,34 @@ struct NestedNodeView: View {
                     }
             }
         )
+        .onAppear {
+            // Comprehensive tree debugging
+            print("🌳 === TREE DISPLAY DEBUG ===")
+            print("📋 Current Node: '\(node.name)'")
+            print("   ├─ Parent: '\(node.parentNode?.name ?? "none")'")
+            print("   ├─ Tree: '\(node.tree?.name ?? "none")'")
+            print("   ├─ Order: \(node.order)")
+            print("   ├─ Type: \(node.nodeType)")
+            print("   ├─ Has Children: \(node.hasChildren)")
+            print("   ├─ Children Count: \(node.childNodes.count)")
+            print("   └─ Depth: \(node.depth)")
+            
+            if node.hasChildren {
+                print("   👶 Children:")
+                let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
+                for (index, child) in sortedChildren.enumerated() {
+                    print("      \(index + 1). '\(child.name)' (Order: \(child.order), Type: \(child.nodeType))")
+                }
+            }
+            
+            // If this is a root node, show the entire tree structure
+            if node.parentNode == nil {
+                print("🌱 === ROOT NODE DETECTED - SHOWING FULL TREE ===")
+                printTreeStructure(node: node, level: 0)
+            }
+            
+            print("🌳 === END TREE DISPLAY DEBUG ===")
+        }
         // .overlay(
         //     // Debug info overlay
         //     VStack {
@@ -147,6 +175,25 @@ struct NestedNodeView: View {
         
         // Show indicators if we have many children OR many descendants OR if width exceeds screen
         return children.count > 4 || hasManyDescendants || totalWidthNeeded > UIScreen.main.bounds.width - 40
+    }
+    
+    // Helper function to print the complete tree structure
+    private func printTreeStructure(node: SkillNode, level: Int) {
+        let indent = String(repeating: "   ", count: level)
+        let prefix = level == 0 ? "🌳" : "├─"
+        
+        print("\(indent)\(prefix) '\(node.name)' (Order: \(node.order), Type: \(node.nodeType), Children: \(node.childNodes.count))")
+        
+        let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
+        for (index, child) in sortedChildren.enumerated() {
+            let isLast = index == sortedChildren.count - 1
+            let childPrefix = isLast ? "└─" : "├─"
+            print("\(indent)   \(childPrefix) '\(child.name)' (Order: \(child.order), Type: \(child.nodeType), Children: \(child.childNodes.count))")
+            
+            if child.hasChildren {
+                printTreeStructure(node: child, level: level + 2)
+            }
+        }
     }
 }
 
