@@ -128,6 +128,12 @@ struct NodeView: View {
     var body: some View {
         SkillNodeVisualView(node: node) {
             onNodeTap(node)
+        } onValidate: {
+            if node.canBeCompleted {
+                node.complete()
+            } else if node.nodeType == .habitLinked {
+                node.completeForToday()
+            }
         }
         .background(
             GeometryReader { geometry in

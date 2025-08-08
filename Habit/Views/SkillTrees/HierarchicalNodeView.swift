@@ -19,6 +19,12 @@ struct HierarchicalNodeView: View {
                 // Node content
                 SkillNodeVisualView(node: node) {
                     onTap(node)
+                } onValidate: {
+                    if node.canBeCompleted {
+                        node.complete()
+                    } else if node.nodeType == .habitLinked {
+                        node.completeForToday()
+                    }
                 }
                 .padding(.leading, node.depth > 0 ? 8 : 0)
                 
