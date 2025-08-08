@@ -88,6 +88,11 @@ struct EditSkillNodeView: View {
             
             Section {
                 Picker("Parent Node", selection: $selectedParent) {
+                    // Allow clearing parent (making node a root) only when editing
+                    if isEditing {
+                        Text("No parent (make root)")
+                            .tag(nil as SkillNode?)
+                    }
                     ForEach(availableParentNodes) { parentNode in
                         HStack {
                             Image(systemName: parentNode.nodeType.icon)

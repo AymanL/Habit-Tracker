@@ -7,6 +7,7 @@ struct SkillTreeVisualizationView: View {
     // Debug state
     @State private var showDebugMode = false
     @State private var showLayoutGuides = false
+    @State private var levelHeights: [Int: CGFloat] = [:]
     
     var rootNode: SkillNode? {
         skillTree.nodes.filter { $0.isRootNode }.sorted { $0.order < $1.order }.first
@@ -46,6 +47,10 @@ struct SkillTreeVisualizationView: View {
             // Single root node tree visualization
             if let root = rootNode {
                 NestedNodeView(node: root, onNodeTap: onNodeTap)
+                    .environment(\.levelHeightMap, levelHeights)
+                    .onPreferenceChange(LevelHeightPreferenceKey.self) { heights in
+                        levelHeights = heights
+                    }
                     .overlay(
                         // Layout guides overlay
                         Group {
