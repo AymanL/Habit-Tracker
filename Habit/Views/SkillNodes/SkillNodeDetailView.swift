@@ -591,31 +591,32 @@ struct SkillNodeActionsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(spacing: 12) {
-                let dailyStatus = skillNode.getDailyCompletionStatus()
-                
-                if dailyStatus == .notCompleted {
-                    Button(action: completeNodeForToday) {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                            Text("Mark as Completed for Today")
+                if skillNode.nodeType != .root {
+                    let dailyStatus = skillNode.getDailyCompletionStatus()
+                    if dailyStatus == .notCompleted {
+                        Button(action: completeNodeForToday) {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                Text("Mark as Completed for Today")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
-                } else {
-                    Button(action: uncompleteNodeForToday) {
-                        HStack {
-                            Image(systemName: "xmark.circle.fill")
-                            Text("Mark as Not Completed for Today")
+                    } else {
+                        Button(action: uncompleteNodeForToday) {
+                            HStack {
+                                Image(systemName: "xmark.circle.fill")
+                                Text("Mark as Not Completed for Today")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
                     }
                 }
                 
