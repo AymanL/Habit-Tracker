@@ -418,7 +418,7 @@ struct ImportSkillTreeView: View {
         return ImportResult(
             forestsCount: forests.count,
             treesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).count },
-            nodesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { treeSum, tree in treeSum + tree.totalNodesCount } },
+            nodesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { treeSum, tree in treeSum + tree.nodes.count } },
             forests: forests
         )
     }

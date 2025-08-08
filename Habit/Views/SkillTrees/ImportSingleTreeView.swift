@@ -422,7 +422,7 @@ struct ImportSingleTreeView: View {
         return ImportResult(
             forestsCount: 0,
             treesCount: trees.count,
-            nodesCount: trees.reduce(0) { sum, tree in sum + tree.totalNodesCount },
+            nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
             forests: []
         )
     }
