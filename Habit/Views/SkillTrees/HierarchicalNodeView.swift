@@ -20,11 +20,15 @@ struct HierarchicalNodeView: View {
                 SkillNodeVisualView(node: node) {
                     onTap(node)
                 } onValidate: {
-                    if node.canBeCompleted {
-                        node.complete()
-                    } else if node.nodeType == .habitLinked {
-                        node.completeForToday()
+                    switch node.nodeType {
+                    case .goal, .activity:
+                        if node.isCompleted { node.uncompleteForToday() } else { node.complete() }
+                    case .habitLinked:
+                        if node.isCompletedForToday() { node.uncompleteForToday() } else { node.completeForToday() }
+                    case .root:
+                        break
                     }
+                    try? node.managedObjectContext?.save()
                 }
                 .padding(.leading, node.depth > 0 ? 8 : 0)
                 

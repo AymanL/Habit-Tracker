@@ -288,6 +288,8 @@ extension SkillNode {
         isCompleted = true
         print("✅ Completed SkillNode: \(name)")
         tree?.updateRootCompletionState()
+        tree?.objectWillChange.send()
+        tree?.forest?.objectWillChange.send()
     }
     
     /// Check if the node is completed for today
@@ -314,7 +316,7 @@ extension SkillNode {
     func getDailyCompletionStatus() -> DailyCompletionStatus {
         switch nodeType {
         case .root:
-            return .notCompleted // Root nodes are never considered completed for daily status
+            return isCompleted ? .completed : .notCompleted
         case .goal, .activity:
             return isCompleted ? .completed : .notCompleted
         case .habitLinked:
@@ -349,6 +351,8 @@ extension SkillNode {
             linkedHabit.addCompletedDate(Date())
             print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
             tree?.updateRootCompletionState()
+            tree?.objectWillChange.send()
+            tree?.forest?.objectWillChange.send()
         }
     }
     
@@ -363,6 +367,8 @@ extension SkillNode {
                 isCompleted = false
             }
             tree?.updateRootCompletionState()
+            tree?.objectWillChange.send()
+            tree?.forest?.objectWillChange.send()
         case .habitLinked:
             guard let linkedHabit = habit else {
                 print("⚠️ Cannot uncomplete habit-linked node '\(name)': no habit linked")
@@ -372,6 +378,8 @@ extension SkillNode {
             linkedHabit.removeCompletedDate(Date())
             print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
             tree?.updateRootCompletionState()
+            tree?.objectWillChange.send()
+            tree?.forest?.objectWillChange.send()
         }
     }
     

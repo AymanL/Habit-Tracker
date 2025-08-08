@@ -115,6 +115,7 @@ struct ForestDetailView: View {
 // MARK: - Forest Header View
 struct ForestHeaderView: View {
     @ObservedObject var forest: Forest
+    @State private var progressRefreshTick: Int = 0
     
     var body: some View {
         VStack(spacing: 12) {
@@ -140,6 +141,7 @@ struct ForestHeaderView: View {
             ProgressView(value: calculateForestCompletion(forest))
                 .progressViewStyle(LinearProgressViewStyle())
                 .tint(.green)
+                .id(progressRefreshTick)
             
             HStack {
                 Label("\(calculateCompletedTreesCount(forest)) completed", systemImage: "checkmark.circle.fill")
@@ -162,6 +164,9 @@ struct ForestHeaderView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: forest.managedObjectContext)) { _ in
+            progressRefreshTick &+= 1
+        }
     }
 }
 
@@ -202,6 +207,7 @@ struct ForestTreeDisplayView: View {
     @State private var showingNodeDetail = false
     @State private var showingAddNode = false
     @State private var levelHeights: [Int: CGFloat] = [:]
+    @State private var progressRefreshTick: Int = 0
     
     var body: some View {
         VStack(spacing: 16) {
@@ -223,6 +229,7 @@ struct ForestTreeDisplayView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
+                    .id(progressRefreshTick)
             }
             
             // Progress bar with navigation and add button
@@ -236,6 +243,7 @@ struct ForestTreeDisplayView: View {
                     .progressViewStyle(LinearProgressViewStyle())
                     .tint(.green)
                     .frame(maxWidth: .infinity)
+                    .id(progressRefreshTick)
                 
                 Button(action: onNext) {
                     Image(systemName: "chevron.right")
@@ -280,6 +288,9 @@ struct ForestTreeDisplayView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: tree.managedObjectContext)) { _ in
+            progressRefreshTick &+= 1
+        }
         .sheet(item: $selectedNode) { node in
             NavigationView {
                 SkillNodeDetailView(skillNode: node)

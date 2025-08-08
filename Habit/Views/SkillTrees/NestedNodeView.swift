@@ -49,12 +49,16 @@ struct NestedNodeView: View {
             SkillNodeVisualView(node: node) {
                 onNodeTap(node)
             } onValidate: {
-                // Validate on tap if possible
-                if node.canBeCompleted {
-                    node.complete()
-                } else if node.nodeType == .habitLinked {
-                    node.completeForToday()
+                // Toggle completion on tap
+                switch node.nodeType {
+                case .goal, .activity:
+                    if node.isCompleted { node.uncompleteForToday() } else { node.complete() }
+                case .habitLinked:
+                    if node.isCompletedForToday() { node.uncompleteForToday() } else { node.completeForToday() }
+                case .root:
+                    break
                 }
+                try? node.managedObjectContext?.save()
             }
             .background(
                 GeometryReader { geometry in
