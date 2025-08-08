@@ -69,6 +69,8 @@ struct SkillNodeVisualView: View {
 #Preview {
     SkillNodeVisualView(node: SkillNode.example) {
         print("Node tapped")
+    } onValidate: {
+        print("Node validated")
     }
         .environmentObject(DataController())
 } 
