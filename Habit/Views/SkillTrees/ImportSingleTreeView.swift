@@ -217,6 +217,29 @@ struct ImportSingleTreeView: View {
         
         print("🔄 Starting line-by-line processing...")
         
+        func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("["), let close = trimmed.firstIndex(of: "]") else {
+                return (trimmed, defaultType)
+            }
+            let tagRange = trimmed.index(after: trimmed.startIndex)..<close
+            let tag = String(trimmed[tagRange]).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let remainder = trimmed.index(after: close)..<trimmed.endIndex
+            let name = String(trimmed[remainder]).trimmingCharacters(in: .whitespaces)
+            let mapping: [String: SkillNodeType] = [
+                "goal": .goal,
+                "g": .goal,
+                "action": .activity,
+                "activity": .activity,
+                "a": .activity,
+                "boss": .boss,
+                "boss fight": .boss,
+                "bossfight": .boss
+            ]
+            let type = mapping[tag] ?? defaultType
+            return (name.isEmpty ? trimmed : name, type)
+        }
+
         for (index, line) in lines.enumerated() {
             let dashCount = line.prefix(while: { $0 == "-" }).count
             let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
@@ -259,7 +282,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .goal)
+                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: context, name: parsedName1, type: parsedType1)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 1 }.count
                 
@@ -289,7 +313,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedName2, type: parsedType2)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 2 }.count
                 
@@ -319,7 +344,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedName3, parsedType3) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedName3, type: parsedType3)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 3 }.count
                 
@@ -349,7 +375,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedNameN, type: parsedTypeN)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == dashCount }.count
                 
