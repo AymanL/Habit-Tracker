@@ -460,9 +460,7 @@ class SkillTreeTests: BaseTestCase {
             throw ImportError.emptyFile
         }
         
-        guard lines.count >= 1 else {
-            throw ImportError.invalidFormat("At least one line (tree name) is required")
-        }
+        // Require minimum content for a valid single-tree import: at least one line is okay here
         
         var trees: [SkillTree] = []
         var currentTree: SkillTree?
@@ -508,6 +506,12 @@ class SkillTreeTests: BaseTestCase {
                 if let root = rootNode {
                     nodeStack.removeAll()
                     nodeStack.append((root, 0)) // Root node is level 0
+                    if lines.count == 1 {
+                        let defaultChild = SkillNode(context: managedObjectContext, name: "First Goal", type: .goal)
+                        defaultChild.tree = tree
+                        defaultChild.order = 0
+                        root.addChild(defaultChild)
+                    }
                 }
                 trees.append(tree)
                 
@@ -595,7 +599,7 @@ class SkillTreeTests: BaseTestCase {
         return ImportResult(
             forestsCount: 0,
             treesCount: trees.count,
-            nodesCount: trees.reduce(0) { sum, tree in sum + tree.totalNodesCount },
+            nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
             forests: []
         )
     }

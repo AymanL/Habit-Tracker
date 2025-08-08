@@ -340,6 +340,13 @@ class ForestImportTests: BaseTestCase {
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
+        // Require minimum forest structure: one forest line (no dash) and at least one tree line (one dash)
+        let dashCounts = lines.map { $0.prefix(while: { $0 == "-" }).count }
+        let hasForestLine = dashCounts.contains(0)
+        let hasTreeLine = dashCounts.contains(1)
+        if !(hasForestLine && hasTreeLine) {
+            return ImportResult(forestsCount: 0, treesCount: 0, nodesCount: 0, forests: [])
+        }
         
         guard let context = managedObjectContext else {
             throw ImportError.saveFailed("No managed object context available")

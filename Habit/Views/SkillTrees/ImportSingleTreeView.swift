@@ -199,6 +199,8 @@ struct ImportSingleTreeView: View {
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
+        // Minimum valid single-tree content: at least a tree name
+        // If only one line is provided, we will create the tree and a single child under root to help users get started
         
         print("📋 Parsed lines (\(lines.count) total):")
         for (index, line) in lines.enumerated() {
@@ -267,6 +269,15 @@ struct ImportSingleTreeView: View {
                     nodeStack.removeAll()
                     nodeStack.append((root, 0)) // Root node is level 0
                     print("  ✅ Tree created with existing root node: '\(content)'")
+                    // If the entire input is a single line (just the tree name), create a default child node
+                    if lines.count == 1 {
+                        let defaultChild = SkillNode(context: context, name: "First Goal", type: .goal)
+                        defaultChild.tree = tree
+                        defaultChild.order = 0
+                        root.addChild(defaultChild)
+                        nodeStack.append((defaultChild, 1))
+                        print("  ➕ Auto-added default child 'First Goal' under root for single-line input")
+                    }
                 } else {
                     print("  ⚠️ No root node found for tree: '\(content)'")
                 }

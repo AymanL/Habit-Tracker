@@ -215,6 +215,13 @@ struct ImportSkillTreeView: View {
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
+        // Minimum valid forest content: at least one forest line (no dash) and one tree line (one dash)
+        let dashCounts = lines.map { $0.prefix(while: { $0 == "-" }).count }
+        let hasForestLine = dashCounts.contains(0)
+        let hasAtLeastOneTree = dashCounts.contains(1)
+        guard hasForestLine && hasAtLeastOneTree else {
+            throw ImportError.invalidFormat("A forest requires a forest name (no dashes) and at least one tree (one dash).")
+        }
         
         var forests: [Forest] = []
         var currentForest: Forest?
