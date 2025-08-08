@@ -62,8 +62,8 @@ struct ForestDetailView: View {
             }
             .padding()
         }
-        .navigationTitle(forest.name_ ?? "Forest")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -120,10 +120,6 @@ struct ForestHeaderView: View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(forest.name_ ?? "Forest")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
                     if !(forest.description_ ?? "").isEmpty {
                         Text(forest.description_ ?? "")
                             .font(.body)
@@ -145,9 +141,22 @@ struct ForestHeaderView: View {
                 }
             }
             
-            ProgressView(value: calculateForestCompletion(forest))
-                .progressViewStyle(LinearProgressViewStyle())
-                .tint(.green)
+            HStack(spacing: 8) {
+                Button(action: { /* previous tree from header if desired */ }) {
+                    Image(systemName: "chevron.left")
+                }
+                .disabled(getTreesSortedByOrder(forest).count <= 1)
+                
+                ProgressView(value: calculateForestCompletion(forest))
+                    .progressViewStyle(LinearProgressViewStyle())
+                    .tint(.green)
+                    .frame(maxWidth: .infinity)
+                
+                Button(action: { /* next tree from header if desired */ }) {
+                    Image(systemName: "chevron.right")
+                }
+                .disabled(getTreesSortedByOrder(forest).count <= 1)
+            }
             
             HStack {
                 Label("\(calculateCompletedTreesCount(forest)) completed", systemImage: "checkmark.circle.fill")
@@ -185,49 +194,15 @@ struct ForestTreeNavigationView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Navigation header
-            HStack {
-                Button(action: onPrevious) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                        .frame(width: 44, height: 44)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(8)
-                }
-                .disabled(totalTrees <= 1)
-                
-                Spacer()
-                
-                VStack(spacing: 4) {
-                    Text("Tree \(currentIndex + 1) of \(totalTrees)")
-                        .font(.headline)
-                        .fontWeight(.medium)
-                    
-                    if let tree = currentTree {
-                        Text(tree.name)
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Spacer()
-                
-                Button(action: onNext) {
-                    Image(systemName: "chevron.right")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                        .frame(width: 44, height: 44)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(8)
-                }
-                .disabled(totalTrees <= 1)
-            }
-            .padding(.horizontal)
-            
             // Current tree display
             if let tree = currentTree {
-                ForestTreeDisplayView(tree: tree, onTreeTap: onTreeTap)
+                ForestTreeDisplayView(
+                    tree: tree,
+                    canNavigate: totalTrees > 1,
+                    onPrevious: onPrevious,
+                    onNext: onNext,
+                    onTreeTap: onTreeTap
+                )
             }
         }
     }
@@ -236,6 +211,9 @@ struct ForestTreeNavigationView: View {
 // MARK: - Forest Tree Display View
 struct ForestTreeDisplayView: View {
     @ObservedObject var tree: SkillTree
+    let canNavigate: Bool
+    let onPrevious: () -> Void
+    let onNext: () -> Void
     let onTreeTap: (SkillTree) -> Void
     @State private var selectedNode: SkillNode?
     @State private var showingNodeDetail = false
@@ -246,36 +224,45 @@ struct ForestTreeDisplayView: View {
         VStack(spacing: 16) {
             // Tree header
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(tree.name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
+                        .font(.headline)
+                        .fontWeight(.semibold)
                     if !tree.treeDescription.isEmpty {
                         Text(tree.treeDescription)
-                            .font(.body)
+                            .font(.caption)
                             .foregroundColor(.secondary)
+                            .lineLimit(2)
                     }
                 }
-                
                 Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(Int(tree.completionPercentage * 100))%")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.green)
-                    
-                    Text("Complete")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+                Text("\(Int(tree.completionPercentage * 100))%")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
             }
             
-            // Progress bar
-            ProgressView(value: tree.completionPercentage)
-                .progressViewStyle(LinearProgressViewStyle())
-                .tint(.green)
+            // Progress bar with navigation and add button
+            HStack(spacing: 8) {
+                Button(action: onPrevious) {
+                    Image(systemName: "chevron.left")
+                }
+                .disabled(!canNavigate)
+                
+                ProgressView(value: tree.completionPercentage)
+                    .progressViewStyle(LinearProgressViewStyle())
+                    .tint(.green)
+                    .frame(maxWidth: .infinity)
+                
+                Button(action: onNext) {
+                    Image(systemName: "chevron.right")
+                }
+                .disabled(!canNavigate)
+                
+                Button(action: { showingAddNode = true }) {
+                    Image(systemName: "plus.circle")
+                }
+            }
             
             // Tree stats
             HStack {
@@ -290,34 +277,9 @@ struct ForestTreeDisplayView: View {
                     .foregroundColor(.green)
             }
             
-            // Add Node button
-            Button(action: { showingAddNode = true }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                    
-                    Text("Add Node")
-                        .font(.body)
-                        .fontWeight(.medium)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "arrow.right")
-                        .font(.caption)
-                }
-                .padding()
-                .background(Color.blue.opacity(0.1))
-                .foregroundColor(.blue)
-                .cornerRadius(8)
-            }
-            
             // Tree visualization
             if let rootNode = tree.rootNodes.first {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Tree Structure")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
                     NestedNodeView(node: rootNode) { node in
                         selectedNode = node
                         showingNodeDetail = true
