@@ -48,6 +48,13 @@ struct NestedNodeView: View {
             // Current node
             SkillNodeVisualView(node: node) {
                 onNodeTap(node)
+            } onValidate: {
+                // Validate on tap if possible
+                if node.canBeCompleted {
+                    node.complete()
+                } else if node.nodeType == .habitLinked {
+                    node.completeForToday()
+                }
             }
             .background(
                 GeometryReader { geometry in

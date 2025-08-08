@@ -3,6 +3,7 @@ import SwiftUI
 struct SkillNodeVisualView: View {
     @ObservedObject var node: SkillNode
     let onTap: () -> Void
+    let onValidate: () -> Void
     @Environment(\.levelHeightMap) private var levelHeightMap
     
     var nodeTypeIcon: String {
@@ -21,23 +22,23 @@ struct SkillNodeVisualView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 8) {
-                // Clickable icon only
-                Button(action: onTap) {
-                    ZStack {
-                        let dailyStatus = node.getDailyCompletionStatus()
-                        Circle()
-                            .fill(dailyStatus == .notCompleted ? Color.blue : Color.green)
-                            .frame(width: 30, height: 30)
-                        
-                        Image(systemName: nodeTypeIcon)
-                            .font(.title3)
-                            .foregroundColor(.white)
-                    }
+                // Icon with gestures: tap validates, long press opens menu
+                ZStack {
+                    let dailyStatus = node.getDailyCompletionStatus()
+                    Circle()
+                        .fill(dailyStatus == .notCompleted ? Color.blue : Color.green)
+                        .frame(width: 30, height: 30)
+                    
+                    Image(systemName: nodeTypeIcon)
+                        .font(.title3)
+                        .foregroundColor(.white)
                 }
+                .contentShape(Circle())
+                .onTapGesture { onValidate() }
+                .onLongPressGesture { onTap() }
                 .anchorPreference(key: NodeCenterPreferenceKey.self, value: .center) { anchor in
                     [node.id: anchor]
                 }
-                .buttonStyle(PlainButtonStyle())
                 .zIndex(1)
                 
                 // Non-clickable title below icon
