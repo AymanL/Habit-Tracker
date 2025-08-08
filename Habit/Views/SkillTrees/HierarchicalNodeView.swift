@@ -21,7 +21,7 @@ struct HierarchicalNodeView: View {
                     onTap(node)
                 } onValidate: {
                     switch node.nodeType {
-                    case .goal, .activity:
+                    case .goal, .activity, .boss:
                         if node.isCompleted { node.uncompleteForToday() } else { node.complete() }
                     case .habitLinked:
                         if node.isCompletedForToday() { node.uncompleteForToday() } else { node.completeForToday() }

@@ -48,6 +48,7 @@ enum SkillNodeType: String, CaseIterable {
     case goal = "goal"
     case activity = "activity"
     case habitLinked = "habitLinked"
+    case boss = "boss"
     
     var displayName: String {
         switch self {
@@ -59,6 +60,8 @@ enum SkillNodeType: String, CaseIterable {
             return "Activity"
         case .habitLinked:
             return "Habit Linked"
+        case .boss:
+            return "Boss Fight"
         }
     }
     
@@ -72,6 +75,8 @@ enum SkillNodeType: String, CaseIterable {
             return "An activity that can be completed multiple times"
         case .habitLinked:
             return "Linked to an existing habit for daily tracking"
+        case .boss:
+            return "A major milestone or super goal in the tree"
         }
     }
     
@@ -85,6 +90,8 @@ enum SkillNodeType: String, CaseIterable {
             return "repeat"
         case .habitLinked:
             return "link"
+        case .boss:
+            return "crown.fill"
         }
     }
 }
@@ -241,7 +248,7 @@ extension SkillNode {
         switch nodeType {
         case .root:
             return false // Root nodes cannot be completed
-        case .goal, .activity:
+        case .goal, .activity, .boss:
             return !isCompleted
         case .habitLinked:
             return habit != nil && !isCompleted
@@ -317,7 +324,7 @@ extension SkillNode {
         switch nodeType {
         case .root:
             return isCompleted ? .completed : .notCompleted
-        case .goal, .activity:
+        case .goal, .activity, .boss:
             return isCompleted ? .completed : .notCompleted
         case .habitLinked:
             if let linkedHabit = habit {
@@ -338,7 +345,7 @@ extension SkillNode {
         case .root:
             // Root nodes cannot be completed
             print("⚠️ Cannot complete root node: \(name)")
-        case .goal, .activity:
+        case .goal, .activity, .boss:
             if !isCompleted {
                 complete()
             }
@@ -362,7 +369,7 @@ extension SkillNode {
         case .root:
             // Root nodes cannot be uncompleted
             print("⚠️ Cannot uncomplete root node: \(name)")
-        case .goal, .activity:
+        case .goal, .activity, .boss:
             if isCompleted {
                 isCompleted = false
             }
