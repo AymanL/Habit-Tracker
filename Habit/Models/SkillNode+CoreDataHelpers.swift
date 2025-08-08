@@ -287,6 +287,7 @@ extension SkillNode {
         
         isCompleted = true
         print("✅ Completed SkillNode: \(name)")
+        tree?.updateRootCompletionState()
     }
     
     /// Check if the node is completed for today
@@ -347,6 +348,7 @@ extension SkillNode {
             // Complete the linked habit for today
             linkedHabit.addCompletedDate(Date())
             print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            tree?.updateRootCompletionState()
         }
     }
     
@@ -360,6 +362,7 @@ extension SkillNode {
             if isCompleted {
                 isCompleted = false
             }
+            tree?.updateRootCompletionState()
         case .habitLinked:
             guard let linkedHabit = habit else {
                 print("⚠️ Cannot uncomplete habit-linked node '\(name)': no habit linked")
@@ -368,6 +371,7 @@ extension SkillNode {
             // Uncomplete the linked habit for today
             linkedHabit.removeCompletedDate(Date())
             print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            tree?.updateRootCompletionState()
         }
     }
     

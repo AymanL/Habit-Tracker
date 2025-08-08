@@ -115,6 +115,23 @@ extension SkillTree {
         print("🌳 Created SkillTree: \(name) with root node")
     }
     
+    // MARK: - Completion Logic
+    
+    /// Automatically validates the root node when all non-root nodes are completed.
+    /// If any non-root node becomes uncompleted, the root node is unvalidated.
+    func updateRootCompletionState() {
+        guard let root = rootNodes.first else { return }
+        let progressNodes = nodes.filter { $0.nodeType != .root }
+        guard !progressNodes.isEmpty else {
+            if root.isCompleted { root.isCompleted = false }
+            return
+        }
+        let shouldCompleteRoot = progressNodes.allSatisfy { $0.isCompleted }
+        if root.isCompleted != shouldCompleteRoot {
+            root.isCompleted = shouldCompleteRoot
+        }
+    }
+    
     // MARK: - Example Data
     
     static var example: SkillTree {
