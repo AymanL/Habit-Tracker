@@ -119,44 +119,27 @@ struct ForestHeaderView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    if !(forest.description_ ?? "").isEmpty {
-                        Text(forest.description_ ?? "")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                    }
-                }
+                // Forest title brought back into the header area
+                Text(forest.name_ ?? "Forest")
+                    .font(.headline)
+                    .fontWeight(.semibold)
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: 2) {
                     Text("\(Int(calculateForestCompletion(forest) * 100))%")
-                        .font(.title2)
+                        .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
-                    
                     Text("Complete")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
             
-            HStack(spacing: 8) {
-                Button(action: { /* previous tree from header if desired */ }) {
-                    Image(systemName: "chevron.left")
-                }
-                .disabled(getTreesSortedByOrder(forest).count <= 1)
-                
-                ProgressView(value: calculateForestCompletion(forest))
-                    .progressViewStyle(LinearProgressViewStyle())
-                    .tint(.green)
-                    .frame(maxWidth: .infinity)
-                
-                Button(action: { /* next tree from header if desired */ }) {
-                    Image(systemName: "chevron.right")
-                }
-                .disabled(getTreesSortedByOrder(forest).count <= 1)
-            }
+            ProgressView(value: calculateForestCompletion(forest))
+                .progressViewStyle(LinearProgressViewStyle())
+                .tint(.green)
             
             HStack {
                 Label("\(calculateCompletedTreesCount(forest)) completed", systemImage: "checkmark.circle.fill")
