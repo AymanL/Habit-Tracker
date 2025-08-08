@@ -240,6 +240,7 @@ struct ForestTreeDisplayView: View {
     @State private var selectedNode: SkillNode?
     @State private var showingNodeDetail = false
     @State private var showingAddNode = false
+    @State private var levelHeights: [Int: CGFloat] = [:]
     
     var body: some View {
         VStack(spacing: 16) {
@@ -320,6 +321,10 @@ struct ForestTreeDisplayView: View {
                     NestedNodeView(node: rootNode) { node in
                         selectedNode = node
                         showingNodeDetail = true
+                    }
+                    .environment(\.levelHeightMap, levelHeights)
+                    .onPreferenceChange(LevelHeightPreferenceKey.self) { heights in
+                        levelHeights = heights
                     }
                     .frame(minHeight: 200)
                     .background(Color(.systemGray6))

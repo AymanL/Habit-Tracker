@@ -1,8 +1,43 @@
 import SwiftUI
 
+// MARK: - Per-Level Height Sharing
+
+struct LevelHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: [Int: CGFloat] = [:]
+    
+    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) {
+        let incoming = nextValue()
+        for (level, height) in incoming {
+            value[level] = max(value[level] ?? 0, height)
+        }
+    }
+}
+
+private struct LevelHeightMapKey: EnvironmentKey {
+    static let defaultValue: [Int: CGFloat] = [:]
+}
+
+extension EnvironmentValues {
+    var levelHeightMap: [Int: CGFloat] {
+        get { self[LevelHeightMapKey.self] }
+        set { self[LevelHeightMapKey.self] = newValue }
+    }
+}
+
+// MARK: - Node Center Preference (for connector lines)
+
+struct NodeCenterPreferenceKey: PreferenceKey {
+    static var defaultValue: [UUID: Anchor<CGPoint>] = [:]
+    
+    static func reduce(value: inout [UUID: Anchor<CGPoint>], nextValue: () -> [UUID: Anchor<CGPoint>]) {
+        value.merge(nextValue()) { current, new in current }
+    }
+}
+
 struct NestedNodeView: View {
     @ObservedObject var node: SkillNode
     let onNodeTap: (SkillNode) -> Void
+    @Environment(\.levelHeightMap) private var levelHeightMap
     
     // Debug state
     @State private var showDebugInfo = false
@@ -84,6 +119,30 @@ struct NestedNodeView: View {
                     }
             }
         )
+        .backgroundPreferenceValue(NodeCenterPreferenceKey.self) { centers in
+            GeometryReader { proxy in
+                Path { path in
+                    guard let parentAnchor = centers[node.id] else { return }
+                    let parentPoint = proxy[parentAnchor]
+                    let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
+                    let childPoints: [CGPoint] = sortedChildren.compactMap { centers[$0.id] }.map { proxy[$0] }
+                    guard !childPoints.isEmpty else { return }
+                    let minChildX = childPoints.map { $0.x }.min() ?? parentPoint.x
+                    let maxChildX = childPoints.map { $0.x }.max() ?? parentPoint.x
+                    let minChildY = childPoints.map { $0.y }.min() ?? parentPoint.y
+                    let junctionY = (parentPoint.y + minChildY) / 2.0
+                    path.move(to: parentPoint)
+                    path.addLine(to: CGPoint(x: parentPoint.x, y: junctionY))
+                    path.move(to: CGPoint(x: minChildX, y: junctionY))
+                    path.addLine(to: CGPoint(x: maxChildX, y: junctionY))
+                    for cp in childPoints {
+                        path.move(to: CGPoint(x: cp.x, y: junctionY))
+                        path.addLine(to: cp)
+                    }
+                }
+                .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round))
+            }
+        }
         .onAppear {
             // Comprehensive tree debugging
             print("🌳 === TREE DISPLAY DEBUG ===")

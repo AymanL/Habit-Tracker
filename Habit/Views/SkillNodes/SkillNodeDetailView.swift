@@ -6,6 +6,7 @@ struct SkillNodeDetailView: View {
     
     @ObservedObject var skillNode: SkillNode
     @State private var showingDeleteAlert = false
+    @State private var navigateToEdit = false
     
     // Debug state tracking
     @State private var debugInfo: String = ""
@@ -22,6 +23,15 @@ struct SkillNodeDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                // Hidden navigation link to push Edit view (avoids presenting a modal over a modal)
+                if let tree = skillNode.tree {
+                    NavigationLink(isActive: $navigateToEdit) {
+                        EditSkillNodeView(skillTree: tree, skillNode: skillNode)
+                    } label: {
+                        EmptyView()
+                    }
+                    .hidden()
+                }
                 // Always visible debug indicator (for testing)
                 #if DEBUG
                 HStack {
@@ -147,11 +157,7 @@ struct SkillNodeDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
-                    NavigationLink(destination: {
-                        if let tree = skillNode.tree {
-                            EditSkillNodeView(skillTree: tree, skillNode: skillNode)
-                        }
-                    }) {
+                    Button(action: { navigateToEdit = true }) {
                         Label("Edit Node", systemImage: "pencil")
                     }
                     

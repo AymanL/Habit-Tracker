@@ -41,18 +41,23 @@ extension SkillTree {
     
     // MARK: - Computed Properties
     
+    private var nonRootNodes: [SkillNode] {
+        return nodes.filter { $0.nodeType != .root }
+    }
+
     var completionPercentage: Double {
-        guard !nodes.isEmpty else { return 0.0 }
-        let completedCount = nodes.filter { $0.isCompleted }.count
-        return Double(completedCount) / Double(nodes.count)
+        let progressNodes = nonRootNodes
+        guard !progressNodes.isEmpty else { return 0.0 }
+        let completedCount = progressNodes.filter { $0.isCompleted }.count
+        return Double(completedCount) / Double(progressNodes.count)
     }
     
     var completedNodesCount: Int {
-        nodes.filter { $0.isCompleted }.count
+        nonRootNodes.filter { $0.isCompleted }.count
     }
     
     var totalNodesCount: Int {
-        nodes.count
+        nonRootNodes.count
     }
     
     // MARK: - Tree Structure
