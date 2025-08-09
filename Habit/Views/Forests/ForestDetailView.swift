@@ -191,13 +191,6 @@ struct ForestTreeNavigationView: View {
                     onNext: onNext,
                     onTreeTap: onTreeTap
                 )
-                ForestTreeDisplayView(
-                    tree: tree,
-                    canNavigate: totalTrees > 1,
-                    onPrevious: onPrevious,
-                    onNext: onNext,
-                    onTreeTap: onTreeTap
-                )
             }
         }
     }
@@ -206,9 +199,6 @@ struct ForestTreeNavigationView: View {
 // MARK: - Forest Tree Display View
 struct ForestTreeDisplayView: View {
     @ObservedObject var tree: SkillTree
-    let canNavigate: Bool
-    let onPrevious: () -> Void
-    let onNext: () -> Void
     let canNavigate: Bool
     let onPrevious: () -> Void
     let onNext: () -> Void
@@ -224,7 +214,6 @@ struct ForestTreeDisplayView: View {
             // Tree header
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                VStack(alignment: .leading, spacing: 2) {
                     Text(tree.name)
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -233,9 +222,7 @@ struct ForestTreeDisplayView: View {
                     if !tree.treeDescription.isEmpty {
                         Text(tree.treeDescription)
                             .font(.caption)
-                            .font(.caption)
                             .foregroundColor(.secondary)
-                            .lineLimit(2)
                             .lineLimit(2)
                     }
                 }

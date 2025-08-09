@@ -34,44 +34,9 @@ struct NodeCenterPreferenceKey: PreferenceKey {
     }
 }
 
-// MARK: - Per-Level Height Sharing
-
-struct LevelHeightPreferenceKey: PreferenceKey {
-    static var defaultValue: [Int: CGFloat] = [:]
-    
-    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) {
-        let incoming = nextValue()
-        for (level, height) in incoming {
-            value[level] = max(value[level] ?? 0, height)
-        }
-    }
-}
-
-private struct LevelHeightMapKey: EnvironmentKey {
-    static let defaultValue: [Int: CGFloat] = [:]
-}
-
-extension EnvironmentValues {
-    var levelHeightMap: [Int: CGFloat] {
-        get { self[LevelHeightMapKey.self] }
-        set { self[LevelHeightMapKey.self] = newValue }
-    }
-}
-
-// MARK: - Node Center Preference (for connector lines)
-
-struct NodeCenterPreferenceKey: PreferenceKey {
-    static var defaultValue: [UUID: Anchor<CGPoint>] = [:]
-    
-    static func reduce(value: inout [UUID: Anchor<CGPoint>], nextValue: () -> [UUID: Anchor<CGPoint>]) {
-        value.merge(nextValue()) { current, new in current }
-    }
-}
-
 struct NestedNodeView: View {
     @ObservedObject var node: SkillNode
     let onNodeTap: (SkillNode) -> Void
-    @Environment(\.levelHeightMap) private var levelHeightMap
     @Environment(\.levelHeightMap) private var levelHeightMap
     
     // Debug state
