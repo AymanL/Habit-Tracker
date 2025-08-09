@@ -215,6 +215,13 @@ struct ImportSkillTreeView: View {
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
+        // Minimum valid forest content: at least one forest line (no dash) and one tree line (one dash)
+        let dashCounts = lines.map { $0.prefix(while: { $0 == "-" }).count }
+        let hasForestLine = dashCounts.contains(0)
+        let hasAtLeastOneTree = dashCounts.contains(1)
+        guard hasForestLine && hasAtLeastOneTree else {
+            throw ImportError.invalidFormat("A forest requires a forest name (no dashes) and at least one tree (one dash).")
+        }
         
         var forests: [Forest] = []
         var currentForest: Forest?
@@ -225,6 +232,29 @@ struct ImportSkillTreeView: View {
         
         print("🔄 Starting line-by-line processing...")
         
+        func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("["), let close = trimmed.firstIndex(of: "]") else {
+                return (trimmed, defaultType)
+            }
+            let tagRange = trimmed.index(after: trimmed.startIndex)..<close
+            let tag = String(trimmed[tagRange]).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let remainder = trimmed.index(after: close)..<trimmed.endIndex
+            let name = String(trimmed[remainder]).trimmingCharacters(in: .whitespaces)
+            let mapping: [String: SkillNodeType] = [
+                "goal": .goal,
+                "g": .goal,
+                "action": .activity,
+                "activity": .activity,
+                "a": .activity,
+                "boss": .boss,
+                "boss fight": .boss,
+                "bossfight": .boss
+            ]
+            let type = mapping[tag] ?? defaultType
+            return (name.isEmpty ? trimmed : name, type)
+        }
+
         for (index, line) in lines.enumerated() {
             let dashCount = line.prefix(while: { $0 == "-" }).count
             let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
@@ -289,7 +319,8 @@ struct ImportSkillTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .goal)
+                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: context, name: parsedName1, type: parsedType1)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 2 }.count
                 
@@ -318,7 +349,8 @@ struct ImportSkillTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedName2, type: parsedType2)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 3 }.count
                 
@@ -347,7 +379,8 @@ struct ImportSkillTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedNameN, type: parsedTypeN)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == dashCount }.count
                 
@@ -392,7 +425,7 @@ struct ImportSkillTreeView: View {
         return ImportResult(
             forestsCount: forests.count,
             treesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).count },
-            nodesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { treeSum, tree in treeSum + tree.totalNodesCount } },
+            nodesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { treeSum, tree in treeSum + tree.nodes.count } },
             forests: forests
         )
     }

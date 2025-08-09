@@ -199,6 +199,8 @@ struct ImportSingleTreeView: View {
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
+        // Minimum valid single-tree content: at least a tree name
+        // If only one line is provided, we will create the tree and a single child under root to help users get started
         
         print("📋 Parsed lines (\(lines.count) total):")
         for (index, line) in lines.enumerated() {
@@ -217,6 +219,29 @@ struct ImportSingleTreeView: View {
         
         print("🔄 Starting line-by-line processing...")
         
+        func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("["), let close = trimmed.firstIndex(of: "]") else {
+                return (trimmed, defaultType)
+            }
+            let tagRange = trimmed.index(after: trimmed.startIndex)..<close
+            let tag = String(trimmed[tagRange]).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let remainder = trimmed.index(after: close)..<trimmed.endIndex
+            let name = String(trimmed[remainder]).trimmingCharacters(in: .whitespaces)
+            let mapping: [String: SkillNodeType] = [
+                "goal": .goal,
+                "g": .goal,
+                "action": .activity,
+                "activity": .activity,
+                "a": .activity,
+                "boss": .boss,
+                "boss fight": .boss,
+                "bossfight": .boss
+            ]
+            let type = mapping[tag] ?? defaultType
+            return (name.isEmpty ? trimmed : name, type)
+        }
+
         for (index, line) in lines.enumerated() {
             let dashCount = line.prefix(while: { $0 == "-" }).count
             let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
@@ -244,6 +269,15 @@ struct ImportSingleTreeView: View {
                     nodeStack.removeAll()
                     nodeStack.append((root, 0)) // Root node is level 0
                     print("  ✅ Tree created with existing root node: '\(content)'")
+                    // If the entire input is a single line (just the tree name), create a default child node
+                    if lines.count == 1 {
+                        let defaultChild = SkillNode(context: context, name: "First Goal", type: .goal)
+                        defaultChild.tree = tree
+                        defaultChild.order = 0
+                        root.addChild(defaultChild)
+                        nodeStack.append((defaultChild, 1))
+                        print("  ➕ Auto-added default child 'First Goal' under root for single-line input")
+                    }
                 } else {
                     print("  ⚠️ No root node found for tree: '\(content)'")
                 }
@@ -259,7 +293,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .goal)
+                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: context, name: parsedName1, type: parsedType1)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 1 }.count
                 
@@ -289,7 +324,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedName2, type: parsedType2)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 2 }.count
                 
@@ -319,7 +355,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedName3, parsedType3) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedName3, type: parsedType3)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 3 }.count
                 
@@ -349,7 +386,8 @@ struct ImportSingleTreeView: View {
                 }
                 
                 print("  📍 Adding node to tree: '\(tree.name)'")
-                let node = SkillNode(context: context, name: content, type: .activity)
+                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: context, name: parsedNameN, type: parsedTypeN)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == dashCount }.count
                 
@@ -395,7 +433,7 @@ struct ImportSingleTreeView: View {
         return ImportResult(
             forestsCount: 0,
             treesCount: trees.count,
-            nodesCount: trees.reduce(0) { sum, tree in sum + tree.totalNodesCount },
+            nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
             forests: []
         )
     }

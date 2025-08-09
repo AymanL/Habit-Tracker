@@ -460,14 +460,35 @@ class SkillTreeTests: BaseTestCase {
             throw ImportError.emptyFile
         }
         
-        guard lines.count >= 1 else {
-            throw ImportError.invalidFormat("At least one line (tree name) is required")
-        }
+        // Require minimum content for a valid single-tree import: at least one line is okay here
         
         var trees: [SkillTree] = []
         var currentTree: SkillTree?
         var nodeStack: [(SkillNode, Int)] = []
         
+        func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("["), let close = trimmed.firstIndex(of: "]") else {
+                return (trimmed, defaultType)
+            }
+            let tagRange = trimmed.index(after: trimmed.startIndex)..<close
+            let tag = String(trimmed[tagRange]).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let remainder = trimmed.index(after: close)..<trimmed.endIndex
+            let name = String(trimmed[remainder]).trimmingCharacters(in: .whitespaces)
+            let mapping: [String: SkillNodeType] = [
+                "goal": .goal,
+                "g": .goal,
+                "action": .activity,
+                "activity": .activity,
+                "a": .activity,
+                "boss": .boss,
+                "boss fight": .boss,
+                "bossfight": .boss
+            ]
+            let type = mapping[tag] ?? defaultType
+            return (name.isEmpty ? trimmed : name, type)
+        }
+
         for (index, line) in lines.enumerated() {
             let dashCount = line.prefix(while: { $0 == "-" }).count
             let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
@@ -485,6 +506,12 @@ class SkillTreeTests: BaseTestCase {
                 if let root = rootNode {
                     nodeStack.removeAll()
                     nodeStack.append((root, 0)) // Root node is level 0
+                    if lines.count == 1 {
+                        let defaultChild = SkillNode(context: managedObjectContext, name: "First Goal", type: .goal)
+                        defaultChild.tree = tree
+                        defaultChild.order = 0
+                        root.addChild(defaultChild)
+                    }
                 }
                 trees.append(tree)
                 
@@ -494,7 +521,8 @@ class SkillTreeTests: BaseTestCase {
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                let node = SkillNode(context: managedObjectContext, name: content, type: .goal)
+                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: managedObjectContext, name: parsedName1, type: parsedType1)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 1 }.count
                 
@@ -512,7 +540,8 @@ class SkillTreeTests: BaseTestCase {
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: managedObjectContext, name: parsedName2, type: parsedType2)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 2 }.count
                 
@@ -530,7 +559,8 @@ class SkillTreeTests: BaseTestCase {
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                let (parsedName3, parsedType3) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: managedObjectContext, name: parsedName3, type: parsedType3)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == 3 }.count
                 
@@ -548,7 +578,8 @@ class SkillTreeTests: BaseTestCase {
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                let node = SkillNode(context: managedObjectContext, name: content, type: .activity)
+                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
+                let node = SkillNode(context: managedObjectContext, name: parsedNameN, type: parsedTypeN)
                 node.tree = tree
                 node.order = nodeStack.filter { $0.1 == dashCount }.count
                 
@@ -568,7 +599,7 @@ class SkillTreeTests: BaseTestCase {
         return ImportResult(
             forestsCount: 0,
             treesCount: trees.count,
-            nodesCount: trees.reduce(0) { sum, tree in sum + tree.totalNodesCount },
+            nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
             forests: []
         )
     }

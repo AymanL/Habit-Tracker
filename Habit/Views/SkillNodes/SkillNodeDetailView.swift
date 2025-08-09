@@ -375,6 +375,8 @@ struct SkillNodeHeaderView: View {
             return "repeat"
         case .habitLinked:
             return "link"
+        case .boss:
+            return "crown.fill"
         }
     }
 }

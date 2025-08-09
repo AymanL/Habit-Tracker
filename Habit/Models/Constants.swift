@@ -8,6 +8,9 @@
 import SwiftUI
 
 enum Constants {    
+    // Toggle to enable/disable debug UI for the skill tree (borders, backgrounds, logs)
+    static let debugSkillTreeUI: Bool = false
+
     static let motivationPrompts: [LocalizedStringKey] = [
          "Keep it Up! 🙌",
          "🙏 Feel the force of the Habit",

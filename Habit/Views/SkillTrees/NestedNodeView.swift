@@ -48,6 +48,17 @@ struct NestedNodeView: View {
             // Current node
             SkillNodeVisualView(node: node) {
                 onNodeTap(node)
+            } onValidate: {
+                // Toggle completion on tap
+                switch node.nodeType {
+                case .goal, .activity, .boss:
+                    if node.isCompleted { node.uncompleteForToday() } else { node.complete() }
+                case .habitLinked:
+                    if node.isCompletedForToday() { node.uncompleteForToday() } else { node.completeForToday() }
+                case .root:
+                    break
+                }
+                try? node.managedObjectContext?.save()
             }
             .background(
                 GeometryReader { geometry in
@@ -84,41 +95,57 @@ struct NestedNodeView: View {
 //                }
 //            )
             
-            // Children (if any) - evenly distributed around parent
+            // Children (if any) - non-boss on first row, boss on second row
             if node.hasChildren {
                 let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
-                
-                ZStack {
-                    HStack(spacing: 0) {
-                        ForEach(sortedChildren, id: \.id) { childNode in
-                            NestedNodeView(node: childNode, onNodeTap: onNodeTap)
-                                .frame(maxHeight: .infinity, alignment: .top)
+                let nonBossChildren = sortedChildren.filter { $0.nodeType != .boss }
+                let bossChildren = sortedChildren.filter { $0.nodeType == .boss }
+
+                VStack(spacing: 0) {
+                    if !nonBossChildren.isEmpty {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(nonBossChildren, id: \.id) { childNode in
+                                // Align children tops and prevent each child from stretching horizontally
+                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
+                        .background(showDebugInfo ? Color.orange.opacity(0.08) : Color.clear)
+                        .frame(alignment: nonBossChildren.count == 1 ? .center : .leading)
                     }
-                    .frame(
-                        // minWidth: max(
-                        //     UIScreen.main.bounds.width,
-                        //     CGFloat(sortedChildren.count) * 100 + CGFloat(sortedChildren.count - 1) * 10 // Reasonable minimum space for nodes
-                        // ),
-                        alignment: sortedChildren.count == 1 ? .center : .leading
-                    )
+
+                    if !bossChildren.isEmpty {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(bossChildren, id: \.id) { childNode in
+                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .background(showDebugInfo ? Color.purple.opacity(0.08) : Color.clear)
+                        .frame(alignment: bossChildren.count == 1 ? .center : .leading)
+                    }
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .border(Color.red, width: 2)
-        .background(Color.blue.opacity(0.1)) // Debug background
-        .background(
-            GeometryReader { geometry in
-                Color.clear
-                    .onAppear {
-                        print("📐 Node '\(node.name)' bounding box: \(Int(geometry.frame(in: .global).width))×\(Int(geometry.frame(in: .global).height))")
-                    }
-                    .onChange(of: geometry.frame(in: .global)) { newFrame in
-                        print("📐 Node '\(node.name)' bounding box updated: \(Int(newFrame.width))×\(Int(newFrame.height))")
-                    }
-            }
-        )
+        // Debug visuals
+        .if(Constants.debugSkillTreeUI) { view in
+            view
+                .border(Color.red, width: 2)
+                .background(Color.blue.opacity(0.1))
+        }
+        .if(Constants.debugSkillTreeUI) { view in
+            view.background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .onAppear {
+                            print("📐 Node '\(node.name)' bounding box: \(Int(geometry.frame(in: .global).width))×\(Int(geometry.frame(in: .global).height))")
+                        }
+                        .onChange(of: geometry.frame(in: .global)) { newFrame in
+                            print("📐 Node '\(node.name)' bounding box updated: \(Int(newFrame.width))×\(Int(newFrame.height))")
+                        }
+                }
+            )
+        }
         .backgroundPreferenceValue(NodeCenterPreferenceKey.self) { centers in
             GeometryReader { proxy in
                 Path { path in
@@ -171,45 +198,11 @@ struct NestedNodeView: View {
             
             print("🌳 === END TREE DISPLAY DEBUG ===")
         }
-        // .overlay(
-        //     // Debug info overlay
-        //     VStack {
-        //         HStack {
-        //             Spacer()
-        //             VStack(alignment: .trailing, spacing: 2) {
-        //                 Text("Children: \(node.childNodes.count)")
-        //                     .font(.caption2)
-        //                     .padding(2)
-        //                     .background(Color.orange.opacity(0.8))
-        //                     .foregroundColor(.white)
-        //                     .cornerRadius(2)
-                        
-        //                 Text("Depth: \(node.depth)")
-        //                     .font(.caption2)
-        //                     .padding(2)
-        //                     .background(Color.purple.opacity(0.8))
-        //                     .foregroundColor(.white)
-        //                     .cornerRadius(2)
-        //             }
-        //         }
-                
-        //         Spacer()
-                
-        //         // Bounding box dimensions
-        //         HStack {
-        //             Spacer()
-        //             VStack(alignment: .trailing, spacing: 2) {
-        //                 Text("📐 Bounding Box")
-        //                     .font(.caption2)
-        //                     .padding(2)
-        //                     .background(Color.red.opacity(0.8))
-        //                     .foregroundColor(.white)
-        //                     .cornerRadius(2)
-        //             }
-        //         }
-        //     }
-        //     .padding(4)
-        // )
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            showDebugInfo.toggle()
+            print("🔎 Debug overlay for '\(node.name)' \(showDebugInfo ? "ON" : "OFF")")
+        }
     }
     
     // Helper function to print the complete tree structure
