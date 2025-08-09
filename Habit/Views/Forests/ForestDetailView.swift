@@ -270,7 +270,7 @@ struct ForestTreeDisplayView: View {
             
             // Tree visualization
             if let rootNode = tree.rootNodes.first {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     NestedNodeView(node: rootNode) { node in
                         selectedNode = node
                         showingNodeDetail = true
@@ -279,7 +279,6 @@ struct ForestTreeDisplayView: View {
                     .onPreferenceChange(LevelHeightPreferenceKey.self) { heights in
                         levelHeights = heights
                     }
-                    .frame(minHeight: 200)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                 }
@@ -288,6 +287,7 @@ struct ForestTreeDisplayView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .frame(maxWidth: 350)
         .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: tree.managedObjectContext)) { _ in
             progressRefreshTick &+= 1
         }

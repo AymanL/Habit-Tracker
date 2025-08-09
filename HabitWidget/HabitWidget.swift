@@ -138,25 +138,14 @@ struct HabitRowView: View {
         ZStack() {
             HStack() {
                 habitTitle
-                //                        .padding(.horizontal, 22)
                     .allowsHitTesting(false)
                 Spacer()
                 checkmarksView
                                         .padding(.trailing, 12)
             }
-//                            .padding(.leading, 22)
-            //                .padding(.top, 12)
-            //
-                            .frame(maxHeight: .infinity)
+            .frame(maxHeight: .infinity)
             
         }
-        //        .frame(height: 95)
-//                .clipShape(
-//                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-//                )
-        //        .sheet(isPresented: $isPresentingEditHabitView) {
-        //            DetailView(habit: habit)
-        //        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(habit.title), \(habit.strengthPercentage)% strength, \(habit.isCompleted(daysAgo: 0) ? "completed" : "not completed") for today.")
         .accessibilityAction(named: "Toggle completion for today") {
