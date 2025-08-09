@@ -40,6 +40,7 @@ struct SkillNodeVisualView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
+        ZStack(alignment: .top) {
             VStack(spacing: 8) {
                 // Icon with gestures: tap validates, long press opens menu
                 ZStack {
@@ -66,6 +67,7 @@ struct SkillNodeVisualView: View {
                     .fontWeight(.medium)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 100)
+                    .fixedSize(horizontal: false, vertical: true)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(8)
