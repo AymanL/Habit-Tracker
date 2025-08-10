@@ -15,7 +15,9 @@ struct ImportSkillTreeView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            // Wrap main content in a vertical ScrollView so the view is scrollable
+            ScrollView {
+                VStack(spacing: 20) {
             // Header
             VStack(spacing: 8) {
                 Image(systemName: "doc.text")
@@ -129,8 +131,11 @@ struct ImportSkillTreeView: View {
                     .cornerRadius(10)
                 }
                 .disabled(textInput.isEmpty)
+                }
+                .padding()
             }
-            .padding()
+            .scrollIndicators(.visible)
+            .scrollDismissesKeyboard(.interactively)
         }
         .navigationTitle("Import Skill Trees")
         .navigationBarTitleDisplayMode(.inline)
