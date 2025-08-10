@@ -11,6 +11,7 @@ struct EditSkillNodeView: View {
     @State private var selectedParent: SkillNode?
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var showingDeleteAlert = false
     
     let skillTree: SkillTree
     let skillNode: SkillNode?
@@ -166,6 +167,21 @@ struct EditSkillNodeView: View {
                 } header: {
                     Text("Node Statistics")
                 }
+
+                // Large destructive button
+                Section {
+                    Button {
+                        showingDeleteAlert = true
+                    } label: {
+                        Text("Delete Node")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .navigationTitle(isEditing ? "Edit Node" : "New Node")
@@ -188,6 +204,14 @@ struct EditSkillNodeView: View {
             Button("OK") { }
         } message: {
             Text(alertMessage)
+        }
+        .alert("Delete Node", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteSkillNode()
+            }
+        } message: {
+            Text("Are you sure you want to delete this node? This action cannot be undone.")
         }
     }
     
@@ -253,6 +277,12 @@ struct EditSkillNodeView: View {
             
             dismiss()
         }
+    }
+
+    private func deleteSkillNode() {
+        guard let node = skillNode else { return }
+        dataController.deleteSkillNode(node)
+        dismiss()
     }
 }
 

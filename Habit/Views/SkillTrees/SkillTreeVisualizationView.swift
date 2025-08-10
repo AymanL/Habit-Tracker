@@ -46,7 +46,7 @@ struct SkillTreeVisualizationView: View {
             
             // Single root node tree visualization
             if let root = rootNode {
-                NestedNodeView(node: root, onNodeTap: onNodeTap)
+                NestedNodeView(node: root, onNodeTap: onNodeTap, onNodeLongPress: onNodeTap)
                     .environment(\.levelHeightMap, levelHeights)
                     .onPreferenceChange(LevelHeightPreferenceKey.self) { heights in
                         levelHeights = heights

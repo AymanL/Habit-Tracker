@@ -3,14 +3,22 @@ import SwiftUI
 struct ForestDetailView: View {
     @ObservedObject var forest: Forest
     @EnvironmentObject var dataController: DataController
+    @FetchRequest(
+        entity: Forest.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Forest.creationDate_, ascending: false)]
+    ) private var forests: FetchedResults<Forest>
     @State private var showingAddTree = false
     @State private var showingImportView = false
     @State private var selectedTree: SkillTree?
     @State private var showingTreeDetail = false
     @State private var currentTreeIndex = 0
+    @State private var selectedForest: Forest?
     
+    // Active forest is the currently selected one (falls back to the one passed in)
+    private var activeForest: Forest { selectedForest ?? forest }
+
     var sortedTrees: [SkillTree] {
-        getTreesSortedByOrder(forest)
+        getTreesSortedByOrder(activeForest)
     }
     
     var currentTree: SkillTree? {
@@ -22,12 +30,17 @@ struct ForestDetailView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // Header with forest info
-                ForestHeaderView(forest: forest)
+                ForestHeaderView(
+                    forest: activeForest,
+                    canNavigateForests: forests.count > 1,
+                    onPreviousForest: previousForest,
+                    onNextForest: nextForest
+                )
                 
                 // Tree navigation and display
                 if !sortedTrees.isEmpty {
                     ForestTreeNavigationView(
-                        forest: forest,
+                        forest: activeForest,
                         currentTree: currentTree,
                         currentIndex: currentTreeIndex,
                         totalTrees: sortedTrees.count,
@@ -81,11 +94,11 @@ struct ForestDetailView: View {
         }
         .sheet(isPresented: $showingAddTree) {
             NavigationView {
-                EditSkillTreeView(forest: forest)
+                EditSkillTreeView(forest: activeForest)
             }
         }
         .sheet(isPresented: $showingImportView) {
-            ImportSingleTreeView(forest: forest)
+            ImportSingleTreeView(forest: activeForest)
         }
         .background(
             Group {
@@ -93,9 +106,7 @@ struct ForestDetailView: View {
                     NavigationLink(
                         destination: SkillTreeDetailView(skillTree: tree),
                         isActive: $showingTreeDetail
-                    ) {
-                        EmptyView()
-                    }
+                    ) { EmptyView() }
                 }
             }
         )
@@ -110,12 +121,28 @@ struct ForestDetailView: View {
         guard !sortedTrees.isEmpty else { return }
         currentTreeIndex = (currentTreeIndex + 1) % sortedTrees.count
     }
+
+    private func previousForest() {
+        guard let currentIndex = forests.firstIndex(of: activeForest), !forests.isEmpty else { return }
+        let newIndex = (currentIndex - 1 + forests.count) % forests.count
+        selectedForest = forests[newIndex]
+        currentTreeIndex = 0
+    }
+
+    private func nextForest() {
+        guard let currentIndex = forests.firstIndex(of: activeForest), !forests.isEmpty else { return }
+        let newIndex = (currentIndex + 1) % forests.count
+        selectedForest = forests[newIndex]
+        currentTreeIndex = 0
+    }
 }
 
 // MARK: - Forest Header View
 struct ForestHeaderView: View {
     @ObservedObject var forest: Forest
-    @State private var progressRefreshTick: Int = 0
+    let canNavigateForests: Bool
+    let onPreviousForest: () -> Void
+    let onNextForest: () -> Void
     
     var body: some View {
         VStack(spacing: 12) {
@@ -127,21 +154,34 @@ struct ForestHeaderView: View {
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .trailing, spacing: 4) {
                     Text("\(Int(calculateForestCompletion(forest) * 100))%")
-                        .font(.headline)
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
+                    
                     Text("Complete")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
             
-            ProgressView(value: calculateForestCompletion(forest))
-                .progressViewStyle(LinearProgressViewStyle())
-                .tint(.green)
-                .id(progressRefreshTick)
+            HStack(spacing: 8) {
+                Button(action: onPreviousForest) {
+                    Image(systemName: "chevron.left")
+                }
+                .disabled(!canNavigateForests)
+
+                ProgressView(value: calculateForestCompletion(forest))
+                    .progressViewStyle(LinearProgressViewStyle())
+                    .tint(.green)
+                    .frame(maxWidth: .infinity)
+                
+                Button(action: onNextForest) {
+                    Image(systemName: "chevron.right")
+                }
+                .disabled(!canNavigateForests)
+            }
             
             HStack {
                 Label("\(calculateCompletedTreesCount(forest)) completed", systemImage: "checkmark.circle.fill")
@@ -164,9 +204,6 @@ struct ForestHeaderView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: forest.managedObjectContext)) { _ in
-            progressRefreshTick &+= 1
-        }
     }
 }
 
@@ -207,7 +244,6 @@ struct ForestTreeDisplayView: View {
     @State private var showingNodeDetail = false
     @State private var showingAddNode = false
     @State private var levelHeights: [Int: CGFloat] = [:]
-    @State private var progressRefreshTick: Int = 0
     
     var body: some View {
         VStack(spacing: 16) {
@@ -215,8 +251,6 @@ struct ForestTreeDisplayView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(tree.name)
-                        .font(.headline)
-                        .fontWeight(.semibold)
                         .font(.headline)
                         .fontWeight(.semibold)
                     if !tree.treeDescription.isEmpty {
@@ -231,7 +265,6 @@ struct ForestTreeDisplayView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
-                    .id(progressRefreshTick)
             }
             
             // Progress bar with navigation and add button
@@ -245,7 +278,6 @@ struct ForestTreeDisplayView: View {
                     .progressViewStyle(LinearProgressViewStyle())
                     .tint(.green)
                     .frame(maxWidth: .infinity)
-                    .id(progressRefreshTick)
                 
                 Button(action: onNext) {
                     Image(systemName: "chevron.right")
@@ -272,8 +304,11 @@ struct ForestTreeDisplayView: View {
             
             // Tree visualization
             if let rootNode = tree.rootNodes.first {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     NestedNodeView(node: rootNode) { node in
+                        selectedNode = node
+                        showingNodeDetail = true
+                    } onNodeLongPress: { node in
                         selectedNode = node
                         showingNodeDetail = true
                     }
@@ -281,6 +316,7 @@ struct ForestTreeDisplayView: View {
                     .onPreferenceChange(LevelHeightPreferenceKey.self) { heights in
                         levelHeights = heights
                     }
+                    .frame(minHeight: 200)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                 }
@@ -289,13 +325,9 @@ struct ForestTreeDisplayView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .frame(maxWidth: 350)
-        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: tree.managedObjectContext)) { _ in
-            progressRefreshTick &+= 1
-        }
         .sheet(item: $selectedNode) { node in
             NavigationView {
-                SkillNodeDetailView(skillNode: node)
+                EditSkillNodeView(skillTree: tree, skillNode: node)
             }
         }
         .sheet(isPresented: $showingAddNode) {

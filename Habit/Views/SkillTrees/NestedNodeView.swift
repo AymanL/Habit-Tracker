@@ -37,6 +37,7 @@ struct NodeCenterPreferenceKey: PreferenceKey {
 struct NestedNodeView: View {
     @ObservedObject var node: SkillNode
     let onNodeTap: (SkillNode) -> Void
+    let onNodeLongPress: (SkillNode) -> Void
     @Environment(\.levelHeightMap) private var levelHeightMap
     
     // Debug state
@@ -47,7 +48,7 @@ struct NestedNodeView: View {
         VStack() {
             // Current node
             SkillNodeVisualView(node: node) {
-                onNodeTap(node)
+                onNodeLongPress(node)
             } onValidate: {
                 // Toggle completion on tap
                 switch node.nodeType {
@@ -106,7 +107,7 @@ struct NestedNodeView: View {
                         HStack(alignment: .top, spacing: 0) {
                             ForEach(nonBossChildren, id: \.id) { childNode in
                                 // Align children tops and prevent each child from stretching horizontally
-                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                NestedNodeView(node: childNode, onNodeTap: onNodeTap, onNodeLongPress: onNodeLongPress)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -117,7 +118,7 @@ struct NestedNodeView: View {
                     if !bossChildren.isEmpty {
                         HStack(alignment: .top, spacing: 0) {
                             ForEach(bossChildren, id: \.id) { childNode in
-                                NestedNodeView(node: childNode, onNodeTap: onNodeTap)
+                                NestedNodeView(node: childNode, onNodeTap: onNodeTap, onNodeLongPress: onNodeLongPress)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -127,7 +128,6 @@ struct NestedNodeView: View {
                 }
             }
         }
-        // Debug visuals
         .if(Constants.debugSkillTreeUI) { view in
             view
                 .border(Color.red, width: 2)
@@ -198,11 +198,45 @@ struct NestedNodeView: View {
             
             print("🌳 === END TREE DISPLAY DEBUG ===")
         }
-        .contentShape(Rectangle())
-        .onTapGesture(count: 2) {
-            showDebugInfo.toggle()
-            print("🔎 Debug overlay for '\(node.name)' \(showDebugInfo ? "ON" : "OFF")")
-        }
+        // .overlay(
+        //     // Debug info overlay
+        //     VStack {
+        //         HStack {
+        //             Spacer()
+        //             VStack(alignment: .trailing, spacing: 2) {
+        //                 Text("Children: \(node.childNodes.count)")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.orange.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
+                        
+        //                 Text("Depth: \(node.depth)")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.purple.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
+        //             }
+        //         }
+                
+        //         Spacer()
+                
+        //         // Bounding box dimensions
+        //         HStack {
+        //             Spacer()
+        //             VStack(alignment: .trailing, spacing: 2) {
+        //                 Text("📐 Bounding Box")
+        //                     .font(.caption2)
+        //                     .padding(2)
+        //                     .background(Color.red.opacity(0.8))
+        //                     .foregroundColor(.white)
+        //                     .cornerRadius(2)
+        //             }
+        //         }
+        //     }
+        //     .padding(4)
+        // )
     }
     
     // Helper function to print the complete tree structure
@@ -226,6 +260,6 @@ struct NestedNodeView: View {
 }
 
 #Preview {
-    NestedNodeView(node: SkillNode.example, onNodeTap: { _ in })
+    NestedNodeView(node: SkillNode.example, onNodeTap: { _ in }, onNodeLongPress: { _ in })
         .environmentObject(DataController())
-} 
+}

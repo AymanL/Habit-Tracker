@@ -54,7 +54,6 @@ struct SkillNodeVisualView: View {
                 }
                 .contentShape(Circle())
                 .onTapGesture { onValidate() }
-                .onLongPressGesture { onTap() }
                 .anchorPreference(key: NodeCenterPreferenceKey.self, value: .center) { anchor in
                     [node.id: anchor]
                 }
@@ -79,6 +78,7 @@ struct SkillNodeVisualView: View {
         // )
         // .shadow(radius: 2)
         .contentShape(RoundedRectangle(cornerRadius: 8))
+        .onLongPressGesture { onTap() }
         .background(
             GeometryReader { geo in
                 // Report the content height for this depth, but do not force any view to grow.

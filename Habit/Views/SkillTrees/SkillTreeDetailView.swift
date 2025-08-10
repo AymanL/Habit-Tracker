@@ -66,7 +66,7 @@ struct SkillTreeDetailView: View {
         }
         .sheet(item: $selectedNode) { node in
             NavigationView {
-                SkillNodeDetailView(skillNode: node)
+                EditSkillNodeView(skillTree: skillTree, skillNode: node)
             }
         }
     }
