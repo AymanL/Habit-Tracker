@@ -10,6 +10,10 @@ import SwiftUI
 enum Constants {    
     // Toggle to enable/disable debug UI for the skill tree (borders, backgrounds, logs)
     static let debugSkillTreeUI: Bool = false
+    
+    /// Max width used to cap the skill tree visualization/root node.
+    /// Keep children from overflowing on narrow screens while preserving centering.
+    static let skillTreeMaxWidth: CGFloat = 300
 
     static let motivationPrompts: [LocalizedStringKey] = [
          "Keep it Up! 🙌",

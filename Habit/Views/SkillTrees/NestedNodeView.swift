@@ -133,7 +133,7 @@ struct NestedNodeView: View {
         // Cap width at root level so children inherit the available space budget
         .if(isRoot) { view in
             view
-                .frame(maxWidth: 300)
+                .frame(maxWidth: Constants.skillTreeMaxWidth)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
         .if(Constants.debugSkillTreeUI) { view in
