@@ -40,6 +40,8 @@ struct NestedNodeView: View {
     let onNodeLongPress: (SkillNode) -> Void
     @Environment(\.levelHeightMap) private var levelHeightMap
     
+    private var isRoot: Bool { node.parentNode == nil }
+    
     // Debug state
     @State private var showDebugInfo = false
     @State private var nodeFrame: CGRect = .zero
@@ -127,6 +129,12 @@ struct NestedNodeView: View {
                     }
                 }
             }
+        }
+        // Cap width at root level so children inherit the available space budget
+        .if(isRoot) { view in
+            view
+                .frame(maxWidth: 300)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
         .if(Constants.debugSkillTreeUI) { view in
             view

@@ -74,6 +74,31 @@ struct ForestDetailView: View {
                 }
             }
             .padding()
+            .if(Constants.debugSkillTreeUI) { view in
+                view
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(Color.yellow, lineWidth: 1)
+                    )
+                    .overlay(alignment: .topLeading) {
+                        Text("🟨 ScrollContent")
+                            .font(.caption2)
+                            .padding(2)
+                            .background(Color.yellow.opacity(0.8))
+                            .foregroundColor(.black)
+                            .cornerRadius(3)
+                            .padding(4)
+                    }
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear
+                                .onAppear { print("🟨 ScrollContent width: \(Int(geo.size.width))") }
+                                .onChange(of: geo.size) { newSize in
+                                    print("🟨 ScrollContent width updated: \(Int(newSize.width))")
+                                }
+                        }
+                    )
+            }
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -230,6 +255,31 @@ struct ForestTreeNavigationView: View {
                 )
             }
         }
+        .if(Constants.debugSkillTreeUI) { view in
+            view
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.blue, lineWidth: 1)
+                )
+                .overlay(alignment: .topLeading) {
+                    Text("🟦 TreeNav")
+                        .font(.caption2)
+                        .padding(2)
+                        .background(Color.blue.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(3)
+                        .padding(4)
+                }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear { print("🟦 TreeNav width: \(Int(geo.size.width))") }
+                            .onChange(of: geo.size) { newSize in
+                                print("🟦 TreeNav width updated: \(Int(newSize.width))")
+                            }
+                    }
+                )
+        }
     }
 }
 
@@ -320,11 +370,60 @@ struct ForestTreeDisplayView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .if(Constants.debugSkillTreeUI) { view in
+                    view
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.purple, lineWidth: 1)
+                        )
+                        .overlay(alignment: .topLeading) {
+                            Text("🟪 TreeWrapper")
+                                .font(.caption2)
+                                .background(Color.purple.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(3)
+                        }
+                        .background(
+                            GeometryReader { geo in
+                                Color.clear
+                                    .onAppear { print("🟪 TreeWrapper width: \(Int(geo.size.width))") }
+                                    .onChange(of: geo.size) { newSize in
+                                        print("🟪 TreeWrapper width updated: \(Int(newSize.width))")
+                                    }
+                            }
+                        )
+                }
             }
         }
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .if(Constants.debugSkillTreeUI) { view in
+            view
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.green, lineWidth: 1)
+                )
+                .overlay(alignment: .topLeading) {
+                    Text("🟩 TreeCard")
+                        .font(.caption2)
+                        .padding(2)
+                        .background(Color.green.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(3)
+                        .padding(4)
+                }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear { print("🟩 TreeCard width: \(Int(geo.size.width))") }
+                            .onChange(of: geo.size) { newSize in
+                                print("🟩 TreeCard width updated: \(Int(newSize.width))")
+                            }
+                    }
+                )
+        }
         .sheet(item: $selectedNode) { node in
             NavigationView {
                 EditSkillNodeView(skillTree: tree, skillNode: node)
