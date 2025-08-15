@@ -41,8 +41,9 @@ struct ImportSkillTreeView: View {
                         .font(.headline)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("• No dashes = Tree name")
-                        Text("• 1+ dashes = Node levels within tree")
+                        Text("• # = Tree name (container only)")
+                        Text("• ## = Level root node (actual node)")
+                        Text("• 1+ dashes = Regular nodes within level")
                     }
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -54,26 +55,30 @@ struct ImportSkillTreeView: View {
                             .fontWeight(.medium)
                         
                         Text("""
-                        Programming Skills
-                        - Learn Swift
-                        -- Basic Syntax
-                        -- Control Flow
-                        --- If Statements
-                        --- Loops
-                        -- Functions
-                        - Build an App
-                        -- UI Design
-                        -- Data Management
+                        # Programming Skills
+                        ## Learn Swift Fundamentals
+                        - Basic Syntax
+                        -- Variables and Constants
+                        -- Data Types
+                        - Control Flow
+                        -- If Statements
+                        -- Loops
+                        ## Build First App
+                        - UI Design
+                        -- Interface Builder
+                        -- Auto Layout
+                        - Data Management
+                        -- Core Data
                         
-                        Fitness Goals
-                        - Cardio Training
-                        -- Running
-                        --- 5K Run
-                        --- 10K Run
-                        -- Swimming
-                        - Strength Training
-                        -- Push Exercises
-                        -- Pull Exercises
+                        # Fitness Goals
+                        ## Cardio Foundation
+                        - Running
+                        -- 5K Run
+                        -- 10K Run
+                        - Swimming
+                        ## Strength Building
+                        - Push Exercises
+                        - Pull Exercises
                         """)
                             .font(.caption)
                             .fontDesign(.monospaced)
@@ -263,11 +268,10 @@ struct ImportSkillTreeView: View {
             throw ImportError.emptyFile
         }
         
-        // Check that we have at least one tree (no dashes)
-        let dashCounts = lines.map { $0.prefix(while: { $0 == "-" }).count }
-        let hasTreeLine = dashCounts.contains(0)
+        // Check that we have at least one tree (starts with #)
+        let hasTreeLine = lines.contains { $0.hasPrefix("#") && !$0.hasPrefix("##") }
         guard hasTreeLine else {
-            throw ImportError.invalidFormat("At least one skill tree name (no dashes) is required.")
+            throw ImportError.invalidFormat("At least one skill tree name (starting with #) is required.")
         }
         
         var skillTrees: [SkillTree] = []
@@ -301,41 +305,88 @@ struct ImportSkillTreeView: View {
             return (name.isEmpty ? trimmed : name, type)
         }
 
+        var currentLevel = 1
+        
         for (index, line) in lines.enumerated() {
-            let dashCount = line.prefix(while: { $0 == "-" }).count
-            let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
-            
             print("📄 Processing line \(index + 1): '\(line)'")
-            print("  Dash count: \(dashCount)")
-            print("  Content: '\(content)'")
             
-            guard !content.isEmpty else { 
-                print("  ⏭️ Skipping empty content")
-                continue 
-            }
-            
-            switch dashCount {
-            case 0:
-                // Tree name
+            if line.hasPrefix("##") {
+                // Level root node (## Level X Root Node Title)
+                let content = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                
+                guard !content.isEmpty else {
+                    print("  ⏭️ Skipping empty level root content")
+                    continue
+                }
+                
+                guard let tree = currentTree else {
+                    print("  ❌ No tree defined for level root node: '\(content)'")
+                    throw ImportError.noTreeDefined(lineNumber: index + 1)
+                }
+                
+                print("  🏛️ Creating level \(currentLevel) root node: '\(content)'")
+                
+                // Ensure the tree has this level in its maxLevel
+                if currentLevel > tree.maxLevel {
+                    tree.maxLevel = currentLevel
+                    print("  📈 Updated tree maxLevel to \(currentLevel)")
+                }
+                
+                // Create root node for this level
+                let (parsedName, _) = parseTaggedContent(content, defaultType: .root)
+                let rootNode = SkillNode(context: context, name: parsedName, type: .root)
+                rootNode.tree = tree
+                rootNode.level = currentLevel
+                rootNode.order = 0
+                
+                // Clear the node stack and add this root node
+                nodeStack.removeAll()
+                nodeStack.append((rootNode, 0)) // Root nodes are at depth 0
+                
+                print("  ✅ Level \(currentLevel) root node created")
+                currentLevel += 1
+                
+            } else if line.hasPrefix("#") {
+                // Tree name (# Tree Title)
+                let content = String(line.dropFirst(1)).trimmingCharacters(in: .whitespaces)
+                
+                guard !content.isEmpty else {
+                    print("  ⏭️ Skipping empty tree content")
+                    continue
+                }
+                
                 print("  🌳 Creating new skill tree: '\(content)'")
                 let tree = SkillTree(context: context, name: content, description: "")
                 skillTrees.append(tree)
                 currentTree = tree
                 nodeStack.removeAll()
+                currentLevel = 1
                 print("  ✅ Tree created and set as current")
                 print("  📊 Current state: \(skillTrees.count) trees")
                 
-            default:
-                // Node within tree
-                print("  🔵 Creating node at depth \(dashCount): '\(content)'")
+            } else if line.hasPrefix("-") {
+                // Regular node with dashes
+                let dashCount = line.prefix(while: { $0 == "-" }).count
+                let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
+                
+                guard !content.isEmpty else {
+                    print("  ⏭️ Skipping empty node content")
+                    continue
+                }
+                
                 guard let tree = currentTree else {
                     print("  ❌ No tree defined for node: '\(content)'")
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
+                print("  🔵 Creating node at depth \(dashCount): '\(content)'")
+                
                 let (parsedName, nodeType) = parseTaggedContent(content, defaultType: .goal)
                 let node = SkillNode(context: context, name: parsedName, type: nodeType)
                 node.tree = tree
+                
+                // Set the level to the current level being processed
+                node.level = currentLevel - 1 // currentLevel was incremented after creating root node
                 
                 // Remove nodes from stack that are at this level or deeper
                 nodeStack.removeAll { $0.1 >= dashCount }
@@ -351,8 +402,10 @@ struct ImportSkillTreeView: View {
                 // Add to stack
                 nodeStack.append((node, dashCount))
                 
-                print("  ✅ Node created with parent: \(node.parentNode?.name ?? "none")")
+                print("  ✅ Node created at level \(node.level) with parent: \(node.parentNode?.name ?? "none")")
                 print("  📊 Stack depth: \(nodeStack.count)")
+            } else {
+                print("  ⚠️ Unrecognized line format: '\(line)'")
             }
         }
         
@@ -394,7 +447,7 @@ enum ImportError: LocalizedError {
         case .invalidFormat(let message):
             return "Invalid format: \(message)"
         case .noTreeDefined(let lineNumber):
-            return "Line \(lineNumber): Node defined without a skill tree. Add a tree name (no dashes) first."
+            return "Line \(lineNumber): Node defined without a skill tree. Add a tree name (starting with #) first."
         }
     }
 }

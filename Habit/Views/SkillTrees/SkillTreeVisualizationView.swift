@@ -8,6 +8,7 @@ struct SkillTreeVisualizationView: View {
     @State private var showDebugMode = false
     @State private var showLayoutGuides = false
     @State private var levelHeights: [Int: CGFloat] = [:]
+    @State private var showPreviousLevels: Bool = false
     
     var rootNode: SkillNode? {
         skillTree.getRootNodeForLevel(skillTree.currentLevel)
@@ -84,8 +85,33 @@ struct SkillTreeVisualizationView: View {
             
             // Hierarchical tree visualization with level progression
             VStack(spacing: 24) {
-                // Completed previous levels
-                CompletedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap, showLayoutGuides: showLayoutGuides, levelHeights: $levelHeights)
+                // Show "See more" button for previous levels if there are any
+                if skillTree.currentLevel > 1 {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showPreviousLevels.toggle()
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: showPreviousLevels ? "chevron.up" : "chevron.down")
+                                .font(.caption)
+                            Text(showPreviousLevels ? "Hide previous levels" : "See previous levels (\(skillTree.currentLevel - 1))")
+                                .font(.subheadline)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color(.systemGray6))
+                        .foregroundColor(.primary)
+                        .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                }
+                
+                // Previous completed levels (collapsible)
+                if showPreviousLevels {
+                    CompletedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap, showLayoutGuides: showLayoutGuides, levelHeights: $levelHeights)
+                }
                 
                 // Current level tree (unlocked)
                 if let root = rootNode {

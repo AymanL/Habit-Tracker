@@ -8,6 +8,8 @@ struct SkillTreeListView: View {
     @State private var selectedNode: SkillNode?
     @State private var showingAddNode = false
     @State private var showingNodeDetail = false
+    @State private var showingDeleteAlert = false
+    @State private var treeToDelete: SkillTree?
     
     @FetchRequest(
         entity: SkillTree.entity(),
@@ -27,10 +29,10 @@ struct SkillTreeListView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    if !sortedTrees.isEmpty {
+                    if !sortedTrees.isEmpty, let tree = currentTree {
                         // Tree Navigation Header
                         SkillTreeNavigationView(
-                            currentTree: currentTree,
+                            currentTree: tree,
                             currentIndex: currentTreeIndex,
                             totalTrees: sortedTrees.count,
                             onPrevious: {
@@ -49,6 +51,10 @@ struct SkillTreeListView: View {
                             },
                             onAddNode: {
                                 showingAddNode = true
+                            },
+                            onDeleteTree: {
+                                treeToDelete = tree
+                                showingDeleteAlert = true
                             }
                         )
                     } else {
@@ -108,23 +114,49 @@ struct SkillTreeListView: View {
                     }
                 }
             }
+            .alert("Delete Skill Tree", isPresented: $showingDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    deleteCurrentTree()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                if let tree = treeToDelete {
+                    Text("Are you sure you want to delete '\(tree.name)'? This action cannot be undone.")
+                }
+            }
         }
+    }
+    
+    private func deleteCurrentTree() {
+        guard let tree = treeToDelete else { return }
+        
+        // Adjust current index if necessary
+        if currentTreeIndex >= sortedTrees.count - 1 && currentTreeIndex > 0 {
+            currentTreeIndex -= 1
+        }
+        
+        // Delete the tree
+        dataController.delete(tree)
+        dataController.save()
+        
+        // Reset state
+        treeToDelete = nil
     }
 }
 
 // MARK: - Skill Tree Navigation View
 struct SkillTreeNavigationView: View {
-    let currentTree: SkillTree?
+    @ObservedObject var currentTree: SkillTree
     let currentIndex: Int
     let totalTrees: Int
     let onPrevious: () -> Void
     let onNext: () -> Void
     let onNodeTap: (SkillNode) -> Void
     let onAddNode: () -> Void
+    let onDeleteTree: () -> Void
     
     var body: some View {
         VStack(spacing: 16) {
-            if let tree = currentTree {
                 // Tree Header with Navigation
                 VStack(spacing: 12) {
                     // Navigation controls
@@ -139,7 +171,7 @@ struct SkillTreeNavigationView: View {
                         Spacer()
                         
                         VStack(spacing: 4) {
-                            Text(tree.name)
+                            Text(currentTree.name)
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .multilineTextAlignment(.center)
@@ -151,17 +183,25 @@ struct SkillTreeNavigationView: View {
                         
                         Spacer()
                         
-                        Button(action: onNext) {
-                            Image(systemName: "chevron.right")
-                                .font(.title2)
-                                .foregroundColor(currentIndex < totalTrees - 1 ? .blue : .gray)
+                        HStack(spacing: 16) {
+                            Button(action: onDeleteTree) {
+                                Image(systemName: "trash")
+                                    .font(.title3)
+                                    .foregroundColor(.red)
+                            }
+                            
+                            Button(action: onNext) {
+                                Image(systemName: "chevron.right")
+                                    .font(.title2)
+                                    .foregroundColor(currentIndex < totalTrees - 1 ? .blue : .gray)
+                            }
+                            .disabled(currentIndex >= totalTrees - 1)
                         }
-                        .disabled(currentIndex >= totalTrees - 1)
                     }
                     
                     // Tree description
-                    if !tree.treeDescription.isEmpty {
-                        Text(tree.treeDescription)
+                    if !currentTree.treeDescription.isEmpty {
+                        Text(currentTree.treeDescription)
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -177,17 +217,17 @@ struct SkillTreeNavigationView: View {
                             
                             Spacer()
                             
-                            Text("\(tree.completedNodesCount)/\(tree.totalNodesCount) nodes")
+                            Text("\(currentTree.completedNodesCount)/\(currentTree.totalNodesCount) nodes")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
-                            Text("\(Int(tree.completionPercentage * 100))%")
+                            Text("\(Int(currentTree.completionPercentage * 100))%")
                                 .font(.caption)
                                 .fontWeight(.bold)
                                 .foregroundColor(.green)
                         }
                         
-                        ProgressView(value: tree.completionPercentage)
+                        ProgressView(value: currentTree.completionPercentage)
                             .progressViewStyle(LinearProgressViewStyle())
                             .scaleEffect(y: 1.5)
                     }
@@ -214,12 +254,11 @@ struct SkillTreeNavigationView: View {
                 .cornerRadius(12)
                 
                 // Tree Visualization
-                SkillTreeVisualizationView(skillTree: tree, onNodeTap: onNodeTap)
+                SkillTreeVisualizationView(skillTree: currentTree, onNodeTap: onNodeTap)
                     .padding()
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
                     .shadow(radius: 2)
-            }
         }
     }
 }

@@ -64,10 +64,8 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 9) // Root + 5 level 1 + 3 level 2 (total 9)
-        XCTAssertEqual(result.forests.count, 0)
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -128,10 +126,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 4) // Root + 2 nodes (total 4 including the automatically created root)
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -167,10 +165,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertGreaterThan(result.nodesCount, 10) // Should have many nodes
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -202,10 +200,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 0)
         XCTAssertEqual(result.nodesCount, 0)
-        XCTAssertEqual(result.forests.count, 0)
+
     }
     
     func testInvalidInput() {
@@ -216,10 +214,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 0)
         XCTAssertEqual(result.nodesCount, 0)
-        XCTAssertEqual(result.forests.count, 0)
+
     }
     
     func testSingleLineInput() {
@@ -230,10 +228,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 2) // Root + 1 node (the single line becomes a tree)
-        XCTAssertEqual(result.forests.count, 0)
+
     }
     
     func testInputWithOnlyRoot() {
@@ -244,10 +242,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 1) // Only root node
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -271,10 +269,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 4) // Root + 3 nodes
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -300,10 +298,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertEqual(result.nodesCount, 3) // Root + 2 nodes
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -329,10 +327,10 @@ class ImportModuleTests: BaseTestCase {
         let result = parseSingleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
+
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertGreaterThan(result.nodesCount, 5) // Should have multiple nodes
-        XCTAssertEqual(result.forests.count, 0)
+
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -350,10 +348,10 @@ class ImportModuleTests: BaseTestCase {
         // When & Then
         measure {
             let result = parseSingleTree(input: largeInput)
-            XCTAssertEqual(result.forestsCount, 0)
+    
             XCTAssertEqual(result.treesCount, 1)
             XCTAssertGreaterThan(result.nodesCount, 100)
-            XCTAssertEqual(result.forests.count, 0)
+    
         }
     }
     
@@ -368,7 +366,7 @@ class ImportModuleTests: BaseTestCase {
     private func parseAndImportSingleTree(input: String) -> ImportResult {
         // Implementation that matches the actual import logic from ImportSingleTreeView
         if input.isEmpty {
-            return ImportResult(forestsCount: 0, treesCount: 0, nodesCount: 0, forests: [])
+            return ImportResult(treesCount: 0, nodesCount: 0, skillTrees: [])
         }
         
         let lines = input.components(separatedBy: .newlines)
@@ -376,7 +374,7 @@ class ImportModuleTests: BaseTestCase {
             .filter { !$0.isEmpty }
         
         guard !lines.isEmpty else {
-            return ImportResult(forestsCount: 0, treesCount: 0, nodesCount: 0, forests: [])
+            return ImportResult(treesCount: 0, nodesCount: 0, skillTrees: [])
         }
         
         let context = dataController.container.viewContext
@@ -485,10 +483,9 @@ class ImportModuleTests: BaseTestCase {
         try! context.save()
         
         return ImportResult(
-            forestsCount: 0,
             treesCount: trees.count,
             nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
-            forests: []
+            skillTrees: trees
         )
     }
     
