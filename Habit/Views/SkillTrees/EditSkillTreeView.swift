@@ -10,30 +10,28 @@ struct EditSkillTreeView: View {
     @State private var alertMessage = ""
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Tree Information")) {
-                    TextField("Tree Name", text: $name)
-                    
-                    TextField("Description (Optional)", text: $description, axis: .vertical)
-                        .lineLimit(3...6)
+        Form {
+            Section(header: Text("Tree Information")) {
+                TextField("Tree Name", text: $name)
+                
+                TextField("Description (Optional)", text: $description, axis: .vertical)
+                    .lineLimit(3...6)
+            }
+        }
+        .navigationTitle("New Skill Tree")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    dismiss()
                 }
             }
-            .navigationTitle("New Skill Tree")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    saveTree()
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveTree()
-                    }
-                    .disabled(name.isEmpty)
-                }
+                .disabled(name.isEmpty)
             }
         }
         .alert("Error", isPresented: $showingAlert) {
