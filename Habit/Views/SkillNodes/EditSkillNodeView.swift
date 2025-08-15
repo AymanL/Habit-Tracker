@@ -9,6 +9,7 @@ struct EditSkillNodeView: View {
     @State private var nodeType: SkillNodeType = .goal
     @State private var selectedHabit: Habit?
     @State private var selectedParent: SkillNode?
+    @State private var selectedLevel: Int = 1
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var showingDeleteAlert = false
@@ -25,6 +26,7 @@ struct EditSkillNodeView: View {
             _nodeType = State(initialValue: node.nodeType)
             _selectedHabit = State(initialValue: node.habit)
             _selectedParent = State(initialValue: node.parentNode)
+            _selectedLevel = State(initialValue: node.level)
         }
     }
     
@@ -37,18 +39,23 @@ struct EditSkillNodeView: View {
     }
     
     var availableParentNodes: [SkillNode] {
-        let allNodes = skillTree.nodes
+        // Ensure root node exists for the selected level before getting nodes
+        skillTree.ensureRootNodeExists(for: selectedLevel)
+        
+        // Only show nodes from the same level as the selected level
+        let levelNodes = skillTree.getNodesForLevel(selectedLevel)
+        
         guard let currentNode = skillNode else {
-            // For new nodes, all nodes are available as parents (including root)
-            return allNodes.sorted { $0.name < $1.name }
+            // For new nodes, show all nodes from the selected level
+            return levelNodes.sorted { $0.name < $1.name }
         }
         
         // For existing nodes, exclude the current node and all its descendants
         let descendants = currentNode.getAllDescendants()
         let excludedNodes = Set([currentNode] + descendants)
         
-        return allNodes
-            .filter { !excludedNodes.contains($0) } // Don't exclude root nodes
+        return levelNodes
+            .filter { !excludedNodes.contains($0) }
             .sorted { $0.name < $1.name }
     }
     
@@ -108,6 +115,65 @@ struct EditSkillNodeView: View {
                 Text("Parent Node")
             } footer: {
                 Text("Select a parent node. All nodes must have a parent except the root node.")
+            }
+            
+            Section {
+                Picker("Level", selection: $selectedLevel) {
+                    ForEach(1...skillTree.maxLevel, id: \.self) { level in
+                        HStack {
+                            Image(systemName: level <= skillTree.currentLevel ? "lock.open.fill" : "lock.fill")
+                                .foregroundColor(level <= skillTree.currentLevel ? .green : .orange)
+                            Text("Level \(level)")
+                            if level == skillTree.currentLevel {
+                                Text("(Current)")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            } else if level > skillTree.currentLevel {
+                                Text("(Locked)")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .tag(level)
+                    }
+                    
+                    // Allow creating nodes for future levels
+                    if selectedLevel > skillTree.maxLevel {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.blue)
+                            Text("Level \(selectedLevel)")
+                            Text("(New Level)")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                        .tag(selectedLevel)
+                    }
+                    
+                    // Add option to create a new level
+                    HStack {
+                        Image(systemName: "plus.circle")
+                            .foregroundColor(.blue)
+                        Text("Level \(skillTree.maxLevel + 1)")
+                        Text("(Create New)")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    .tag(skillTree.maxLevel + 1)
+                }
+                .pickerStyle(.navigationLink)
+                .onChange(of: selectedLevel) { newValue in
+                    // When level changes, ensure root node exists and auto-select it as parent
+                    skillTree.ensureRootNodeExists(for: newValue)
+                    
+                    // Auto-select the root node of the new level as the parent
+                    let rootNode = skillTree.getRootNodeForLevel(newValue)
+                    selectedParent = rootNode
+                }
+            } header: {
+                Text("Level")
+            } footer: {
+                Text("Choose which level this node belongs to. Level \(skillTree.currentLevel) is currently unlocked. Higher levels will be locked until previous levels are completed.")
             }
             
             if nodeType == .habitLinked {
@@ -183,21 +249,27 @@ struct EditSkillNodeView: View {
                     .buttonStyle(.plain)
                 }
             }
-        }
-        .navigationTitle(isEditing ? "Edit Node" : "New Node")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel") {
-                    dismiss()
-                }
-            }
             
-            ToolbarItem(placement: .navigationBarTrailing) {
+            // Create/Save Button Section
+            Section {
                 Button(isEditing ? "Save" : "Create") {
                     saveSkillNode()
                 }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
                 .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+        .navigationTitle(isEditing ? "Edit Node" : "New Node")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // For new nodes, auto-select the root node as parent if no parent is selected
+            if skillNode == nil && selectedParent == nil {
+                skillTree.ensureRootNodeExists(for: selectedLevel)
+                selectedParent = skillTree.getRootNodeForLevel(selectedLevel)
             }
         }
         .alert("Error", isPresented: $showingAlert) {
@@ -244,6 +316,14 @@ struct EditSkillNodeView: View {
                 existingNode.name = trimmedName
                 existingNode.nodeDescription = trimmedDescription
                 existingNode.nodeType = nodeType
+                existingNode.level = selectedLevel
+                
+                // Update tree's maxLevel if this node is in a higher level
+                if selectedLevel > skillTree.maxLevel {
+                    skillTree.maxLevel = selectedLevel
+                    // Ensure root node exists for this new level
+                    skillTree.ensureRootNodeExists(for: selectedLevel)
+                }
                 
                 // Handle parent relationship (can change parent, including to root)
                 dataController.moveNodeToNewParent(node: existingNode, newParent: selectedParent)
@@ -263,6 +343,14 @@ struct EditSkillNodeView: View {
             } else {
                 // Create new node (parent is required)
                 let newNode = dataController.createSkillNode(name: trimmedName, type: nodeType, description: trimmedDescription, in: skillTree)
+                newNode.level = selectedLevel
+                
+                // Update tree's maxLevel if this node is in a higher level
+                if selectedLevel > skillTree.maxLevel {
+                    skillTree.maxLevel = selectedLevel
+                    // Ensure root node exists for this new level
+                    skillTree.ensureRootNodeExists(for: selectedLevel)
+                }
                 
                 // Add to selected parent (required)
                 if let selectedParent = selectedParent {
@@ -273,6 +361,8 @@ struct EditSkillNodeView: View {
                 if nodeType == .habitLinked, let selectedHabit = selectedHabit {
                     newNode.linkToHabit(selectedHabit)
                 }
+                
+                dataController.save()
             }
             
             dismiss()

@@ -52,6 +52,9 @@ struct NestedNodeView: View {
             SkillNodeVisualView(node: node) {
                 onNodeLongPress(node)
             } onValidate: {
+                // Only allow completion if node is unlocked (current level)
+                guard node.isUnlocked else { return }
+                
                 // Toggle completion on tap
                 switch node.nodeType {
                 case .goal, .activity, .boss:

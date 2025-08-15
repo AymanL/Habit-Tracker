@@ -37,7 +37,7 @@ struct ContentView: View {
             // Skill Trees Tab
             SkillForestsView()
                 .tabItem {
-                    Label("Skill Forests", systemImage: "tree")
+                    Label("Skill Trees", systemImage: "tree")
                 }
         }
         .onAppear {

@@ -296,11 +296,6 @@ extension DataController {
         print("🗑️ Deleted skill tree: \(tree.name)")
     }
     
-    func deleteForest(_ forest: Forest) {
-        container.viewContext.delete(forest)
-        save()
-        print("🗑️ Deleted forest: \(forest.name_ ?? "Unknown")")
-    }
     
     // MARK: - Skill Node Methods
     

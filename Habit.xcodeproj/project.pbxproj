@@ -59,21 +59,21 @@
 		E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F32E42D35E00B15958 /* CategoryListView.swift */; };
 		E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F72E42D35E00B15958 /* ChartView.swift */; };
 		E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */; };
-		E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */; };
+
 		E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */; };
 		E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A70B2E42D35E00B15958 /* EditSkillNodeView.swift */; };
 		E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A6F62E42D35E00B15958 /* CalendarView.swift */; };
 		E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7072E42D35E00B15958 /* PastHabitEditorView.swift */; };
-		E3E9A72E2E42D35E00B15958 /* EditForestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A72F2E42D35E00B15958 /* EditForestView.swift */; };
+
 		E3E9A7322E44DBBD00B15958 /* ImportModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */; };
-		E3E9A7332E44DBBD00B15958 /* ForestImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */; };
+
 		E3E9A73C2E42D35E00B15958 /* SkillTreeVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */; };
 		E3E9A73D2E42D35E00B15958 /* NestedNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */; };
 		E3E9A73E2E42D35E00B15958 /* SkillNodeVisualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */; };
 		E3E9A73F2E42D35E00B15958 /* HierarchicalNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */; };
 		E3E9A7422E42D35E00B15958 /* TreeLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7412E42D35E00B15958 /* TreeLayoutView.swift */; };
 		E3E9A7442E42D35E00B15958 /* ImportSkillTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7432E42D35E00B15958 /* ImportSkillTreeView.swift */; };
-		E3E9A7462E42D35E00B15958 /* ImportSingleTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E9A7452E42D35E00B15958 /* ImportSingleTreeView.swift */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -165,7 +165,7 @@
 		E3E9A6FC2E42D35E00B15958 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		E3E9A6FD2E42D35E00B15958 /* SortMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortMenuView.swift; sourceTree = "<group>"; };
 		E3E9A6FE2E42D35E00B15958 /* TipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipView.swift; sourceTree = "<group>"; };
-		E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestDetailView.swift; sourceTree = "<group>"; };
+
 		E3E9A7022E42D35E00B15958 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		E3E9A7032E42D35E00B15958 /* EditDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDurationView.swift; sourceTree = "<group>"; };
 		E3E9A7042E42D35E00B15958 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
@@ -179,16 +179,16 @@
 		E3E9A7102E42D35E00B15958 /* SkillTreeDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDebugView.swift; sourceTree = "<group>"; };
 		E3E9A7112E42D35E00B15958 /* SkillTreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeDetailView.swift; sourceTree = "<group>"; };
 		E3E9A7122E42D35E00B15958 /* SkillTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeListView.swift; sourceTree = "<group>"; };
-		E3E9A72F2E42D35E00B15958 /* EditForestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditForestView.swift; sourceTree = "<group>"; };
+
 		E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportModuleTests.swift; sourceTree = "<group>"; };
-		E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestImportTests.swift; sourceTree = "<group>"; };
+
 		E3E9A7382E42D35E00B15958 /* SkillTreeVisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeVisualizationView.swift; sourceTree = "<group>"; };
 		E3E9A7392E42D35E00B15958 /* NestedNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestedNodeView.swift; sourceTree = "<group>"; };
 		E3E9A73A2E42D35E00B15958 /* SkillNodeVisualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillNodeVisualView.swift; sourceTree = "<group>"; };
 		E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchicalNodeView.swift; sourceTree = "<group>"; };
 		E3E9A7412E42D35E00B15958 /* TreeLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeLayoutView.swift; sourceTree = "<group>"; };
 		E3E9A7432E42D35E00B15958 /* ImportSkillTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportSkillTreeView.swift; sourceTree = "<group>"; };
-		E3E9A7452E42D35E00B15958 /* ImportSingleTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportSingleTreeView.swift; sourceTree = "<group>"; };
+
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,7 +235,6 @@
 			children = (
 				E3E9A6F52E42D35E00B15958 /* Categories */,
 				E3E9A6FF2E42D35E00B15958 /* Common */,
-				E3E9A7012E42D35E00B15958 /* Forests */,
 				E3E9A7082E42D35E00B15958 /* Habits */,
 				E3E9A70A2E42D35E00B15958 /* Settings */,
 				E3E9A70D2E42D35E00B15958 /* SkillNodes */,
@@ -348,7 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				E3E9A7312E44DBBD00B15958 /* ImportModuleTests.swift */,
-				E3E9A7342E44DBBD00B15958 /* ForestImportTests.swift */,
+
 				E3E9A6EB2E3FFF0800B15958 /* SkillTreeTests.swift */,
 				02EC2FAA2A1CEA410004DA4B /* Habit.xctestplan */,
 				02EC2FB12A1CECF00004DA4B /* BaseTestCase.swift */,
@@ -405,15 +404,7 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
-		E3E9A7012E42D35E00B15958 /* Forests */ = {
-			isa = PBXGroup;
-			children = (
-				E3E9A7002E42D35E00B15958 /* ForestDetailView.swift */,
-				E3E9A72F2E42D35E00B15958 /* EditForestView.swift */,
-			);
-			path = Forests;
-			sourceTree = "<group>";
-		};
+
 		E3E9A7082E42D35E00B15958 /* Habits */ = {
 			isa = PBXGroup;
 			children = (
@@ -457,7 +448,6 @@
 				E3E9A73B2E42D35E00B15958 /* HierarchicalNodeView.swift */,
 				E3E9A7412E42D35E00B15958 /* TreeLayoutView.swift */,
 				E3E9A7432E42D35E00B15958 /* ImportSkillTreeView.swift */,
-				E3E9A7452E42D35E00B15958 /* ImportSingleTreeView.swift */,
 			);
 			path = SkillTrees;
 			sourceTree = "<group>";
@@ -632,8 +622,8 @@
 				E3E9A7252E42D35E00B15958 /* CategoryListView.swift in Sources */,
 				E3E9A7262E42D35E00B15958 /* ChartView.swift in Sources */,
 				E3E9A7282E42D35E00B15958 /* SortMenuView.swift in Sources */,
-				E3E9A7292E42D35E00B15958 /* ForestDetailView.swift in Sources */,
-				E3E9A72E2E42D35E00B15958 /* EditForestView.swift in Sources */,
+
+
 				E3E9A72A2E42D35E00B15958 /* SkillTreeListView.swift in Sources */,
 				E3E9A73C2E42D35E00B15958 /* SkillTreeVisualizationView.swift in Sources */,
 				E3E9A73D2E42D35E00B15958 /* NestedNodeView.swift in Sources */,
@@ -641,7 +631,7 @@
 				E3E9A73F2E42D35E00B15958 /* HierarchicalNodeView.swift in Sources */,
 				E3E9A7422E42D35E00B15958 /* TreeLayoutView.swift in Sources */,
 				E3E9A7442E42D35E00B15958 /* ImportSkillTreeView.swift in Sources */,
-				E3E9A7462E42D35E00B15958 /* ImportSingleTreeView.swift in Sources */,
+
 				E3E9A72B2E42D35E00B15958 /* EditSkillNodeView.swift in Sources */,
 				E3E9A72C2E42D35E00B15958 /* CalendarView.swift in Sources */,
 				E3E9A72D2E42D35E00B15958 /* PastHabitEditorView.swift in Sources */,
@@ -671,7 +661,7 @@
 				0261399D2A8BCF76003D6711 /* DateExtensionTests.swift in Sources */,
 				E3E9A6EC2E3FFF0800B15958 /* SkillTreeTests.swift in Sources */,
 				E3E9A7322E44DBBD00B15958 /* ImportModuleTests.swift in Sources */,
-				E3E9A7332E44DBBD00B15958 /* ForestImportTests.swift in Sources */,
+
 				02EC2FBF2A20E5730004DA4B /* DevelopmentTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -720,7 +710,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -737,7 +727,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -884,7 +874,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -920,7 +910,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.habit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -940,7 +930,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -958,7 +948,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6AZS2Q3UZ;
 				GENERATE_INFOPLIST_FILE = YES;
-                MARKETING_VERSION = 1.3.1;
+                MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayman.HabitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

@@ -29,14 +29,19 @@ extension SkillTree {
         set { creationDate_ = newValue }
     }
     
+    var currentLevel: Int {
+        get { Int(currentLevel_) }
+        set { currentLevel_ = Int64(newValue) }
+    }
+    
+    var maxLevel: Int {
+        get { Int(maxLevel_) }
+        set { maxLevel_ = Int64(newValue) }
+    }
+    
     var nodes: [SkillNode] {
         get { nodes_?.allObjects as? [SkillNode] ?? [] }
         set { nodes_ = NSSet(array: newValue) }
-    }
-    
-    var forest: Forest? {
-        get { forest_ }
-        set { forest_ = newValue }
     }
     
     // MARK: - Computed Properties
@@ -70,6 +75,83 @@ extension SkillTree {
         return nodes.filter { $0.depth == level }.sorted { $0.order < $1.order }
     }
     
+    // MARK: - Level Management
+    
+    func getNodesForLevel(_ level: Int) -> [SkillNode] {
+        return nodes.filter { $0.level == level }.sorted { $0.order < $1.order }
+    }
+    
+    func getRootNodeForLevel(_ level: Int) -> SkillNode? {
+        return nodes.filter { $0.level == level && $0.nodeType == .root }.first
+    }
+    
+    func ensureRootNodeExists(for level: Int) {
+        // Check if root node already exists for this level
+        if getRootNodeForLevel(level) != nil {
+            return
+        }
+        
+        // Create new root node for this level
+        guard let context = managedObjectContext else { return }
+        
+        let rootNode = SkillNode(context: context, name: name, type: .root)
+        rootNode.tree = self
+        rootNode.level = level
+        rootNode.order = 0
+        
+        print("🌳 Created root node for level \(level) in tree '\(name)'")
+        
+        // Update maxLevel if necessary
+        if level > maxLevel {
+            maxLevel = level
+        }
+    }
+    
+    func getUnlockedNodes() -> [SkillNode] {
+        return nodes.filter { $0.level <= currentLevel }.sorted { $0.order < $1.order }
+    }
+    
+    func getLockedNodes() -> [SkillNode] {
+        return nodes.filter { $0.level > currentLevel }.sorted { $0.order < $1.order }
+    }
+    
+    func isLevelUnlocked(_ level: Int) -> Bool {
+        return level <= currentLevel
+    }
+    
+    func canUnlockNextLevel() -> Bool {
+        guard currentLevel < maxLevel else { return false }
+        
+        // Check if all nodes in current level are completed
+        let currentLevelNodes = getNodesForLevel(currentLevel).filter { $0.nodeType != .root }
+        return !currentLevelNodes.isEmpty && currentLevelNodes.allSatisfy { $0.isCompleted }
+    }
+    
+    func unlockNextLevel() -> Bool {
+        guard canUnlockNextLevel() else { return false }
+        
+        currentLevel += 1
+        
+        // Ensure there's a root node for the new current level
+        ensureRootNodeExists(for: currentLevel)
+        
+        print("🔓 Unlocked level \(currentLevel) in tree '\(name)'")
+        objectWillChange.send()
+        return true
+    }
+    
+    func getCurrentLevelProgress() -> (completed: Int, total: Int) {
+        let levelNodes = getNodesForLevel(currentLevel).filter { $0.nodeType != .root }
+        let completed = levelNodes.filter { $0.isCompleted }.count
+        return (completed: completed, total: levelNodes.count)
+    }
+    
+    func getLevelProgress(for level: Int) -> (completed: Int, total: Int) {
+        let levelNodes = getNodesForLevel(level).filter { $0.nodeType != .root }
+        let completed = levelNodes.filter { $0.isCompleted }.count
+        return (completed: completed, total: levelNodes.count)
+    }
+    
     func buildHierarchicalStructure() -> [SkillNode] {
         var result: [SkillNode] = []
         
@@ -95,6 +177,8 @@ extension SkillTree {
         self.name = name
         self.treeDescription = description
         self.creationDate = Date()
+        self.currentLevel = 1
+        self.maxLevel = 1
         
         // Set initial order to be the last in the list
         let request: NSFetchRequest<SkillTree> = SkillTree.fetchRequest()
@@ -107,12 +191,10 @@ extension SkillTree {
             self.order_ = 0
         }
         
-        // Create the root node with the same name as the tree
-        let rootNode = SkillNode(context: context, name: name, type: .root)
-        rootNode.tree = self
-        rootNode.order = 0
+        // Create the root node for level 1
+        ensureRootNodeExists(for: 1)
         
-        print("🌳 Created SkillTree: \(name) with root node")
+        print("🌳 Created SkillTree: \(name) with root node at level 1")
     }
     
     // MARK: - Completion Logic

@@ -2,168 +2,268 @@ import SwiftUI
 
 struct SkillTreeListView: View {
     @EnvironmentObject var dataController: DataController
-    @State private var showingAddForest = false
+    @State private var showingAddTree = false
     @State private var showingImportView = false
-    @State private var searchText = ""
+    @State private var currentTreeIndex = 0
+    @State private var selectedNode: SkillNode?
+    @State private var showingAddNode = false
+    @State private var showingNodeDetail = false
+    @State private var showingDeleteAlert = false
+    @State private var treeToDelete: SkillTree?
     
     @FetchRequest(
-        entity: Forest.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Forest.creationDate_, ascending: false)]
-    ) var forests: FetchedResults<Forest>
+        entity: SkillTree.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \SkillTree.order_, ascending: true)]
+    ) var skillTrees: FetchedResults<SkillTree>
     
-    var filteredForests: [Forest] {
-        if searchText.isEmpty {
-            return Array(forests)
-        } else {
-            return forests.filter { forest in
-                ((forest.name_ ?? "").localizedCaseInsensitiveContains(searchText) ||
-                 (forest.description_ ?? "").localizedCaseInsensitiveContains(searchText))
-            }
-        }
+    var sortedTrees: [SkillTree] {
+        Array(skillTrees)
+    }
+    
+    var currentTree: SkillTree? {
+        guard !sortedTrees.isEmpty, currentTreeIndex < sortedTrees.count else { return nil }
+        return sortedTrees[currentTreeIndex]
     }
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(filteredForests) { forest in
-                    NavigationLink(destination: ForestDetailView(forest: forest)) {
-                        ForestRowView(forest: forest)
+            ScrollView {
+                VStack(spacing: 20) {
+                    if !sortedTrees.isEmpty, let tree = currentTree {
+                        // Tree Navigation Header
+                        SkillTreeNavigationView(
+                            currentTree: tree,
+                            currentIndex: currentTreeIndex,
+                            totalTrees: sortedTrees.count,
+                            onPrevious: {
+                                if currentTreeIndex > 0 {
+                                    currentTreeIndex -= 1
+                                }
+                            },
+                            onNext: {
+                                if currentTreeIndex < sortedTrees.count - 1 {
+                                    currentTreeIndex += 1
+                                }
+                            },
+                            onNodeTap: { node in
+                                selectedNode = node
+                                showingNodeDetail = true
+                            },
+                            onAddNode: {
+                                showingAddNode = true
+                            },
+                            onDeleteTree: {
+                                treeToDelete = tree
+                                showingDeleteAlert = true
+                            }
+                        )
+                    } else {
+                        // Empty state
+                        VStack(spacing: 20) {
+                            Image(systemName: "tree.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray)
+                            
+                            Text("No Skill Trees")
+                                .font(.title2)
+                                .fontWeight(.medium)
+                            
+                            Text("Create your first skill tree to get started")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        .padding(.top, 100)
                     }
                 }
-                .onDelete(perform: deleteForests)
+                .padding()
             }
-            .searchable(text: $searchText, prompt: "Search forests...")
-            .navigationTitle("Forests")
+            .navigationTitle("Skill Trees")
             .navigationBarTitleDisplayMode(.large)
-            .navigationBarBackButtonHidden(false)
-            .navigationBarItems(trailing: HStack {
-                Button(action: { showingImportView = true }) {
-                    Image(systemName: "doc.badge.plus")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: { showingImportView = true }) {
+                            Image(systemName: "doc.badge.plus")
+                        }
+                        
+                        Button("Add") {
+                            showingAddTree = true
+                        }
+                    }
                 }
-                
-                Button("Add") {
-                    showingAddForest = true
-                }
-            })
-            .sheet(isPresented: $showingAddForest) {
+            }
+            .sheet(isPresented: $showingAddTree) {
                 NavigationView {
-                    EditForestView()
+                    EditSkillTreeView()
                 }
             }
             .sheet(isPresented: $showingImportView) {
                 ImportSkillTreeView()
             }
-            .overlay {
-                if filteredForests.isEmpty {
-                    VStack(spacing: 20) {
-                        Image(systemName: "tree.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.gray)
-                        
-                        Text("No Forests")
-                            .font(.title2)
-                            .fontWeight(.medium)
-                        
-                        Text(searchText.isEmpty ? 
-                            "Create your first forest to get started" : 
-                            "No forests match your search"
-                        )
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
+            .sheet(item: $selectedNode) { node in
+                NavigationView {
+                    EditSkillNodeView(skillTree: node.tree!, skillNode: node)
+                }
+            }
+            .sheet(isPresented: $showingAddNode) {
+                if let currentTree = sortedTrees.indices.contains(currentTreeIndex) ? sortedTrees[currentTreeIndex] : nil {
+                    NavigationView {
+                        EditSkillNodeView(skillTree: currentTree)
                     }
+                }
+            }
+            .alert("Delete Skill Tree", isPresented: $showingDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    deleteCurrentTree()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                if let tree = treeToDelete {
+                    Text("Are you sure you want to delete '\(tree.name)'? This action cannot be undone.")
                 }
             }
         }
     }
     
-    private func deleteForests(offsets: IndexSet) {
-        for index in offsets {
-            let forest = filteredForests[index]
-            dataController.deleteForest(forest)
+    private func deleteCurrentTree() {
+        guard let tree = treeToDelete else { return }
+        
+        // Adjust current index if necessary
+        if currentTreeIndex >= sortedTrees.count - 1 && currentTreeIndex > 0 {
+            currentTreeIndex -= 1
         }
-    }
-    
-}
-
-// MARK: - Helper Functions
-
-private func calculateForestCompletion(for forest: Forest) -> Double {
-    let trees = forest.trees_?.allObjects as? [SkillTree] ?? []
-    guard !trees.isEmpty else { return 0.0 }
-    let totalCompletion = trees.reduce(0.0) { sum, tree in
-        sum + tree.completionPercentage
-    }
-    return totalCompletion / Double(trees.count)
-}
-
-private func calculateCompletedTreesCount(for forest: Forest) -> Int {
-    let trees = forest.trees_?.allObjects as? [SkillTree] ?? []
-    return trees.filter { $0.completionPercentage == 1.0 }.count
-}
-
-private func calculateTotalTreesCount(for forest: Forest) -> Int {
-    let trees = forest.trees_?.allObjects as? [SkillTree] ?? []
-    return trees.count
-}
-
-private func calculateTotalNodesCount(for forest: Forest) -> Int {
-    let trees = forest.trees_?.allObjects as? [SkillTree] ?? []
-    return trees.reduce(0) { sum, tree in
-        sum + tree.totalNodesCount
+        
+        // Delete the tree
+        dataController.delete(tree)
+        dataController.save()
+        
+        // Reset state
+        treeToDelete = nil
     }
 }
 
-struct ForestRowView: View {
-    @ObservedObject var forest: Forest
+// MARK: - Skill Tree Navigation View
+struct SkillTreeNavigationView: View {
+    @ObservedObject var currentTree: SkillTree
+    let currentIndex: Int
+    let totalTrees: Int
+    let onPrevious: () -> Void
+    let onNext: () -> Void
+    let onNodeTap: (SkillNode) -> Void
+    let onAddNode: () -> Void
+    let onDeleteTree: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(forest.name_ ?? "")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+        VStack(spacing: 16) {
+                // Tree Header with Navigation
+                VStack(spacing: 12) {
+                    // Navigation controls
+                    HStack {
+                        Button(action: onPrevious) {
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .foregroundColor(currentIndex > 0 ? .blue : .gray)
+                        }
+                        .disabled(currentIndex <= 0)
+                        
+                        Spacer()
+                        
+                        VStack(spacing: 4) {
+                            Text(currentTree.name)
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.center)
+                            
+                            Text("\(currentIndex + 1) of \(totalTrees)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 16) {
+                            Button(action: onDeleteTree) {
+                                Image(systemName: "trash")
+                                    .font(.title3)
+                                    .foregroundColor(.red)
+                            }
+                            
+                            Button(action: onNext) {
+                                Image(systemName: "chevron.right")
+                                    .font(.title2)
+                                    .foregroundColor(currentIndex < totalTrees - 1 ? .blue : .gray)
+                            }
+                            .disabled(currentIndex >= totalTrees - 1)
+                        }
+                    }
                     
-                    if let description = forest.description_, !description.isEmpty {
-                        Text(description)
+                    // Tree description
+                    if !currentTree.treeDescription.isEmpty {
+                        Text(currentTree.treeDescription)
                             .font(.caption)
                             .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(calculateCompletedTreesCount(for: forest))/\(calculateTotalTreesCount(for: forest))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                     
-                    ProgressView(value: calculateForestCompletion(for: forest))
-                        .progressViewStyle(LinearProgressViewStyle())
-                        .frame(width: 60)
+                    // Progress information
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("Progress")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Text("\(currentTree.completedNodesCount)/\(currentTree.totalNodesCount) nodes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(Int(currentTree.completionPercentage * 100))%")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                        }
+                        
+                        ProgressView(value: currentTree.completionPercentage)
+                            .progressViewStyle(LinearProgressViewStyle())
+                            .scaleEffect(y: 1.5)
+                    }
+                    
+                    // Add Node Button
+                    Button(action: onAddNode) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                                .font(.subheadline)
+                            Text("Add Node")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-            }
-            
-            HStack {
-                Label("\(calculateTotalNodesCount(for: forest)) nodes", systemImage: "circle.grid.2x2")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
                 
-                Spacer()
-                
-                Text((forest.creationDate_ ?? Date()).formatted(date: .abbreviated, time: .omitted))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+                // Tree Visualization
+                SkillTreeVisualizationView(skillTree: currentTree, onNodeTap: onNodeTap)
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
         }
-        .padding(.vertical, 4)
     }
 }
 
 #Preview {
     SkillTreeListView()
         .environmentObject(DataController.preview)
-} 
+}

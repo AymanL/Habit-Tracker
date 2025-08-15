@@ -14,11 +14,12 @@ class ImportModuleTests: BaseTestCase {
     // MARK: - Test Data
     
     let validSingleTreeInput = """
-    Swift Development
+    # Swift Development
+    ## Fundamentals
     - Learn Swift Basics
     - Understand Optionals
     - Master Closures
-    - Build Simple Apps
+    ## Advanced Topics
     - Advanced Swift Features
     -- Protocol-Oriented Programming
     -- Generics and Type Constraints
@@ -26,33 +27,39 @@ class ImportModuleTests: BaseTestCase {
     """
     
     let simpleTreeInput = """
-    Programming
+    # Programming
+    ## Basics
     - Learn Python
     - Learn JavaScript
     """
     
     let deepNestedTreeInput = """
-    Software Development
-    - Frontend Development
+    # Software Development
+    ## Frontend Development
+    - Web Fundamentals
     -- HTML & CSS
     --- Responsive Design
     --- CSS Frameworks
-    -- JavaScript
-    --- ES6+ Features
-    --- React.js
-    ---- Hooks
-    ---- Context API
-    --- Vue.js
-    - Backend Development
+    - JavaScript Frameworks
+    -- React.js
+    --- Hooks
+    --- Context API
+    -- Vue.js
+    ## Backend Development
+    - Server Technologies
     -- Node.js
-    -- Python
-    --- Django
-    --- Flask
+    - Python Development
+    -- Django
+    -- Flask
     """
     
     let emptyInput = ""
     let invalidInput = "Invalid format without proper structure"
-    let singleLineInput = "Just one line without proper structure"
+    let singleLineInput = """
+    # Simple Tree
+    ## Basic Level
+    - Single Node
+    """
     
     // MARK: - Test Methods
     
@@ -61,13 +68,11 @@ class ImportModuleTests: BaseTestCase {
         let input = validSingleTreeInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 9) // Root + 5 level 1 + 3 level 2 (total 9)
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 10) // 1 tree root + 2 level root nodes + 7 child nodes
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -75,49 +80,47 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Swift Development")
-        XCTAssertEqual(tree.nodes.count, 9)
+        XCTAssertEqual(tree.maxLevel, 2) // Two levels: Fundamentals and Advanced Topics
         
-        // Verify root node
-        let rootNode = tree.nodes.first { $0.name == "Swift Development" }
-        XCTAssertNotNil(rootNode, "Root node 'Swift Development' should exist")
-        XCTAssertEqual(rootNode?.nodeType, .root)
+        // Verify tree-level root node
+        let treeRootNode = tree.nodes.first { $0.name == "Swift Development" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
         
-        // Verify level 1 nodes (children of root)
+        // Verify level 1 root node
+        let level1Root = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(level1Root)
+        XCTAssertEqual(level1Root?.name, "Fundamentals")
+        XCTAssertEqual(level1Root?.nodeType, .root)
+        XCTAssertEqual(level1Root?.level, 1)
         
-        let level1Nodes = tree.nodes.filter { $0.name != "Swift Development" && $0.parentNode?.name == "Swift Development" }
-        XCTAssertEqual(level1Nodes.count, 5)
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Learn Swift Basics" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Understand Optionals" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Master Closures" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Build Simple Apps" })
-        XCTAssertTrue(level1Nodes.contains { $0.name == "Advanced Swift Features" })
+        // Verify level 2 root node  
+        let level2Root = tree.getRootNodeForLevel(2)
+        XCTAssertNotNil(level2Root)
+        XCTAssertEqual(level2Root?.name, "Advanced Topics")
+        XCTAssertEqual(level2Root?.nodeType, .root)
+        XCTAssertEqual(level2Root?.level, 2)
         
-        // Verify level 2 nodes (children of Advanced Swift Features)
-        let advancedFeaturesNode = level1Nodes.first { $0.name == "Advanced Swift Features" }
+        // Verify level 1 children (children of Fundamentals)
+        let level1Children = tree.getNodesForLevel(1).filter { $0.parentNode == level1Root && $0.nodeType != .root }
+        XCTAssertEqual(level1Children.count, 3)
+        XCTAssertTrue(level1Children.contains { $0.name == "Learn Swift Basics" })
+        XCTAssertTrue(level1Children.contains { $0.name == "Understand Optionals" })
+        XCTAssertTrue(level1Children.contains { $0.name == "Master Closures" })
+        
+        // Verify level 2 children (children of Advanced Topics)
+        let level2Children = tree.getNodesForLevel(2).filter { $0.parentNode == level2Root && $0.nodeType != .root }
+        XCTAssertEqual(level2Children.count, 1)
+        
+        let advancedFeaturesNode = level2Children.first { $0.name == "Advanced Swift Features" }
         XCTAssertNotNil(advancedFeaturesNode)
+        XCTAssertEqual(advancedFeaturesNode?.level, 2)
         
-        let level2Nodes = tree.nodes.filter { $0.parentNode?.name == "Advanced Swift Features" }
-        XCTAssertEqual(level2Nodes.count, 3)
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Protocol-Oriented Programming" })
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Generics and Type Constraints" })
-        XCTAssertTrue(level2Nodes.contains { $0.name == "Memory Management" })
-        
-        // Verify specific nodes
-        let learnSwiftBasics = level1Nodes.first { $0.name == "Learn Swift Basics" }
-        XCTAssertNotNil(learnSwiftBasics)
-        XCTAssertEqual(learnSwiftBasics?.nodeType, .goal)
-        XCTAssertEqual(learnSwiftBasics?.parentNode, rootNode)
-        
-        let advancedFeatures = level1Nodes.first { $0.name == "Advanced Swift Features" }
-        XCTAssertNotNil(advancedFeatures)
-        XCTAssertEqual(advancedFeatures?.nodeType, .goal)
-        XCTAssertEqual(advancedFeatures?.parentNode, rootNode)
-        
-        // Verify nested nodes
-        let protocolOriented = level2Nodes.first { $0.name == "Protocol-Oriented Programming" }
-        XCTAssertNotNil(protocolOriented)
-        XCTAssertEqual(protocolOriented?.nodeType, .activity) // Level 2 nodes are created as .activity
-        XCTAssertEqual(protocolOriented?.parentNode, advancedFeatures)
+        // Verify nested nodes under Advanced Swift Features
+        let nestedNodes = tree.getNodesForLevel(2).filter { $0.parentNode == advancedFeaturesNode }
+        XCTAssertEqual(nestedNodes.count, 3)
+        XCTAssertTrue(nestedNodes.contains { $0.name == "Protocol-Oriented Programming" })
+        XCTAssertTrue(nestedNodes.contains { $0.name == "Generics and Type Constraints" })
+        XCTAssertTrue(nestedNodes.contains { $0.name == "Memory Management" })
     }
     
     func testSimpleTreeImport() {
@@ -125,13 +128,11 @@ class ImportModuleTests: BaseTestCase {
         let input = simpleTreeInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 4) // Root + 2 nodes (total 4 including the automatically created root)
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 4) // 1 tree root + 1 level root node + 2 child nodes
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -139,24 +140,29 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Programming")
-        XCTAssertEqual(tree.nodes.count, 4)
+        XCTAssertEqual(tree.maxLevel, 1) // One level: Basics
         
-        // Verify root node
-        let rootNode = tree.nodes.first { $0.name == "Programming" }
-        XCTAssertNotNil(rootNode, "Root node 'Programming' should exist")
-        XCTAssertEqual(rootNode?.nodeType, .root)
+        // Verify tree-level root node
+        let treeRootNode = tree.nodes.first { $0.name == "Programming" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
         
-        // Verify child nodes (children of root)
-        let childNodes = tree.nodes.filter { $0.name != "Programming" && $0.parentNode?.name == "Programming" }
+        // Verify level 1 root node
+        let level1Root = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(level1Root)
+        XCTAssertEqual(level1Root?.name, "Basics")
+        XCTAssertEqual(level1Root?.nodeType, .root)
+        
+        // Verify child nodes (children of Basics root)
+        let childNodes = tree.getNodesForLevel(1).filter { $0.parentNode == level1Root && $0.nodeType != .root }
         XCTAssertEqual(childNodes.count, 2)
         
         let learnPython = childNodes.first { $0.name == "Learn Python" }
         XCTAssertNotNil(learnPython)
-        XCTAssertEqual(learnPython?.parentNode?.name, "Programming")
+        XCTAssertEqual(learnPython?.parentNode, level1Root)
         
         let learnJavaScript = childNodes.first { $0.name == "Learn JavaScript" }
         XCTAssertNotNil(learnJavaScript)
-        XCTAssertEqual(learnJavaScript?.parentNode?.name, "Programming")
+        XCTAssertEqual(learnJavaScript?.parentNode, level1Root)
     }
     
     func testDeepNestedTreeImport() {
@@ -164,13 +170,11 @@ class ImportModuleTests: BaseTestCase {
         let input = deepNestedTreeInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
         XCTAssertGreaterThan(result.nodesCount, 10) // Should have many nodes
-        XCTAssertEqual(result.forests.count, 0)
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -178,20 +182,36 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Software Development")
+        XCTAssertEqual(tree.maxLevel, 2) // Two levels: Frontend and Backend
         XCTAssertGreaterThan(tree.nodes.count, 10)
         
-        // Verify specific nodes exist
-        let frontendDev = tree.nodes.first { $0.name == "Frontend Development" }
-        XCTAssertNotNil(frontendDev)
+        // Verify level root nodes exist
+        let frontendRoot = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(frontendRoot)
+        XCTAssertEqual(frontendRoot?.name, "Frontend Development")
         
-        let backendDev = tree.nodes.first { $0.name == "Backend Development" }
-        XCTAssertNotNil(backendDev)
+        let backendRoot = tree.getRootNodeForLevel(2)
+        XCTAssertNotNil(backendRoot)
+        XCTAssertEqual(backendRoot?.name, "Backend Development")
         
-        let htmlCss = tree.nodes.first { $0.name == "HTML & CSS" }
+        // Verify specific nodes exist in level 1
+        let level1Nodes = tree.getNodesForLevel(1)
+        let webFundamentals = level1Nodes.first { $0.name == "Web Fundamentals" }
+        XCTAssertNotNil(webFundamentals)
+        
+        let htmlCss = level1Nodes.first { $0.name == "HTML & CSS" }
         XCTAssertNotNil(htmlCss)
         
-        let reactJs = tree.nodes.first { $0.name == "React.js" }
+        let reactJs = level1Nodes.first { $0.name == "React.js" }
         XCTAssertNotNil(reactJs)
+        
+        // Verify specific nodes exist in level 2
+        let level2Nodes = tree.getNodesForLevel(2)
+        let serverTech = level2Nodes.first { $0.name == "Server Technologies" }
+        XCTAssertNotNil(serverTech)
+        
+        let pythonDev = level2Nodes.first { $0.name == "Python Development" }
+        XCTAssertNotNil(pythonDev)
     }
     
     func testEmptyInput() {
@@ -199,13 +219,11 @@ class ImportModuleTests: BaseTestCase {
         let input = emptyInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 0)
         XCTAssertEqual(result.nodesCount, 0)
-        XCTAssertEqual(result.forests.count, 0)
     }
     
     func testInvalidInput() {
@@ -213,13 +231,11 @@ class ImportModuleTests: BaseTestCase {
         let input = invalidInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 0)
         XCTAssertEqual(result.nodesCount, 0)
-        XCTAssertEqual(result.forests.count, 0)
     }
     
     func testSingleLineInput() {
@@ -227,54 +243,59 @@ class ImportModuleTests: BaseTestCase {
         let input = singleLineInput
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 2) // Root + 1 node (the single line becomes a tree)
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 3) // 1 tree root + 1 level root node + 1 child node
     }
     
     func testInputWithOnlyRoot() {
         // Given
-        let input = "Just a root node"
+        let input = """
+        # Just a root tree
+        ## Only Root Level
+        """
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 1) // Only root node
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 2) // 1 tree root + 1 level root node
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
         XCTAssertEqual(trees.count, 1)
         
         let tree = trees.first!
-        XCTAssertEqual(tree.name, "Just a root node")
-        XCTAssertEqual(tree.nodes.count, 1)
+        XCTAssertEqual(tree.name, "Just a root tree")
+        XCTAssertEqual(tree.maxLevel, 1)
+        
+        let treeRootNode = tree.nodes.first { $0.name == "Just a root tree" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
+        
+        let level1Root = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(level1Root)
+        XCTAssertEqual(level1Root?.name, "Only Root Level")
     }
     
     func testInputWithSpecialCharacters() {
         // Given
         let input = """
-        Test Tree with Special Chars: @#$%^&*()
+        # Test Tree with Special Chars: @#$%^&*()
+        ## Special Characters Level
         - Node with spaces and dots ...
         - Node with dashes - and underscores _
         - Node with numbers 123 and symbols !@#
         """
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 4) // Root + 3 nodes
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 5) // 1 tree root + 1 level root node + 3 child nodes
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -282,13 +303,21 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Test Tree with Special Chars: @#$%^&*()")
-        XCTAssertEqual(tree.nodes.count, 4)
+        XCTAssertEqual(tree.maxLevel, 1)
+        
+        let treeRootNode = tree.nodes.first { $0.name == "Test Tree with Special Chars: @#$%^&*()" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
+        
+        let level1Root = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(level1Root)
+        XCTAssertEqual(level1Root?.name, "Special Characters Level")
     }
     
     func testInputWithEmptyLines() {
         // Given
         let input = """
-        Test Tree
+        # Test Tree
+        ## Empty Lines Level
         
         - First Node
         
@@ -297,13 +326,11 @@ class ImportModuleTests: BaseTestCase {
         """
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertEqual(result.nodesCount, 3) // Root + 2 nodes
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertEqual(result.nodesCount, 4) // 1 tree root + 1 level root node + 2 child nodes
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -311,28 +338,34 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Test Tree")
-        XCTAssertEqual(tree.nodes.count, 3)
+        XCTAssertEqual(tree.maxLevel, 1)
+        
+        let treeRootNode = tree.nodes.first { $0.name == "Test Tree" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
+        
+        let level1Root = tree.getRootNodeForLevel(1)
+        XCTAssertNotNil(level1Root)
+        XCTAssertEqual(level1Root?.name, "Empty Lines Level")
     }
     
     func testInputWithMixedIndentation() {
         // Given
         let input = """
-        Test Tree
+        # Test Tree
+        ## Mixed Indentation Level
         - Node 1
-          - Subnode 1.1
+        -- Subnode 1.1
         - Node 2
-          - Subnode 2.1
-            - Sub-subnode 2.1.1
+        -- Subnode 2.1
+        --- Sub-subnode 2.1.1
         """
         
         // When
-        let result = parseSingleTree(input: input)
+        let result = parseMultipleTree(input: input)
         
         // Then
-        XCTAssertEqual(result.forestsCount, 0)
         XCTAssertEqual(result.treesCount, 1)
-        XCTAssertGreaterThan(result.nodesCount, 5) // Should have multiple nodes
-        XCTAssertEqual(result.forests.count, 0)
+        XCTAssertGreaterThan(result.nodesCount, 6) // Should have multiple nodes (tree root + level root + children)
         
         // Verify the tree structure by fetching from Core Data
         let trees = try! managedObjectContext.fetch(SkillTree.fetchRequest())
@@ -340,7 +373,11 @@ class ImportModuleTests: BaseTestCase {
         
         let tree = trees.first!
         XCTAssertEqual(tree.name, "Test Tree")
-        XCTAssertGreaterThan(tree.nodes.count, 5)
+        XCTAssertEqual(tree.maxLevel, 1)
+        XCTAssertGreaterThan(tree.nodes.count, 6)
+        
+        let treeRootNode = tree.nodes.first { $0.name == "Test Tree" && $0.nodeType == .root }
+        XCTAssertNotNil(treeRootNode)
     }
     
     func testPerformanceWithLargeTree() {
@@ -349,26 +386,24 @@ class ImportModuleTests: BaseTestCase {
         
         // When & Then
         measure {
-            let result = parseSingleTree(input: largeInput)
-            XCTAssertEqual(result.forestsCount, 0)
+            let result = parseMultipleTree(input: largeInput)
+    
             XCTAssertEqual(result.treesCount, 1)
             XCTAssertGreaterThan(result.nodesCount, 100)
-            XCTAssertEqual(result.forests.count, 0)
         }
     }
     
     // MARK: - Helper Methods
     
-    private func parseSingleTree(input: String) -> ImportResult {
-        // Use the actual parsing logic from ImportSingleTreeView
-        // This is a simplified version that tests the core functionality
-        return parseAndImportSingleTree(input: input)
+    private func parseMultipleTree(input: String) -> ImportResult {
+        // Use the actual parsing logic from ImportSkillTreeView
+        return parseAndImportMultipleTrees(input: input)
     }
     
-    private func parseAndImportSingleTree(input: String) -> ImportResult {
-        // Implementation that matches the actual import logic from ImportSingleTreeView
+    private func parseAndImportMultipleTrees(input: String) -> ImportResult {
+        // Implementation that matches the new import logic from ImportSkillTreeView
         if input.isEmpty {
-            return ImportResult(forestsCount: 0, treesCount: 0, nodesCount: 0, forests: [])
+            return ImportResult(treesCount: 0, nodesCount: 0, skillTrees: [])
         }
         
         let lines = input.components(separatedBy: .newlines)
@@ -376,13 +411,15 @@ class ImportModuleTests: BaseTestCase {
             .filter { !$0.isEmpty }
         
         guard !lines.isEmpty else {
-            return ImportResult(forestsCount: 0, treesCount: 0, nodesCount: 0, forests: [])
+            return ImportResult(treesCount: 0, nodesCount: 0, skillTrees: [])
         }
         
         let context = dataController.container.viewContext
-        var trees: [SkillTree] = []
+        var skillTrees: [SkillTree] = []
         var currentTree: SkillTree?
         var nodeStack: [(SkillNode, Int)] = []
+        var currentLevel = 1
+        var currentWorkingLevel = 1
         
         func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
             let trimmed = raw.trimmingCharacters(in: .whitespaces)
@@ -407,74 +444,58 @@ class ImportModuleTests: BaseTestCase {
             return (name.isEmpty ? trimmed : name, type)
         }
 
-        for (index, line) in lines.enumerated() {
-            let dashCount = line.prefix(while: { $0 == "-" }).count
-            let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
-            
-            guard !content.isEmpty else { continue }
-            
-            switch dashCount {
-            case 0:
-                // Tree name - create the tree (it automatically creates a root node)
-                let tree = SkillTree(context: context, name: content)
+        for (_, line) in lines.enumerated() {
+            if line.hasPrefix("##") {
+                // Level root node
+                let content = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                guard let tree = currentTree else { continue }
+                
+                // Update maxLevel if necessary
+                if currentLevel > tree.maxLevel {
+                    tree.maxLevel = currentLevel
+                }
+                
+                // Create root node for this level
+                let (parsedName, _) = parseTaggedContent(content, defaultType: .root)
+                let rootNode = SkillNode(context: context, name: parsedName, type: .root)
+                rootNode.tree = tree
+                rootNode.level = currentLevel
+                rootNode.order = 0
+                
+                // Clear the node stack and add this root node
+                nodeStack.removeAll()
+                nodeStack.append((rootNode, 0)) // Root nodes are at depth 0
+                
+                currentWorkingLevel = currentLevel
+                currentLevel += 1
+                
+            } else if line.hasPrefix("#") {
+                // Tree name
+                let content = String(line.dropFirst(1)).trimmingCharacters(in: .whitespaces)
+                let tree = SkillTree(context: context, name: content, description: "")
+                skillTrees.append(tree)
                 currentTree = tree
+                nodeStack.removeAll()
+                currentLevel = 1
+                currentWorkingLevel = 1
                 
-                // Find the automatically created root node
-                let rootNode = tree.nodes.first { $0.name == content }
-                if let root = rootNode {
-                    nodeStack.removeAll()
-                    nodeStack.append((root, 0)) // Root node is level 0
-                }
-                trees.append(tree)
-                
-            case 1:
-                // Level 1 node (1 dash = level 1 in tree)
+            } else if line.hasPrefix("-") {
+                // Regular node
+                let dashCount = line.prefix(while: { $0 == "-" }).count
+                let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
                 guard let tree = currentTree else { continue }
                 
-                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
-                let node = SkillNode(context: context, name: parsedName1, type: parsedType1)
+                let (parsedName, nodeType) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: context, name: parsedName, type: nodeType)
                 node.tree = tree
-                node.order = nodeStack.filter { $0.1 == 1 }.count
+                node.level = currentWorkingLevel
                 
-                // Find the root node (level 0) as parent
-                if let rootIndex = nodeStack.lastIndex(where: { $0.1 == 0 }) {
-                    let root = nodeStack[rootIndex].0
-                    root.addChild(node)
-                }
+                // Remove nodes from stack that are at greater or equal depth
+                nodeStack.removeAll { $0.1 >= dashCount }
                 
-                nodeStack.append((node, 1))
-                
-            case 2:
-                // Level 2 node (2 dashes = level 2 in tree)
-                guard let tree = currentTree else { continue }
-                
-                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
-                let node = SkillNode(context: context, name: parsedName2, type: parsedType2)
-                node.tree = tree
-                node.order = nodeStack.filter { $0.1 == 2 }.count
-                
-                // Find the most recent level 1 node as parent
-                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == 1 }) {
-                    let parent = nodeStack[parentIndex].0
-                    parent.addChild(node)
-                }
-                
-                nodeStack.append((node, 2))
-                
-            default:
-                // Deeper levels (3+ dashes)
-                guard let tree = currentTree else { continue }
-                
-                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
-                let node = SkillNode(context: context, name: parsedNameN, type: parsedTypeN)
-                node.tree = tree
-                node.order = nodeStack.filter { $0.1 == dashCount }.count
-                
-                // Find the most recent node at the previous level as parent
-                let parentLevel = dashCount - 1
-                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == parentLevel }) {
-                    let parent = nodeStack[parentIndex].0
-                    parent.addChild(node)
+                // Find parent node at the previous depth level
+                if let parentInfo = nodeStack.last(where: { $0.1 == dashCount - 1 }) {
+                    node.parentNode = parentInfo.0
                 }
                 
                 nodeStack.append((node, dashCount))
@@ -485,10 +506,9 @@ class ImportModuleTests: BaseTestCase {
         try! context.save()
         
         return ImportResult(
-            forestsCount: 0,
-            treesCount: trees.count,
-            nodesCount: trees.reduce(0) { sum, tree in sum + tree.nodes.count },
-            forests: []
+            treesCount: skillTrees.count,
+            nodesCount: skillTrees.reduce(0) { sum, tree in sum + tree.nodes.count },
+            skillTrees: skillTrees
         )
     }
     
@@ -500,13 +520,14 @@ class ImportModuleTests: BaseTestCase {
     }
     
     private func generateLargeTreeInput() -> String {
-        var input = "Large Test Tree\n"
+        var input = "# Large Test Tree\n"
+        input += "## Performance Level\n"
         for i in 1...100 {
             input += "- Node \(i)\n"
             for j in 1...5 {
-                input += "  - Subnode \(i).\(j)\n"
+                input += "-- Subnode \(i).\(j)\n"
                 for k in 1...3 {
-                    input += "    - Sub-subnode \(i).\(j).\(k)\n"
+                    input += "--- Sub-subnode \(i).\(j).\(k)\n"
                 }
             }
         }
