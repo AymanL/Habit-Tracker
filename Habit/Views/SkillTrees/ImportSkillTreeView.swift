@@ -28,7 +28,7 @@ struct ImportSkillTreeView: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                Text("Import forests and skill trees from a text file")
+                Text("Import skill trees from a text file")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -41,9 +41,8 @@ struct ImportSkillTreeView: View {
                         .font(.headline)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("• No dashes = Forest name")
-                        Text("• 1 dash = Tree name")
-                        Text("• 2+ dashes = Node levels within tree")
+                        Text("• No dashes = Tree name")
+                        Text("• 1+ dashes = Node levels within tree")
                     }
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -55,110 +54,144 @@ struct ImportSkillTreeView: View {
                             .fontWeight(.medium)
                         
                         Text("""
-                        My Forest
-                        - Programming Skills
-                        -- Learn Swift
-                        -- Build iOS App
-                        -- Daily Practice
-                        - Fitness Goals
-                        -- Cardio Training
-                        -- Strength Training
+                        Programming Skills
+                        - Learn Swift
+                        -- Basic Syntax
+                        -- Control Flow
+                        --- If Statements
+                        --- Loops
+                        -- Functions
+                        - Build an App
+                        -- UI Design
+                        -- Data Management
+                        
+                        Fitness Goals
+                        - Cardio Training
+                        -- Running
+                        --- 5K Run
+                        --- 10K Run
+                        -- Swimming
+                        - Strength Training
+                        -- Push Exercises
+                        -- Pull Exercises
                         """)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(4)
+                            .font(.caption)
+                            .fontDesign(.monospaced)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(6)
                     }
                 }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .padding(.horizontal)
                 
-                // Import options
-                VStack(spacing: 16) {
-                    Button(action: { showingFilePicker = true }) {
-                        HStack {
-                            Image(systemName: "doc.badge.plus")
-                                .font(.title3)
-                            Text("Import from File")
-                                .font(.body)
-                                .fontWeight(.medium)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
+                // Input section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Input Method:")
+                        .font(.headline)
                     
-                    Text("or")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    // Input buttons
+                    HStack(spacing: 16) {
+                        Button(action: { showingFilePicker = true }) {
+                            VStack(spacing: 8) {
+                                Image(systemName: "doc.badge.plus")
+                                    .font(.title2)
+                                Text("Choose File")
+                                    .font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemBlue))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            // Clear and focus on text input
+                            textInput = ""
+                        }) {
+                            VStack(spacing: 8) {
+                                Image(systemName: "text.cursor")
+                                    .font(.title2)
+                                Text("Type Text")
+                                    .font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGreen))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     // Text input area
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Paste text directly:")
-                            .font(.headline)
-                        
-                        TextEditor(text: $textInput)
-                            .frame(minHeight: 200)
-                            .padding(8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color(.systemGray4), lineWidth: 1)
-                            )
-                    }
-                }
-                
-                Spacer()
-                
-                // Import button
-                Button(action: importFromText) {
-                    HStack {
-                        Image(systemName: "arrow.down.doc")
-                            .font(.title3)
-                        Text("Import")
-                            .font(.body)
+                        Text("Or paste text directly:")
+                            .font(.subheadline)
                             .fontWeight(.medium)
+                        
+                        ZStack(alignment: .topLeading) {
+                            TextEditor(text: $textInput)
+                                .padding(8)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                                .frame(minHeight: 150)
+                            
+                            if textInput.isEmpty {
+                                Text("Paste your skill tree structure here...")
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 16)
+                                    .allowsHitTesting(false)
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(textInput.isEmpty ? Color.gray : Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .padding(.horizontal)
                 }
-                .disabled(textInput.isEmpty)
+                
+                // Action buttons
+                VStack(spacing: 12) {
+                    Button(action: { 
+                        performImport()
+                    }) {
+                        Text("Import Skill Trees")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(textInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color.blue)
+                            .cornerRadius(10)
+                    }
+                    .disabled(textInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .padding(.horizontal)
                 }
-                .padding()
+                
+                Spacer(minLength: 20)
             }
-            .scrollIndicators(.visible)
-            .scrollDismissesKeyboard(.interactively)
-        }
-        .navigationTitle("Import Skill Trees")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel") {
-                    dismiss()
+            }
+            .navigationTitle("Import")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
             }
         }
         .fileImporter(
             isPresented: $showingFilePicker,
-            allowedContentTypes: [UTType.plainText],
+            allowedContentTypes: [.plainText, .text],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let files):
                 if let file = files.first {
-                    loadFile(file)
+                    loadTextFromFile(file)
                 }
             case .failure(let error):
-                alertTitle = "Import Error"
-                alertMessage = "Failed to import file: \(error.localizedDescription)"
+                alertTitle = "File Error"
+                alertMessage = "Could not read file: \(error.localizedDescription)"
                 showingAlert = true
             }
         }
@@ -169,67 +202,75 @@ struct ImportSkillTreeView: View {
         }
         .sheet(isPresented: $showingPreview) {
             if let result = importResult {
-                ImportPreviewView(result: result) {
+                ImportResultView(result: result) {
                     dismiss()
                 }
             }
         }
     }
     
-    private func loadFile(_ file: URL) {
+    private func loadTextFromFile(_ url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            alertTitle = "Access Error"
+            alertMessage = "Unable to access the selected file"
+            showingAlert = true
+            return
+        }
+        
+        defer { url.stopAccessingSecurityScopedResource() }
+        
         do {
-            let content = try String(contentsOf: file)
+            let content = try String(contentsOf: url, encoding: .utf8)
             textInput = content
         } catch {
-            alertTitle = "File Error"
-            alertMessage = "Failed to read file: \(error.localizedDescription)"
+            alertTitle = "Read Error"
+            alertMessage = "Could not read file content: \(error.localizedDescription)"
             showingAlert = true
         }
     }
     
-    private func importFromText() {
-        guard !textInput.isEmpty else { return }
+    private func performImport() {
+        let trimmedInput = textInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedInput.isEmpty else {
+            alertTitle = "Empty Input"
+            alertMessage = "Please provide some text to import"
+            showingAlert = true
+            return
+        }
         
         do {
-            let result = try parseAndImport(textInput)
+            let result = try parseAndImportSkillTrees(trimmedInput)
             importResult = result
             showingPreview = true
-        } catch {
+        } catch let error as ImportError {
             alertTitle = "Import Error"
             alertMessage = error.localizedDescription
             showingAlert = true
+        } catch {
+            alertTitle = "Unexpected Error"
+            alertMessage = "An unexpected error occurred: \(error.localizedDescription)"
+            showingAlert = true
         }
     }
     
-    private func parseAndImport(_ text: String) throws -> ImportResult {
-        print("🔍 Starting text parsing...")
-        print("📝 Raw text input:")
-        print(text)
-        print("---")
-        
+    private func parseAndImportSkillTrees(_ text: String) throws -> ImportResult {
         let lines = text.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
         
-        print("📋 Parsed lines (\(lines.count) total):")
-        for (index, line) in lines.enumerated() {
-            print("  Line \(index + 1): '\(line)'")
-        }
-        print("---")
-        
         guard !lines.isEmpty else {
             throw ImportError.emptyFile
         }
-        // Minimum valid forest content: at least one forest line (no dash) and one tree line (one dash)
+        
+        // Check that we have at least one tree (no dashes)
         let dashCounts = lines.map { $0.prefix(while: { $0 == "-" }).count }
-        let hasForestLine = dashCounts.contains(0)
-        let hasAtLeastOneTree = dashCounts.contains(1)
-        guard hasForestLine && hasAtLeastOneTree else {
-            throw ImportError.invalidFormat("A forest requires a forest name (no dashes) and at least one tree (one dash).")
+        let hasTreeLine = dashCounts.contains(0)
+        guard hasTreeLine else {
+            throw ImportError.invalidFormat("At least one skill tree name (no dashes) is required.")
         }
         
-        var forests: [Forest] = []
-        var currentForest: Forest?
+        var skillTrees: [SkillTree] = []
         var currentTree: SkillTree?
         var nodeStack: [(SkillNode, Int)] = []
         
@@ -267,8 +308,6 @@ struct ImportSkillTreeView: View {
             print("📄 Processing line \(index + 1): '\(line)'")
             print("  Dash count: \(dashCount)")
             print("  Content: '\(content)'")
-            print("  Raw line bytes: \(Array(line.utf8))")
-            print("  First 10 characters: '\(String(line.prefix(10)))'")
             
             guard !content.isEmpty else { 
                 print("  ⏭️ Skipping empty content")
@@ -277,178 +316,76 @@ struct ImportSkillTreeView: View {
             
             switch dashCount {
             case 0:
-                // Forest name
-                print("  🌲 Creating new forest: '\(content)'")
-                let forest = Forest(context: context)
-                forest.name_ = content
-                forest.description_ = ""
-                forests.append(forest)
-                currentForest = forest
-                currentTree = nil
-                nodeStack.removeAll()
-                print("  ✅ Forest created and set as current")
-                print("  📊 Current state: \(forests.count) forests, currentTree: \(currentTree?.name ?? "nil")")
-                
-            case 1:
                 // Tree name
-                print("  🌳 Creating new tree: '\(content)'")
-                guard let forest = currentForest else {
-                    print("  ❌ No forest defined for tree: '\(content)'")
-                    throw ImportError.noForestDefined(lineNumber: index + 1)
-                }
-                
-                print("  📍 Adding tree to forest: '\(forest.name_ ?? "unknown")'")
-                let tree = SkillTree(context: context, name: content)
-                tree.forest = forest
+                print("  🌳 Creating new skill tree: '\(content)'")
+                let tree = SkillTree(context: context, name: content, description: "")
+                skillTrees.append(tree)
                 currentTree = tree
                 nodeStack.removeAll()
-                
-                // Find the automatically created root node and add it to the stack
-                let rootNode = tree.nodes.first { $0.name == content }
-                if let root = rootNode {
-                    nodeStack.append((root, 0)) // Root node is level 0
-                    print("  ✅ Found and added root node '\(root.name)' to stack at level 0")
-                } else {
-                    print("  ⚠️ Could not find automatically created root node")
-                }
-                
                 print("  ✅ Tree created and set as current")
-                print("  📊 Current state: currentTree: '\(currentTree?.name ?? "nil")', nodeStack: \(nodeStack.count) items")
-                
-            case 2:
-                // Level 1 node (2 dashes = level 1 in tree) - should be child of root
-                print("  📌 Creating level 1 node: '\(content)'")
-                guard let tree = currentTree else {
-                    print("  ❌ No tree defined for node: '\(content)'")
-                    throw ImportError.noTreeDefined(lineNumber: index + 1)
-                }
-                
-                print("  📍 Adding node to tree: '\(tree.name)'")
-                let (parsedName1, parsedType1) = parseTaggedContent(content, defaultType: .goal)
-                let node = SkillNode(context: context, name: parsedName1, type: parsedType1)
-                node.tree = tree
-                node.order = nodeStack.filter { $0.1 == 2 }.count
-                
-                // Find the root node (level 0) as parent
-                print("  🔍 Looking for root node (level 0)...")
-                if let rootIndex = nodeStack.lastIndex(where: { $0.1 == 0 }) {
-                    let root = nodeStack[rootIndex].0
-                    print("  👆 Found root node: '\(root.name)' at index \(rootIndex)")
-                    root.addChild(node)
-                    print("  ✅ Linked node '\(content)' to root '\(root.name)'")
-                } else {
-                    print("  ⚠️ No root node found for node '\(content)' at level 1")
-                    print("  📊 Available nodes in stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
-                }
-                
-                nodeStack.append((node, 2))
-                print("  ✅ Level 1 node created and added to stack")
-                print("  📊 Node stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
-                
-            case 3:
-                // Level 2 node (3 dashes = level 2 in tree)
-                print("  📌 Creating level 2 node: '\(content)'")
-                guard let tree = currentTree else {
-                    print("  ❌ No tree defined for node: '\(content)'")
-                    throw ImportError.noTreeDefined(lineNumber: index + 1)
-                }
-                
-                print("  📍 Adding node to tree: '\(tree.name)'")
-                let (parsedName2, parsedType2) = parseTaggedContent(content, defaultType: .activity)
-                let node = SkillNode(context: context, name: parsedName2, type: parsedType2)
-                node.tree = tree
-                node.order = nodeStack.filter { $0.1 == 3 }.count
-                
-                // Find the most recent level 2 node as parent
-                print("  🔍 Looking for parent at level 2...")
-                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == 2 }) {
-                    let parent = nodeStack[parentIndex].0
-                    print("  👆 Found parent: '\(parent.name)' at index \(parentIndex)")
-                    parent.addChild(node)
-                    print("  ✅ Linked node '\(content)' to parent '\(parent.name)'")
-                } else {
-                    print("  ⚠️ No parent found for node '\(content)' at level 3")
-                    print("  📊 Available nodes in stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
-                }
-                
-                nodeStack.append((node, 3))
-                print("  ✅ Level 2 node created and added to stack")
-                print("  📊 Node stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
+                print("  📊 Current state: \(skillTrees.count) trees")
                 
             default:
-                // Deeper levels (4+ dashes)
-                print("  📌 Creating level \(dashCount) node: '\(content)'")
+                // Node within tree
+                print("  🔵 Creating node at depth \(dashCount): '\(content)'")
                 guard let tree = currentTree else {
                     print("  ❌ No tree defined for node: '\(content)'")
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                print("  📍 Adding node to tree: '\(tree.name)'")
-                let (parsedNameN, parsedTypeN) = parseTaggedContent(content, defaultType: .activity)
-                let node = SkillNode(context: context, name: parsedNameN, type: parsedTypeN)
+                let (parsedName, nodeType) = parseTaggedContent(content, defaultType: .goal)
+                let node = SkillNode(context: context, name: parsedName, type: nodeType)
                 node.tree = tree
-                node.order = nodeStack.filter { $0.1 == dashCount }.count
                 
-                // Find the most recent node at the previous level as parent
-                let parentLevel = dashCount - 1
-                print("  🔍 Looking for parent at level \(parentLevel)...")
-                if let parentIndex = nodeStack.lastIndex(where: { $0.1 == parentLevel }) {
-                    let parent = nodeStack[parentIndex].0
-                    print("  👆 Found parent: '\(parent.name)' at index \(parentIndex)")
-                    parent.addChild(node)
-                    print("  ✅ Linked node '\(content)' to parent '\(parent.name)' at level \(parentLevel)")
-                } else {
-                    print("  ⚠️ No parent found for node '\(content)' at level \(dashCount)")
-                    print("  📊 Available nodes in stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
+                // Remove nodes from stack that are at this level or deeper
+                nodeStack.removeAll { $0.1 >= dashCount }
+                
+                // Find parent (the last node with depth = dashCount - 1)
+                if let parentInfo = nodeStack.last(where: { $0.1 == dashCount - 1 }) {
+                    node.parentNode = parentInfo.0
+                    print("  👨‍👩‍👧‍👦 Set parent: '\(parentInfo.0.name)' for '\(parsedName)'")
+                } else if dashCount > 1 {
+                    print("  ⚠️ No parent found for depth \(dashCount), but depth > 1")
                 }
                 
+                // Add to stack
                 nodeStack.append((node, dashCount))
-                print("  ✅ Level \(dashCount) node created and added to stack")
-                print("  📊 Node stack: \(nodeStack.map { "\($0.0.name)(level \($0.1))" }.joined(separator: ", "))")
+                
+                print("  ✅ Node created with parent: \(node.parentNode?.name ?? "none")")
+                print("  📊 Stack depth: \(nodeStack.count)")
             }
         }
         
-        print("🔄 Processing complete!")
-        print("📊 Final summary:")
-        print("  - Forests created: \(forests.count)")
-        for (index, forest) in forests.enumerated() {
-            print("    \(index + 1). \(forest.name_ ?? "unknown")")
+        // Verify we created at least one tree
+        guard !skillTrees.isEmpty else {
+            throw ImportError.invalidFormat("No skill trees were created.")
         }
-        print("  - Node stack size: \(nodeStack.count)")
-        print("  - Current tree: \(currentTree?.name ?? "nil")")
         
-        // Save to Core Data
-        print("💾 Saving to Core Data...")
-        do {
-            try context.save()
-            print("✅ Successfully imported \(forests.count) forests")
-        } catch {
-            print("❌ Failed to save: \(error.localizedDescription)")
-            throw ImportError.saveFailed(error.localizedDescription)
-        }
+        // Save the context
+        try context.save()
+        
+        print("✅ Successfully imported \(skillTrees.count) skill trees")
+        
+        let totalNodes = skillTrees.reduce(0) { sum, tree in sum + tree.nodes.count }
         
         return ImportResult(
-            forestsCount: forests.count,
-            treesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).count },
-            nodesCount: forests.reduce(0) { sum, forest in sum + (forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { treeSum, tree in treeSum + tree.nodes.count } },
-            forests: forests
+            treesCount: skillTrees.count,
+            nodesCount: totalNodes,
+            skillTrees: skillTrees
         )
     }
 }
 
 struct ImportResult {
-    let forestsCount: Int
     let treesCount: Int
     let nodesCount: Int
-    let forests: [Forest]
+    let skillTrees: [SkillTree]
 }
 
 enum ImportError: LocalizedError {
     case emptyFile
     case invalidFormat(String)
-    case noForestDefined(lineNumber: Int)
     case noTreeDefined(lineNumber: Int)
-    case saveFailed(String)
     
     var errorDescription: String? {
         switch self {
@@ -456,70 +393,65 @@ enum ImportError: LocalizedError {
             return "The file is empty or contains no valid content."
         case .invalidFormat(let message):
             return "Invalid format: \(message)"
-        case .noForestDefined(let lineNumber):
-            return "Line \(lineNumber): Tree defined without a forest. Add a forest name (no dashes) first."
         case .noTreeDefined(let lineNumber):
-            return "Line \(lineNumber): Node defined without a tree. Add a tree name (one dash) first."
-        case .saveFailed(let message):
-            return "Failed to save imported data: \(message)"
+            return "Line \(lineNumber): Node defined without a skill tree. Add a tree name (no dashes) first."
         }
     }
 }
 
-struct ImportPreviewView: View {
+struct ImportResultView: View {
     let result: ImportResult
     let onDismiss: () -> Void
     
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Success icon
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.green)
-                
-                Text("Import Successful!")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                // Success header
+                VStack(spacing: 12) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.green)
+                    
+                    Text("Import Successful!")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                }
+                .padding()
                 
                 // Statistics
                 VStack(spacing: 16) {
-                    StatCard(
-                        icon: "tree",
-                        title: "Forests",
-                        value: "\(result.forestsCount)",
-                        color: .blue
-                    )
-                    
-                    StatCard(
-                        icon: "leaf",
-                        title: "Trees",
+                    StatRow(
+                        title: "Skill Trees",
                         value: "\(result.treesCount)",
-                        color: .green
+                        icon: "tree"
                     )
                     
-                    StatCard(
-                        icon: "circle.grid.2x2",
-                        title: "Nodes",
+                    StatRow(
+                        title: "Total Nodes",
                         value: "\(result.nodesCount)",
-                        color: .orange
+                        icon: "circle.grid.2x2"
                     )
                 }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .padding(.horizontal)
                 
-                // Forest list
-                if !result.forests.isEmpty {
+                // Tree list
+                if !result.skillTrees.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Imported Forests:")
+                        Text("Imported Skill Trees:")
                             .font(.headline)
+                            .padding(.horizontal)
                         
                         ScrollView {
                             LazyVStack(spacing: 8) {
-                                ForEach(result.forests, id: \.id) { forest in
-                                    ForestPreviewRow(forest: forest)
+                                ForEach(result.skillTrees, id: \.id) { tree in
+                                    SkillTreePreviewRow(skillTree: tree)
                                 }
                             }
+                            .padding(.horizontal)
                         }
-                        .frame(maxHeight: 200)
                     }
                 }
                 
@@ -528,72 +460,67 @@ struct ImportPreviewView: View {
                 Button("Done") {
                     onDismiss()
                 }
+                .font(.headline)
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.blue)
-                .foregroundColor(.white)
                 .cornerRadius(10)
+                .padding(.horizontal)
             }
-            .padding()
             .navigationTitle("Import Complete")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
 
-struct StatCard: View {
-    let icon: String
+struct StatRow: View {
     let title: String
     let value: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(color)
-                .frame(width: 30)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(value)
-                    .font(.title3)
-                    .fontWeight(.bold)
-            }
-            
-            Spacer()
-        }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
-    }
-}
-
-struct ForestPreviewRow: View {
-    let forest: Forest
+    let icon: String
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(forest.name_ ?? "")
-                    .font(.body)
-                    .fontWeight(.medium)
-                
-                Text("\((forest.trees_?.allObjects as? [SkillTree] ?? []).count) trees, \((forest.trees_?.allObjects as? [SkillTree] ?? []).reduce(0) { sum, tree in sum + tree.totalNodesCount }) nodes")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            Image(systemName: icon)
+                .foregroundColor(.blue)
+                .frame(width: 30)
+            
+            Text(title)
+                .font(.body)
             
             Spacer()
             
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Text(value)
+                .font(.headline)
+                .fontWeight(.bold)
         }
-        .padding(.vertical, 4)
+    }
+}
+
+struct SkillTreePreviewRow: View {
+    let skillTree: SkillTree
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(skillTree.name_ ?? "")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Text("\(skillTree.totalNodesCount) nodes")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(.systemGray4), lineWidth: 1)
+        )
     }
 }
 

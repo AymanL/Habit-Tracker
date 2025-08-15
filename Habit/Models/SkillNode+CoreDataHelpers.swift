@@ -129,6 +129,11 @@ extension SkillNode {
         set { completionDate_ = newValue }
     }
     
+    var level: Int {
+        get { Int(level_) }
+        set { level_ = Int64(newValue) }
+    }
+    
     var isCompleted: Bool {
         get { isCompleted_ }
         set { 
@@ -249,10 +254,19 @@ extension SkillNode {
         case .root:
             return false // Root nodes cannot be completed
         case .goal, .activity, .boss:
-            return !isCompleted
+            return !isCompleted && isUnlocked
         case .habitLinked:
-            return habit != nil && !isCompleted
+            return habit != nil && !isCompleted && isUnlocked
         }
+    }
+    
+    var isUnlocked: Bool {
+        guard let tree = tree else { return false }
+        return tree.isLevelUnlocked(level)
+    }
+    
+    var isLocked: Bool {
+        return !isUnlocked
     }
     
     var isHabitLinked: Bool {
@@ -261,7 +275,7 @@ extension SkillNode {
     
     // MARK: - Initialization
     
-    convenience init(context: NSManagedObjectContext, name: String, type: SkillNodeType, description: String = "") {
+    convenience init(context: NSManagedObjectContext, name: String, type: SkillNodeType, description: String = "", level: Int = 1) {
         self.init(context: context)
         self.id = UUID()
         self.name = name
@@ -269,6 +283,7 @@ extension SkillNode {
         self.nodeType = type
         self.creationDate = Date()
         self.isCompleted = false
+        self.level = level
         
         // Set initial order to be the last in the list
         let request: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
@@ -281,7 +296,7 @@ extension SkillNode {
             self.order_ = 0
         }
         
-        print("📋 Created SkillNode: \(name) (\(type.displayName))")
+        print("📋 Created SkillNode: \(name) (\(type.displayName)) at level \(level)")
     }
     
     // MARK: - Methods
@@ -294,9 +309,14 @@ extension SkillNode {
         
         isCompleted = true
         print("✅ Completed SkillNode: \(name)")
+        
+        // Check if completing this node unlocks the next level
+        if let tree = tree, tree.canUnlockNextLevel() {
+            _ = tree.unlockNextLevel()
+        }
+        
         tree?.updateRootCompletionState()
         tree?.objectWillChange.send()
-        tree?.forest?.objectWillChange.send()
     }
     
     /// Check if the node is completed for today
@@ -357,9 +377,14 @@ extension SkillNode {
             // Complete the linked habit for today
             linkedHabit.addCompletedDate(Date())
             print("✅ Completed habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
+            
+            // Check if completing this node unlocks the next level
+            if let tree = tree, tree.canUnlockNextLevel() {
+                _ = tree.unlockNextLevel()
+            }
+            
             tree?.updateRootCompletionState()
             tree?.objectWillChange.send()
-            tree?.forest?.objectWillChange.send()
         }
     }
     
@@ -375,7 +400,6 @@ extension SkillNode {
             }
             tree?.updateRootCompletionState()
             tree?.objectWillChange.send()
-            tree?.forest?.objectWillChange.send()
         case .habitLinked:
             guard let linkedHabit = habit else {
                 print("⚠️ Cannot uncomplete habit-linked node '\(name)': no habit linked")
@@ -386,7 +410,6 @@ extension SkillNode {
             print("❌ Uncompleted habit-linked node '\(name)' via habit '\(linkedHabit.title)'")
             tree?.updateRootCompletionState()
             tree?.objectWillChange.send()
-            tree?.forest?.objectWillChange.send()
         }
     }
     

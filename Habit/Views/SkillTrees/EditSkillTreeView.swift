@@ -4,8 +4,6 @@ struct EditSkillTreeView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var dataController: DataController
     
-    let forest: Forest?
-    
     @State private var name = ""
     @State private var description = ""
     @State private var showingAlert = false
@@ -19,20 +17,6 @@ struct EditSkillTreeView: View {
                     
                     TextField("Description (Optional)", text: $description, axis: .vertical)
                         .lineLimit(3...6)
-                }
-                
-                Section(header: Text("Forest")) {
-                    if let forest = forest {
-                        HStack {
-                            Text("Forest")
-                            Spacer()
-                            Text(forest.name_ ?? "Unnamed Forest")
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        Text("No forest selected")
-                            .foregroundColor(.secondary)
-                    }
                 }
             }
             .navigationTitle("New Skill Tree")
@@ -69,12 +53,7 @@ struct EditSkillTreeView: View {
         let context = dataController.container.viewContext
         
         do {
-            let tree = SkillTree(context: context, name: name, description: description)
-            
-            // Associate with forest if provided
-            if let forest = forest {
-                tree.forest = forest
-            }
+            _ = SkillTree(context: context, name: name, description: description)
             
             try context.save()
             
@@ -90,6 +69,6 @@ struct EditSkillTreeView: View {
 }
 
 #Preview {
-    EditSkillTreeView(forest: nil)
+    EditSkillTreeView()
         .environmentObject(DataController.preview)
 } 

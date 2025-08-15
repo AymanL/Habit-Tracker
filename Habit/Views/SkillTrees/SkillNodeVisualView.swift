@@ -39,18 +39,27 @@ struct SkillNodeVisualView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .top) {
+        let dailyStatus = node.getDailyCompletionStatus()
+        let isLocked = node.isLocked
+        
+        return ZStack(alignment: .top) {
             VStack(spacing: 8) {
                 // Icon with gestures: tap validates, long press opens menu
                 ZStack {
-                    let dailyStatus = node.getDailyCompletionStatus()
                     Circle()
-                        .fill(dailyStatus == .notCompleted ? Color.blue : Color.green)
+                        .fill(isLocked ? Color.gray.opacity(0.4) : 
+                              (dailyStatus == .notCompleted ? Color.blue : Color.green))
                         .frame(width: 30, height: 30)
                     
-                    Image(systemName: nodeTypeIcon)
-                        .font(.title3)
-                        .foregroundColor(.white)
+                    if isLocked {
+                        Image(systemName: "lock.fill")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                    } else {
+                        Image(systemName: nodeTypeIcon)
+                            .font(.title3)
+                            .foregroundColor(.white)
+                    }
                 }
                 .contentShape(Circle())
                 .onTapGesture { onValidate() }
@@ -66,6 +75,8 @@ struct SkillNodeVisualView: View {
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 100)
                     .fixedSize(horizontal: false, vertical: true)
+                    .foregroundColor(isLocked ? .secondary : .primary)
+                    .opacity(isLocked ? 0.6 : 1.0)
             }
             .padding(8)
             // Prevent compression narrower than the icon + horizontal padding (30 + 16)
