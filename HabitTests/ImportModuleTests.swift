@@ -393,6 +393,19 @@ class ImportModuleTests: BaseTestCase {
         }
     }
     
+    func testPerformanceWith73NodeTree() {
+        // Given - Generate a 24-level, 73-node tree similar to user's real-world case
+        let largeInput = generateRealistic73NodeTree()
+        
+        // When & Then
+        measure {
+            let result = parseMultipleTree(input: largeInput)
+    
+            XCTAssertEqual(result.treesCount, 1)
+            XCTAssertEqual(result.nodesCount, 73)
+        }
+    }
+    
     // MARK: - Helper Methods
     
     private func parseMultipleTree(input: String) -> ImportResult {
@@ -531,6 +544,26 @@ class ImportModuleTests: BaseTestCase {
                 }
             }
         }
+        return input
+    }
+    
+    private func generateRealistic73NodeTree() -> String {
+        var input = "# Machine Learning Skill Tree\n"
+        
+        // Generate exactly 73 nodes across 24 levels (including root nodes)
+        // 24 level root nodes + 49 regular nodes = 73 total nodes
+        let nodesPerLevel = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1] // 49 regular nodes total
+        
+        for level in 1...24 {
+            input += "## Level \(level) Foundation\n"
+            let nodeCount = nodesPerLevel[level - 1]
+            
+            for i in 1...nodeCount {
+                let dashes = String(repeating: "-", count: 1) // Keep depth consistent at 1
+                input += "\(dashes) Level \(level) Node \(i)\n"
+            }
+        }
+        
         return input
     }
     

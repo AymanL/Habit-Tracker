@@ -295,8 +295,19 @@ extension SkillNode {
         } else {
             self.order_ = 0
         }
-        
-        print("📋 Created SkillNode: \(name) (\(type.displayName)) at level \(level)")
+    }
+    
+    // Optimized convenience init for batch imports (skips order query)
+    convenience init(context: NSManagedObjectContext, name: String, type: SkillNodeType, order: Int64, description: String = "", level: Int = 1) {
+        self.init(context: context)
+        self.id = UUID()
+        self.name = name
+        self.nodeDescription = description
+        self.nodeType = type
+        self.creationDate = Date()
+        self.isCompleted = false
+        self.level = level
+        self.order_ = order
     }
     
     // MARK: - Methods

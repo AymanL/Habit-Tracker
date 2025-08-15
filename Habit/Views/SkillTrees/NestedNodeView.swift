@@ -46,6 +46,11 @@ struct NestedNodeView: View {
     @State private var showDebugInfo = false
     @State private var nodeFrame: CGRect = .zero
     
+    // Performance optimization: cache sorted children
+    private var sortedChildren: [SkillNode] {
+        Array(node.childNodes).sorted(by: { $0.order < $1.order })
+    }
+    
     var body: some View {
         VStack() {
             // Current node
@@ -103,7 +108,6 @@ struct NestedNodeView: View {
             
             // Children (if any) - non-boss on first row, boss on second row
             if node.hasChildren {
-                let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
                 let nonBossChildren = sortedChildren.filter { $0.nodeType != .boss }
                 let bossChildren = sortedChildren.filter { $0.nodeType == .boss }
 
@@ -144,19 +148,7 @@ struct NestedNodeView: View {
                 .border(Color.red, width: 2)
                 .background(Color.blue.opacity(0.1))
         }
-        .if(Constants.debugSkillTreeUI) { view in
-            view.background(
-                GeometryReader { geometry in
-                    Color.clear
-                        .onAppear {
-                            print("📐 Node '\(node.name)' bounding box: \(Int(geometry.frame(in: .global).width))×\(Int(geometry.frame(in: .global).height))")
-                        }
-                        .onChange(of: geometry.frame(in: .global)) { newFrame in
-                            print("📐 Node '\(node.name)' bounding box updated: \(Int(newFrame.width))×\(Int(newFrame.height))")
-                        }
-                }
-            )
-        }
+        // Removed debug geometry logging for performance
         .backgroundPreferenceValue(NodeCenterPreferenceKey.self) { centers in
             GeometryReader { proxy in
                 Path { path in
@@ -181,34 +173,7 @@ struct NestedNodeView: View {
                 .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round))
             }
         }
-        .onAppear {
-            // Comprehensive tree debugging
-            print("🌳 === TREE DISPLAY DEBUG ===")
-            print("📋 Current Node: '\(node.name)'")
-            print("   ├─ Parent: '\(node.parentNode?.name ?? "none")'")
-            print("   ├─ Tree: '\(node.tree?.name ?? "none")'")
-            print("   ├─ Order: \(node.order)")
-            print("   ├─ Type: \(node.nodeType)")
-            print("   ├─ Has Children: \(node.hasChildren)")
-            print("   ├─ Children Count: \(node.childNodes.count)")
-            print("   └─ Depth: \(node.depth)")
-            
-            if node.hasChildren {
-                print("   👶 Children:")
-                let sortedChildren = Array(node.childNodes).sorted(by: { $0.order < $1.order })
-                for (index, child) in sortedChildren.enumerated() {
-                    print("      \(index + 1). '\(child.name)' (Order: \(child.order), Type: \(child.nodeType))")
-                }
-            }
-            
-            // If this is a root node, show the entire tree structure
-            if node.parentNode == nil {
-                print("🌱 === ROOT NODE DETECTED - SHOWING FULL TREE ===")
-                printTreeStructure(node: node, level: 0)
-            }
-            
-            print("🌳 === END TREE DISPLAY DEBUG ===")
-        }
+        // Removed excessive console logging for performance
         // .overlay(
         //     // Debug info overlay
         //     VStack {

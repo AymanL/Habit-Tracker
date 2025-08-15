@@ -43,6 +43,16 @@
         <relationship name="habit_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Habit" inverseName="skillNodes_" inverseEntity="Habit"/>
         <relationship name="parentNode_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillNode" inverseName="childNodes_" inverseEntity="SkillNode"/>
         <relationship name="tree_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SkillTree" inverseName="nodes_" inverseEntity="SkillTree"/>
+        <fetchIndex name="byTreeAndLevel">
+            <fetchIndexElement property="tree_" type="Binary" order="ascending"/>
+            <fetchIndexElement property="level_" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byOrder">
+            <fetchIndexElement property="order_" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byNodeType">
+            <fetchIndexElement property="nodeType_" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
 
     <entity name="SkillTree" representedClassName="SkillTree" syncable="YES" codeGenerationType="class">
@@ -54,5 +64,8 @@
         <attribute name="name_" optional="YES" attributeType="String"/>
         <attribute name="order_" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="nodes_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SkillNode" inverseName="tree_" inverseEntity="SkillNode"/>
+        <fetchIndex name="byOrder">
+            <fetchIndexElement property="order_" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
 </model>

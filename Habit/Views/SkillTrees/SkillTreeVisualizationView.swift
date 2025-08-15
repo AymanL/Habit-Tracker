@@ -108,9 +108,11 @@ struct SkillTreeVisualizationView: View {
                     .buttonStyle(.plain)
                 }
                 
-                // Previous completed levels (collapsible)
+                // Previous completed levels (collapsible) - lazy loaded
                 if showPreviousLevels {
-                    CompletedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap, showLayoutGuides: showLayoutGuides, levelHeights: $levelHeights)
+                    LazyVStack(spacing: 16) {
+                        CompletedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap, showLayoutGuides: showLayoutGuides, levelHeights: $levelHeights)
+                    }
                 }
                 
                 // Current level tree (unlocked)
@@ -172,8 +174,10 @@ struct SkillTreeVisualizationView: View {
                         .padding()
                 }
                 
-                // Locked future levels
-                LockedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap)
+                // Locked future levels - lazy loaded
+                LazyVStack(spacing: 16) {
+                    LockedLevelsView(skillTree: skillTree, onNodeTap: onNodeTap)
+                }
             }
         }
         .padding(.vertical)
@@ -192,21 +196,45 @@ struct SkillTreeVisualizationView: View {
 struct LockedLevelsView: View {
     @ObservedObject var skillTree: SkillTree
     let onNodeTap: (SkillNode) -> Void
+    @State private var showAllLevels = false
     
     var lockedLevels: [Int] {
         guard skillTree.maxLevel > skillTree.currentLevel else { return [] }
         return Array((skillTree.currentLevel + 1)...skillTree.maxLevel)
     }
     
+    var visibleLevels: [Int] {
+        // Performance optimization: only show next 3 levels by default
+        if showAllLevels || lockedLevels.count <= 3 {
+            return lockedLevels
+        } else {
+            return Array(lockedLevels.prefix(3))
+        }
+    }
+    
     var body: some View {
         if !lockedLevels.isEmpty {
             VStack(spacing: 16) {
-                ForEach(lockedLevels, id: \.self) { level in
+                ForEach(visibleLevels, id: \.self) { level in
                     LockedLevelSection(
                         skillTree: skillTree,
                         level: level,
                         onNodeTap: onNodeTap
                     )
+                }
+                
+                // Show "Show more" button if there are hidden levels
+                if lockedLevels.count > 3 && !showAllLevels {
+                    Button("Show \(lockedLevels.count - 3) more locked levels") {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showAllLevels = true
+                        }
+                    }
+                    .font(.caption)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
                 }
             }
         }
@@ -451,21 +479,47 @@ struct CompletedLevelsView: View {
     let onNodeTap: (SkillNode) -> Void
     let showLayoutGuides: Bool
     @Binding var levelHeights: [Int: CGFloat]
+    @State private var showAllLevels = false
     
     var completedLevels: [Int] {
         // All levels before the current level are considered completed
         return Array(1..<skillTree.currentLevel).sorted()
     }
     
+    var visibleLevels: [Int] {
+        // Performance optimization: only show last 3 levels by default
+        if showAllLevels || completedLevels.count <= 3 {
+            return completedLevels
+        } else {
+            return Array(completedLevels.suffix(3))
+        }
+    }
+    
     var body: some View {
-        ForEach(completedLevels, id: \.self) { level in
-            CompletedLevelSection(
-                skillTree: skillTree,
-                level: level,
-                onNodeTap: onNodeTap,
-                showLayoutGuides: showLayoutGuides,
-                levelHeights: $levelHeights
-            )
+        VStack(spacing: 16) {
+            // Show "Show more" button if there are hidden levels
+            if completedLevels.count > 3 && !showAllLevels {
+                Button("Show \(completedLevels.count - 3) more levels") {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showAllLevels = true
+                    }
+                }
+                .font(.caption)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+            }
+            
+            ForEach(visibleLevels, id: \.self) { level in
+                CompletedLevelSection(
+                    skillTree: skillTree,
+                    level: level,
+                    onNodeTap: onNodeTap,
+                    showLayoutGuides: showLayoutGuides,
+                    levelHeights: $levelHeights
+                )
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import CoreData
 
 struct ImportSkillTreeView: View {
     @Environment(\.dismiss) var dismiss
@@ -11,7 +12,7 @@ struct ImportSkillTreeView: View {
     @State private var alertMessage = ""
     @State private var alertTitle = ""
     @State private var importResult: ImportResult?
-    @State private var showingPreview = false
+    @State private var showingSuccessNotification = false
     
     var body: some View {
         NavigationView {
@@ -34,60 +35,6 @@ struct ImportSkillTreeView: View {
                     .multilineTextAlignment(.center)
             }
             .padding()
-                
-                // Format instructions
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("File Format:")
-                        .font(.headline)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("• # = Tree name (container only)")
-                        Text("• ## = Level root node (actual node)")
-                        Text("• 1+ dashes = Regular nodes within level")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    // Example
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Example:")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                        
-                        Text("""
-                        # Programming Skills
-                        ## Learn Swift Fundamentals
-                        - Basic Syntax
-                        -- Variables and Constants
-                        -- Data Types
-                        - Control Flow
-                        -- If Statements
-                        -- Loops
-                        ## Build First App
-                        - UI Design
-                        -- Interface Builder
-                        -- Auto Layout
-                        - Data Management
-                        -- Core Data
-                        
-                        # Fitness Goals
-                        ## Cardio Foundation
-                        - Running
-                        -- 5K Run
-                        -- 10K Run
-                        - Swimming
-                        ## Strength Building
-                        - Push Exercises
-                        - Pull Exercises
-                        """)
-                            .font(.caption)
-                            .fontDesign(.monospaced)
-                            .padding(8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(6)
-                    }
-                }
-                .padding(.horizontal)
                 
                 // Input section
                 VStack(alignment: .leading, spacing: 12) {
@@ -171,6 +118,60 @@ struct ImportSkillTreeView: View {
                     .padding(.horizontal)
                 }
                 
+                // Format instructions
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("File Format:")
+                        .font(.headline)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("• # = Tree name (container only)")
+                        Text("• ## = Level root node (actual node)")
+                        Text("• 1+ dashes = Regular nodes within level")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    
+                    // Example
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Example:")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        
+                        Text("""
+                        # Programming Skills
+                        ## Learn Swift Fundamentals
+                        - Basic Syntax
+                        -- Variables and Constants
+                        -- Data Types
+                        - Control Flow
+                        -- If Statements
+                        -- Loops
+                        ## Build First App
+                        - UI Design
+                        -- Interface Builder
+                        -- Auto Layout
+                        - Data Management
+                        -- Core Data
+                        
+                        # Fitness Goals
+                        ## Cardio Foundation
+                        - Running
+                        -- 5K Run
+                        -- 10K Run
+                        - Swimming
+                        ## Strength Building
+                        - Push Exercises
+                        - Pull Exercises
+                        """)
+                            .font(.caption)
+                            .fontDesign(.monospaced)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(6)
+                    }
+                }
+                .padding(.horizontal)
+                
                 Spacer(minLength: 20)
             }
             }
@@ -205,13 +206,34 @@ struct ImportSkillTreeView: View {
         } message: {
             Text(alertMessage)
         }
-        .sheet(isPresented: $showingPreview) {
-            if let result = importResult {
-                ImportResultView(result: result) {
-                    dismiss()
+        .overlay(
+            // Success notification popup
+            Group {
+                if showingSuccessNotification, let result = importResult {
+                    VStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundColor(.green)
+                        
+                        Text("Import Successful!")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        Text("\(result.treesCount) skill tree\(result.treesCount == 1 ? "" : "s") with \(result.nodesCount) node\(result.nodesCount == 1 ? "" : "s") imported")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(20)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    .scaleEffect(showingSuccessNotification ? 1.0 : 0.8)
+                    .opacity(showingSuccessNotification ? 1.0 : 0.0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingSuccessNotification)
                 }
             }
-        }
+        )
     }
     
     private func loadTextFromFile(_ url: URL) {
@@ -247,7 +269,12 @@ struct ImportSkillTreeView: View {
         do {
             let result = try parseAndImportSkillTrees(trimmedInput)
             importResult = result
-            showingPreview = true
+            showingSuccessNotification = true
+            
+            // Auto-dismiss after showing success notification
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                dismiss()
+            }
         } catch let error as ImportError {
             alertTitle = "Import Error"
             alertMessage = error.localizedDescription
@@ -280,7 +307,24 @@ struct ImportSkillTreeView: View {
         
         let context = dataController.container.viewContext
         
-        print("🔄 Starting line-by-line processing...")
+        // Performance optimization: batch processing variables
+        var nodeOrderCounter: Int64 = 0
+        var treeOrderCounter: Int64 = 0
+        
+        // Get initial order values once instead of querying for each entity
+        let nodeRequest: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
+        nodeRequest.sortDescriptors = [NSSortDescriptor(keyPath: \SkillNode.order_, ascending: false)]
+        nodeRequest.fetchLimit = 1
+        if let lastNode = try? context.fetch(nodeRequest).first {
+            nodeOrderCounter = lastNode.order_ + 1
+        }
+        
+        let treeRequest: NSFetchRequest<SkillTree> = SkillTree.fetchRequest()
+        treeRequest.sortDescriptors = [NSSortDescriptor(keyPath: \SkillTree.order_, ascending: false)]
+        treeRequest.fetchLimit = 1
+        if let lastTree = try? context.fetch(treeRequest).first {
+            treeOrderCounter = lastTree.order_ + 1
+        }
         
         func parseTaggedContent(_ raw: String, defaultType: SkillNodeType) -> (String, SkillNodeType) {
             let trimmed = raw.trimmingCharacters(in: .whitespaces)
@@ -309,42 +353,39 @@ struct ImportSkillTreeView: View {
         var currentWorkingLevel = 1 // Track the level we're currently adding nodes to
         
         for (index, line) in lines.enumerated() {
-            print("📄 Processing line \(index + 1): '\(line)'")
-            
             if line.hasPrefix("##") {
                 // Level root node (## Level X Root Node Title)
                 let content = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
                 
                 guard !content.isEmpty else {
-                    print("  ⏭️ Skipping empty level root content")
                     continue
                 }
                 
                 guard let tree = currentTree else {
-                    print("  ❌ No tree defined for level root node: '\(content)'")
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
-                
-                print("  🏛️ Creating level \(currentLevel) root node: '\(content)'")
                 
                 // Ensure the tree has this level in its maxLevel
                 if currentLevel > tree.maxLevel {
                     tree.maxLevel = currentLevel
-                    print("  📈 Updated tree maxLevel to \(currentLevel)")
                 }
                 
-                // Create root node for this level
+                // Create root node for this level with optimized initialization
                 let (parsedName, _) = parseTaggedContent(content, defaultType: .root)
-                let rootNode = SkillNode(context: context, name: parsedName, type: .root)
-                rootNode.tree = tree
-                rootNode.level = currentLevel
-                rootNode.order = 0
+                let rootNode = SkillNode(context: context)
+                rootNode.id_ = UUID()
+                rootNode.name_ = parsedName
+                rootNode.nodeType_ = SkillNodeType.root.rawValue
+                rootNode.creationDate_ = Date()
+                rootNode.isCompleted_ = false
+                rootNode.level_ = Int64(currentLevel)
+                rootNode.order_ = 0
+                rootNode.tree_ = tree
                 
                 // Clear the node stack and add this root node
                 nodeStack.removeAll()
                 nodeStack.append((rootNode, 0)) // Root nodes are at depth 0
                 
-                print("  ✅ Level \(currentLevel) root node created")
                 currentWorkingLevel = currentLevel // Set the working level to the current root node's level
                 currentLevel += 1
                 
@@ -353,19 +394,25 @@ struct ImportSkillTreeView: View {
                 let content = String(line.dropFirst(1)).trimmingCharacters(in: .whitespaces)
                 
                 guard !content.isEmpty else {
-                    print("  ⏭️ Skipping empty tree content")
                     continue
                 }
                 
-                print("  🌳 Creating new skill tree: '\(content)'")
-                let tree = SkillTree(context: context, name: content, description: "")
+                // Create tree with optimized initialization
+                let tree = SkillTree(context: context)
+                tree.id_ = UUID()
+                tree.name_ = content
+                tree.description_ = ""
+                tree.creationDate_ = Date()
+                tree.currentLevel_ = 1
+                tree.maxLevel_ = 1
+                tree.order_ = treeOrderCounter
+                treeOrderCounter += 1
+                
                 skillTrees.append(tree)
                 currentTree = tree
                 nodeStack.removeAll()
                 currentLevel = 1
                 currentWorkingLevel = 1
-                print("  ✅ Tree created and set as current")
-                print("  📊 Current state: \(skillTrees.count) trees")
                 
             } else if line.hasPrefix("-") {
                 // Regular node with dashes
@@ -373,42 +420,37 @@ struct ImportSkillTreeView: View {
                 let content = String(line.dropFirst(dashCount)).trimmingCharacters(in: .whitespaces)
                 
                 guard !content.isEmpty else {
-                    print("  ⏭️ Skipping empty node content")
                     continue
                 }
                 
                 guard let tree = currentTree else {
-                    print("  ❌ No tree defined for node: '\(content)'")
                     throw ImportError.noTreeDefined(lineNumber: index + 1)
                 }
                 
-                print("  🔵 Creating node at depth \(dashCount): '\(content)'")
-                
                 let (parsedName, nodeType) = parseTaggedContent(content, defaultType: .goal)
-                let node = SkillNode(context: context, name: parsedName, type: nodeType)
-                node.tree = tree
                 
-                // Set the level to the current working level (same as the current root node)
-                node.level = currentWorkingLevel
+                // Create node with optimized initialization
+                let node = SkillNode(context: context)
+                node.id_ = UUID()
+                node.name_ = parsedName
+                node.nodeType_ = nodeType.rawValue
+                node.creationDate_ = Date()
+                node.isCompleted_ = false
+                node.level_ = Int64(currentWorkingLevel)
+                node.order_ = nodeOrderCounter
+                node.tree_ = tree
+                nodeOrderCounter += 1
                 
                 // Remove nodes from stack that are at this level or deeper
                 nodeStack.removeAll { $0.1 >= dashCount }
                 
                 // Find parent (the last node with depth = dashCount - 1)
                 if let parentInfo = nodeStack.last(where: { $0.1 == dashCount - 1 }) {
-                    node.parentNode = parentInfo.0
-                    print("  👨‍👩‍👧‍👦 Set parent: '\(parentInfo.0.name)' for '\(parsedName)'")
-                } else if dashCount > 1 {
-                    print("  ⚠️ No parent found for depth \(dashCount), but depth > 1")
+                    node.parentNode_ = parentInfo.0
                 }
                 
                 // Add to stack
                 nodeStack.append((node, dashCount))
-                
-                print("  ✅ Node created at level \(node.level) with parent: \(node.parentNode?.name ?? "none")")
-                print("  📊 Stack depth: \(nodeStack.count)")
-            } else {
-                print("  ⚠️ Unrecognized line format: '\(line)'")
             }
         }
         
@@ -417,12 +459,12 @@ struct ImportSkillTreeView: View {
             throw ImportError.invalidFormat("No skill trees were created.")
         }
         
-        // Save the context
+        // Save the context once at the end
         try context.save()
         
-        print("✅ Successfully imported \(skillTrees.count) skill trees")
-        
-        let totalNodes = skillTrees.reduce(0) { sum, tree in sum + tree.nodes.count }
+        let totalNodes = skillTrees.reduce(0) { sum, tree in 
+            sum + (tree.nodes_?.allObjects as? [SkillNode] ?? []).count 
+        }
         
         return ImportResult(
             treesCount: skillTrees.count,
@@ -452,131 +494,6 @@ enum ImportError: LocalizedError {
         case .noTreeDefined(let lineNumber):
             return "Line \(lineNumber): Node defined without a skill tree. Add a tree name (starting with #) first."
         }
-    }
-}
-
-struct ImportResultView: View {
-    let result: ImportResult
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Success header
-                VStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.green)
-                    
-                    Text("Import Successful!")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                }
-                .padding()
-                
-                // Statistics
-                VStack(spacing: 16) {
-                    StatRow(
-                        title: "Skill Trees",
-                        value: "\(result.treesCount)",
-                        icon: "tree"
-                    )
-                    
-                    StatRow(
-                        title: "Total Nodes",
-                        value: "\(result.nodesCount)",
-                        icon: "circle.grid.2x2"
-                    )
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-                .padding(.horizontal)
-                
-                // Tree list
-                if !result.skillTrees.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Imported Skill Trees:")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        ScrollView {
-                            LazyVStack(spacing: 8) {
-                                ForEach(result.skillTrees, id: \.id) { tree in
-                                    SkillTreePreviewRow(skillTree: tree)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-                }
-                
-                Spacer()
-                
-                Button("Done") {
-                    onDismiss()
-                }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-                .padding(.horizontal)
-            }
-            .navigationTitle("Import Complete")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-struct StatRow: View {
-    let title: String
-    let value: String
-    let icon: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.blue)
-                .frame(width: 30)
-            
-            Text(title)
-                .font(.body)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.headline)
-                .fontWeight(.bold)
-        }
-    }
-}
-
-struct SkillTreePreviewRow: View {
-    let skillTree: SkillTree
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(skillTree.name_ ?? "")
-                    .font(.headline)
-                
-                Spacer()
-                
-                Text("\(skillTree.totalNodesCount) nodes")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(Color(.systemBackground))
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(.systemGray4), lineWidth: 1)
-        )
     }
 }
 

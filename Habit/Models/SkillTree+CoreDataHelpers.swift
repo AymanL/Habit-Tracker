@@ -40,7 +40,10 @@ extension SkillTree {
     }
     
     var nodes: [SkillNode] {
-        get { nodes_?.allObjects as? [SkillNode] ?? [] }
+        get { 
+            // Use Core Data's built-in caching by accessing the relationship directly
+            return nodes_?.allObjects as? [SkillNode] ?? [] 
+        }
         set { nodes_ = NSSet(array: newValue) }
     }
     
@@ -78,11 +81,39 @@ extension SkillTree {
     // MARK: - Level Management
     
     func getNodesForLevel(_ level: Int) -> [SkillNode] {
-        return nodes.filter { $0.level == level }.sorted { $0.order < $1.order }
+        // For large trees, use a Core Data fetch request instead of filtering in memory
+        guard let context = managedObjectContext else {
+            return nodes.filter { $0.level == level }.sorted { $0.order < $1.order }
+        }
+        
+        let request: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
+        request.predicate = NSPredicate(format: "tree_ == %@ AND level_ == %d", self, level)
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \SkillNode.order_, ascending: true)]
+        
+        do {
+            return try context.fetch(request)
+        } catch {
+            // Fallback to in-memory filtering if fetch fails
+            return nodes.filter { $0.level == level }.sorted { $0.order < $1.order }
+        }
     }
     
     func getRootNodeForLevel(_ level: Int) -> SkillNode? {
-        return nodes.filter { $0.level == level && $0.nodeType == .root }.first
+        // Use efficient Core Data query for root node lookup
+        guard let context = managedObjectContext else {
+            return nodes.filter { $0.level == level && $0.nodeType == .root }.first
+        }
+        
+        let request: NSFetchRequest<SkillNode> = SkillNode.fetchRequest()
+        request.predicate = NSPredicate(format: "tree_ == %@ AND level_ == %d AND nodeType_ == %@", self, level, SkillNodeType.root.rawValue)
+        request.fetchLimit = 1
+        
+        do {
+            return try context.fetch(request).first
+        } catch {
+            // Fallback to in-memory filtering if fetch fails
+            return nodes.filter { $0.level == level && $0.nodeType == .root }.first
+        }
     }
     
     func ensureRootNodeExists(for level: Int) {
@@ -193,8 +224,18 @@ extension SkillTree {
         
         // Create the root node for level 1
         ensureRootNodeExists(for: 1)
-        
-        print("🌳 Created SkillTree: \(name) with root node at level 1")
+    }
+    
+    // Optimized convenience init for batch imports (skips order query and root node creation)
+    convenience init(context: NSManagedObjectContext, name: String, order: Int64, description: String = "") {
+        self.init(context: context)
+        self.id = UUID()
+        self.name = name
+        self.treeDescription = description
+        self.creationDate = Date()
+        self.currentLevel = 1
+        self.maxLevel = 1
+        self.order_ = order
     }
     
     // MARK: - Completion Logic
