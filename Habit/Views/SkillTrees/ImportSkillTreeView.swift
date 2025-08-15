@@ -306,6 +306,7 @@ struct ImportSkillTreeView: View {
         }
 
         var currentLevel = 1
+        var currentWorkingLevel = 1 // Track the level we're currently adding nodes to
         
         for (index, line) in lines.enumerated() {
             print("📄 Processing line \(index + 1): '\(line)'")
@@ -344,6 +345,7 @@ struct ImportSkillTreeView: View {
                 nodeStack.append((rootNode, 0)) // Root nodes are at depth 0
                 
                 print("  ✅ Level \(currentLevel) root node created")
+                currentWorkingLevel = currentLevel // Set the working level to the current root node's level
                 currentLevel += 1
                 
             } else if line.hasPrefix("#") {
@@ -361,6 +363,7 @@ struct ImportSkillTreeView: View {
                 currentTree = tree
                 nodeStack.removeAll()
                 currentLevel = 1
+                currentWorkingLevel = 1
                 print("  ✅ Tree created and set as current")
                 print("  📊 Current state: \(skillTrees.count) trees")
                 
@@ -385,8 +388,8 @@ struct ImportSkillTreeView: View {
                 let node = SkillNode(context: context, name: parsedName, type: nodeType)
                 node.tree = tree
                 
-                // Set the level to the current level being processed
-                node.level = currentLevel - 1 // currentLevel was incremented after creating root node
+                // Set the level to the current working level (same as the current root node)
+                node.level = currentWorkingLevel
                 
                 // Remove nodes from stack that are at this level or deeper
                 nodeStack.removeAll { $0.1 >= dashCount }
