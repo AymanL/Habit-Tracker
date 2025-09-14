@@ -317,6 +317,7 @@ struct DetailView: View {
             "dailyCounters": Dictionary(uniqueKeysWithValues: habit.dailyCounters.map { 
                 (String($0.key.timeIntervalSince1970), $0.value)
             }),
+            "duration": habit.currentDuration,
             "durationHistory": habit.durationHistory.map { duration in
                 [
                     "minutes": duration.minutes,

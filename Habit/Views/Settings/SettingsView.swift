@@ -134,6 +134,7 @@ struct SettingsView: View {
                     "dailyCounters": Dictionary(uniqueKeysWithValues: habit.dailyCounters.map { 
                         (String($0.key.timeIntervalSince1970), $0.value)
                     }),
+                    "duration": habit.currentDuration,
                     "durationHistory": habit.durationHistory.map { duration in
                         [
                             "minutes": duration.minutes,
@@ -145,7 +146,7 @@ struct SettingsView: View {
             }
             
             let exportData: [String: Any] = [
-                "version": "1.2.1",
+                "version": "1.4.2",
                 "exportDate": Date().timeIntervalSince1970,
                 "habits": habitsData
             ]
